@@ -3,9 +3,26 @@
   <DefaultLanguage xmlns="" code="en-US" />
   <Languages xmlns="">
     <Language code="en" />
+    <Language code="en-ZW" />
+    <Language code="en-US" />
+    <Language code="en-GB" />
+    <Language code="en-TT" />
+    <Language code="en-ZA" />
+    <Language code="en-SG" />
+    <Language code="en-PH" />
+    <Language code="en-NZ" />
+    <Language code="en-MY" />
+    <Language code="en-JM" />
+    <Language code="en-IE" />
+    <Language code="en-IN" />
+    <Language code="en-HK" />
+    <Language code="en-029" />
+    <Language code="en-CA" />
+    <Language code="en-BZ" />
+    <Language code="en-AU" />
   </Languages>
-  <App xmlns="" ProductID="{3bacf703-65e0-4919-89a3-ac901decf82a}" Title="Weathr" RuntimeType="Silverlight" Version="1.0.0.0" Genre="apps.normal" Author="Chris Barry" Description="A new weather app for Windows Phone with not only live tile support, but also the ability to have a detailed forecast on your lockscreen, without changing your current wallpaper. Combine with other apps that can set the lockscreen to have even more glance " Publisher="WeatherLock" PublisherID="{6b72e231-93c0-4e18-b20d-449acf2b5d53}">
-    <IconPath IsRelative="true" IsResource="false">Icon Normal II.png</IconPath>
+  <App xmlns="" ProductID="{3bacf703-65e0-4919-89a3-ac901decf82a}" Title="Weathr" RuntimeType="Silverlight" Version="1.0.1.0" Genre="apps.normal" Author="Chris Barry" Description="A new weather app for Windows Phone with not only live tile support, but also the ability to have a detailed forecast on your lockscreen, without changing your current wallpaper. Combine with other apps that can set the lockscreen to have even more glance " Publisher="WeatherLock" PublisherID="{6b72e231-93c0-4e18-b20d-449acf2b5d53}">
+    <IconPath IsRelative="true" IsResource="false">IconNormal.png</IconPath>
     <Capabilities>
       <Capability Name="ID_CAP_NETWORKING" />
       <Capability Name="ID_CAP_WEBBROWSERCOMPONENT" />

@@ -14,6 +14,7 @@
     Foreground="White"
     SupportedOrientations="Portrait"  Orientation="Portrait" shell:SystemTray.ForegroundColor="LightGray"
     >
+    
     <toolkit:TransitionService.NavigationInTransition>
         <toolkit:NavigationInTransition>
             <toolkit:NavigationInTransition.Backward>
@@ -35,7 +36,7 @@
         </toolkit:NavigationOutTransition>
     </toolkit:TransitionService.NavigationOutTransition>
 
-
+    
     <!--LayoutRoot contains the root grid where all other page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Black">
         <Grid.RowDefinitions>
@@ -118,6 +119,7 @@
             <shell:ApplicationBar.MenuItems>
                 <shell:ApplicationBarMenuItem Text="change image" Click="ApplicationBarMenuItem_Click"/>
                 <shell:ApplicationBarMenuItem Text="about" Click="ApplicationBarMenuItem_Click_1"/>
+                <shell:ApplicationBarMenuItem Text="change location" Click="ApplicationBarMenuItem_Click_2"/>
             </shell:ApplicationBar.MenuItems>
         </shell:ApplicationBar>
     </phone:PhoneApplicationPage.ApplicationBar>

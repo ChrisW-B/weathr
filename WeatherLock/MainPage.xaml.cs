@@ -84,7 +84,7 @@ namespace WeatherLock
             InitializeComponent();
 
             //Testing Key
-            //apiKey = "fb1dd3f4321d048d";
+            apiKey = "fb1dd3f4321d048d";
 
             restoreWeather();
             getFlickrPic();
@@ -390,7 +390,6 @@ namespace WeatherLock
               forecastListBox.ItemsSource = null;
               foreRes.Clear();
               foreRes = (ObservableCollection<ForecastResults>)store["backupForecast"];
-              var hello = 10;
              }
             
 
@@ -610,7 +609,6 @@ namespace WeatherLock
             store["backupApp"] = backup;
 
             store["backupForecast"] = foreRes;
-            var forecastStuff = store["backupForecast"];
             store["backupAlerts"] = results;
         }
         public class ForecastResults
@@ -870,6 +868,11 @@ namespace WeatherLock
         private void ApplicationBarMenuItem_Click_1(object sender, EventArgs e)
         {
             NavigationService.Navigate(new Uri("/About.xaml", UriKind.Relative));
+        }
+
+        private void ApplicationBarMenuItem_Click_2(object sender, EventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/SelectLocation.xaml", UriKind.Relative));
         }
     }
 }

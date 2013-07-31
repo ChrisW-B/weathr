@@ -94,6 +94,9 @@
     <Compile Include="About.xaml.cs">
       <DependentUpon>About.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AddLocation.xaml.cs">
+      <DependentUpon>AddLocation.xaml</DependentUpon>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
@@ -112,6 +115,9 @@
       <DependentUpon>AppResources.resx</DependentUpon>
     </Compile>
     <Compile Include="searchLocation.cs" />
+    <Compile Include="SelectLocation.xaml.cs">
+      <DependentUpon>SelectLocation.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SettingsPivot.xaml.cs">
       <DependentUpon>SettingsPivot.xaml</DependentUpon>
     </Compile>
@@ -126,7 +132,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="AddLocation.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SelectLocation.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -145,7 +159,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Icon Normal II.png" />
+    <Content Include="Assets\AppBar\add.png" />
     <Content Include="IconMedium.png" />
     <Content Include="IconNormal.png" />
     <Content Include="IconSmall.png" />
