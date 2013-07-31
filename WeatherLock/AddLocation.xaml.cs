@@ -99,18 +99,19 @@ namespace WeatherLock
             var x = ResultListBox.SelectedIndex;
             var resArray = locResults.ToArray()[x];
             store["newLocation"] = resArray.LocName;
+            store["locAdded"] = true;
             store["locUrl"] = resArray.LocUrl;
             store["locChanged"] = true;
             store.Save();
 
-            string googleUrl = "http://maps.googleapis.com/maps/api/geocode/xml?address=" + store["locName"] + "&sensor=true";
+            string googleUrl = "http://maps.googleapis.com/maps/api/geocode/xml?address=" + store["newLocation"] + "&sensor=true";
 
             WebClient client = new WebClient();
             client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(getCoordinates);
             client.DownloadStringAsync(new Uri(googleUrl));
 
 
-            SearchBox.Text = store["locName"];
+            SearchBox.Text = store["newLocation"];
             searchComplete = true;
         }
         private void getCoordinates(object sender, DownloadStringCompletedEventArgs e)
