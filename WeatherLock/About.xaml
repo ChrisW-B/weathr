@@ -1,0 +1,93 @@
+﻿<phone:PhoneApplicationPage
+    x:Class="WeatherLock.About"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    SupportedOrientations="Portrait" Orientation="Portrait"
+    mc:Ignorable="d"
+    shell:SystemTray.IsVisible="True">
+    <toolkit:TransitionService.NavigationInTransition>
+        <toolkit:NavigationInTransition>
+            <toolkit:NavigationInTransition.Backward>
+                <toolkit:TurnstileTransition Mode="BackwardIn"/>
+            </toolkit:NavigationInTransition.Backward>
+            <toolkit:NavigationInTransition.Forward>
+                <toolkit:TurnstileTransition Mode="ForwardIn"/>
+            </toolkit:NavigationInTransition.Forward>
+        </toolkit:NavigationInTransition>
+    </toolkit:TransitionService.NavigationInTransition>
+    <toolkit:TransitionService.NavigationOutTransition>
+        <toolkit:NavigationOutTransition>
+            <toolkit:NavigationOutTransition.Backward>
+                <toolkit:TurnstileTransition Mode="BackwardOut"/>
+            </toolkit:NavigationOutTransition.Backward>
+            <toolkit:NavigationOutTransition.Forward>
+                <toolkit:TurnstileTransition Mode="ForwardOut"/>
+            </toolkit:NavigationOutTransition.Forward>
+        </toolkit:NavigationOutTransition>
+    </toolkit:TransitionService.NavigationOutTransition>
+
+    <!--LayoutRoot is the root grid where all page content is placed-->
+    <Grid x:Name="LayoutRoot" Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!--TitlePanel contains the name of the application and page title-->
+        <StackPanel Grid.Row="0" Margin="12,17,0,28">
+            <TextBlock Text="WEATHR" Style="{StaticResource PhoneTextNormalStyle}"/>
+            <TextBlock Text="about" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
+        </StackPanel>
+
+        <!--ContentPanel - place additional content here-->
+        <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
+            <ScrollViewer>
+                <RichTextBox HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{x:Null}" >
+                    <Paragraph>
+                        <Run Text="Weathr was developed by Chris Barry "/>
+                    </Paragraph>
+                    <Paragraph>
+                        <Hyperlink TargetName="mailTo" NavigateUri="mailto:ChrisApps@outlook.com">Email</Hyperlink>
+                    </Paragraph>
+                    <Paragraph>
+                        <Hyperlink TargetName="twitter" NavigateUri="http://twitter.com/CB_27">Twitter</Hyperlink>
+                    </Paragraph>
+                    <Paragraph/>
+                    <Paragraph>
+                        <Run FontSize="26">Privacy:</Run>
+                    </Paragraph>
+                    <Paragraph>
+                        <Run Text="When Use Current Location is enabled, rough GPS coordinates are saved for use in finding your location. These coordinates are sent to " />
+                        <Hyperlink TargetName="flickrApi" NavigateUri="http://www.flickr.com/services/developer/">Flickr</Hyperlink>
+                        <Run Text=", to get a local picture, "/>
+                        <Hyperlink TargetName="wunderApi" NavigateUri="http://www.wunderground.com/?apiref=cdd8be6583b62f40">Weather Underground</Hyperlink>
+                        <Run Text=" for current weather data, as well as forecasts, and the "/>
+                        <Hyperlink TargetName="NWSapi" NavigateUri="http://graphical.weather.gov/xml/">
+                            National Weather Service
+                        </Hyperlink>
+                        <Run Text=" to get weather alerts."/>
+                    </Paragraph>
+                    <Paragraph/>
+                    <Paragraph>
+                        <Run Text="Additionally, when a location is added manually, rough coordinates are obtained for the town/city via the "/>
+                        <Hyperlink TargetName="googleApi" NavigateUri="https://developers.google.com/maps/documentation/geocoding/?hl=en">Google Maps API</Hyperlink>
+                        <Run Text=" and then used to find local photos through Flickr. "></Run>
+                    </Paragraph>
+                    <Paragraph/>
+                    <Paragraph>
+                        <Run Text="Coordinates are also stored on your phone in case the GPS service is inaccessible, and in that case, the last known location can be used. None of this data is saved off your phone, and I (the developer) do not have access to any of it"/>
+                    </Paragraph>
+                </RichTextBox>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+
+</phone:PhoneApplicationPage>

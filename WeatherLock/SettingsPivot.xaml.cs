@@ -1,0 +1,797 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Navigation;
+using Microsoft.Phone.Controls;
+using Microsoft.Phone.Shell;
+using Microsoft.Phone.Scheduler;
+using System.IO.IsolatedStorage;
+using System.Collections.ObjectModel;
+using System.Xml.Linq;
+using Microsoft.Phone.Marketplace;
+using Microsoft.Phone.Tasks;
+
+namespace WeatherLock
+{
+    public partial class SettingsPivot : PhoneApplicationPage
+    {
+        PeriodicTask periodicTask;
+
+        string periodicTaskName = "PeriodicAgent";
+        public bool agentsAreEnabled = true;
+        int selectedItem;
+        bool searchComplete;
+
+        ProgressIndicator progSearch;
+        ProgressIndicator progTile;
+
+        //Check to see if app is running as trial
+        LicenseInformation licInfo;
+        public bool isTrial;
+
+
+        ObservableCollection<LocResults> locResults = new ObservableCollection<LocResults>();
+
+
+        //save some typing
+        dynamic store = IsolatedStorageSettings.ApplicationSettings;
+        
+        public SettingsPivot()
+        {
+            InitializeComponent();            
+        }
+
+        private void setValues()
+        {
+
+            if (store.Contains("lockUnit"))
+            {
+                if (store["lockUnit"] == "c")
+                {
+                    lockCelsius.IsChecked = true;
+                }
+                else
+                {
+                    lockFahrenheit.IsChecked = true;
+                }
+            }
+            else
+            {
+                store["lockUnit"] = "c";
+                lockCelsius.IsChecked = true;
+            }
+
+            if (store.Contains("forecastUnit"))
+            {
+                if(store["forecastUnit"] == "i"){
+                    imperial.IsChecked = true;
+                }
+                else
+                {
+                    metric.IsChecked = true;
+                }
+            }
+            else
+            {
+                store["forecastUnit"] = "m";
+                metric.IsChecked = true;
+            }
+
+            if (store.Contains("useFlickr"))
+            {
+                if ((bool)store["useFlickr"])
+                {
+                    flickrPics.IsChecked = true;
+                }
+                else
+                {
+                    flickrPics.IsChecked = false;
+                }
+            }
+            else
+            {
+                store["useFlickr"] = true;
+                flickrPics.IsChecked = true;
+            }
+
+            if (store.Contains("tempIsC"))
+            {
+                if ((bool)store["tempIsC"])
+                {
+                    celsius.IsChecked = true;
+                }
+                else
+                {
+                    fahrenheit.IsChecked = true;
+                }
+            }
+            else
+            {
+                store["tempIsC"] = "true";
+                celsius.IsChecked = true;
+            }
+
+            if (store.Contains("windUnit"))
+            {
+                if ((string)store["windUnit"] == "m")
+                {
+                    unitMiles.IsChecked = true;
+                }
+                else
+                {
+                    unitKms.IsChecked = true;
+                }
+            }
+            else
+            {
+                store["windUnit"] = "m";
+                unitMiles.IsChecked = true;
+            }
+            if (store.Contains("tempAlert"))
+            {
+                if ((bool)store["tempAlert"])
+                {
+                    HiLo.IsChecked = true;
+                }
+                else
+                {
+                    HiLo.IsChecked = false;
+                }
+            }
+            else
+            {
+                store["tempAlert"] = true;
+                HiLo.IsChecked = true;
+            }
+
+
+            if (store.Contains("updateRate"))
+            {
+                string x = (string)store["updateRate"];
+                switch (x)
+                {
+                    case "720":
+                        UpdateBox.SelectedIndex = 0;
+                        selectedItem = 0;
+                        store["updateRate"] = "720";
+                        break;
+                    case "360":
+                        UpdateBox.SelectedIndex = 1;
+                        selectedItem = 1;
+                        store["updateRate"] = "360";
+                        break;
+                    case "180":
+                        UpdateBox.SelectedIndex = 2;
+                        selectedItem = 2;
+                        store["updateRate"] = "180";
+                        break;
+                    case "60":
+                        UpdateBox.SelectedIndex = 3;
+                        selectedItem = 3;
+                        store["updateRate"] = "60";
+                        break;
+                    case "0":
+                        UpdateBox.SelectedIndex = 4;
+                        selectedItem = 4;
+                        store["updateRate"] = "0";
+                        break;
+                }
+            }
+            else
+            {
+                UpdateBox.SelectedIndex = 0;
+                selectedItem = 0;
+                store["updateRate"] = "720";
+            }
+
+            if (store.Contains("notifyMe"))
+            {
+                if ((bool)store["notifyMe"])
+                {
+                    notifyMe.IsChecked = true;
+                }
+                else
+                {
+                    notifyMe.IsChecked = false;
+                }
+            }
+            else
+            {
+                notifyMe.IsChecked = false;
+                store["notifyMe"] = false;
+            }
+        }
+
+        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
+        {
+            licInfo = new LicenseInformation();
+            isTrial = licInfo.IsTrial();
+
+            searchComplete = false;
+            setValues();
+            
+            ignoreCheckBoxEvents = true;
+
+            periodicTask = ScheduledActionService.Find(periodicTaskName) as PeriodicTask;
+
+            if (periodicTask != null)
+            {
+                PeriodicStackPanel.DataContext = periodicTask;
+            }
+            ignoreCheckBoxEvents = false;
+
+            if (store.Contains("LocationConsent"))
+            {
+                if ((bool)store["LocationConsent"])
+                {
+                    useCurrent.IsChecked = true;
+                    SearchBox.IsEnabled = false;
+                }
+                else
+                {
+                    useCurrent.IsChecked = false;
+                    SearchBox.IsEnabled = true;
+                }
+            }
+            if (store.Contains("locName"))
+            {
+                SearchBox.Text = (string)store["locName"];
+            }
+            else
+            {
+                SearchBox.Text = "enter location";
+            }
+        }
+
+        //Now Pivot
+        private void celsius_Checked(object sender, RoutedEventArgs e)
+        {
+            store["tempIsC"] = true;
+            store["unitChanged"] = true;
+        }
+        private void fahrenheit_Checked(object sender, RoutedEventArgs e)
+        {
+            store["tempIsC"] = false;
+            store["unitChanged"] = true;
+        }
+        private void unitKms_Checked(object sender, RoutedEventArgs e)
+        {
+            store["windUnit"] = "k";
+            store["unitChanged"] = true;
+        }
+        private void unitMiles_Checked(object sender, RoutedEventArgs e)
+        {
+            store["windUnit"] = "m";
+            store["unitChanged"] = true;
+        }
+        private void flickrPics_Checked(object sender, RoutedEventArgs e)
+        {
+            store["useFlickr"] = true;
+        }
+        private void flickrPics_Unchecked(object sender, RoutedEventArgs e)
+        {
+            store["useFlickr"] = false;
+        }
+
+        //Location Pivot
+        void seachResults(object sender, DownloadStringCompletedEventArgs e)
+        {
+            //HAP needs a HTML-Document as it is based on Linq/Xpath
+            XDocument doc = new XDocument();
+            doc = XDocument.Parse(e.Result);
+
+            //search the html document for the search result, based on Xpath:
+            var locNames = doc.Descendants().Elements("name");
+            foreach (XElement elm in doc.Descendants().Elements("name"))
+            {
+                var locationName = (string)elm.Value;
+                var wuUrlNode = elm.NextNode.NextNode.NextNode.NextNode.NextNode.NextNode;
+                var wuUrl = wuUrlNode.ToString();
+                wuUrl = wuUrl.Replace("<l>", "");
+                wuUrl = wuUrl.Replace("</l>", "");
+
+                locResults.Add(new LocResults() { LocName = locationName, LocUrl = wuUrl });
+                ResultListBox.ItemsSource = locResults;
+
+            }
+            progSearch.IsVisible = false;
+        }
+        private void SearchBox_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            if (SearchBox.Text == "enter location" || SearchBox.Text == (string)store["locName"])
+            {
+                SearchBox.Text = "";
+            }
+        }
+        private void SearchBox_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (SearchBox.Text == "")
+            {
+                if (store.Contains("locName"))
+                {
+                    SearchBox.Text = (string)store["locName"];
+                }
+                else
+                {
+                    SearchBox.Text = "enter location";
+                }
+            }
+        }
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (searchComplete == false)
+            {
+                //Start Progress Bar
+                startSearchProg();
+
+                //clear previous results, if there are any since this is a non-MVVM sample:
+                ResultListBox.ItemsSource = null;
+                locResults.Clear();
+                //create searchUri
+                //search is based on the user's CurrentCulture
+                string searchUri = string.Format("http://autocomplete.wunderground.com/aq?query={0}&format=XML", SearchBox.Text);
+
+                //start WebClient (this way it will work on WP7 & WP8)
+                WebClient client = new WebClient();
+                //Add this header to asure that new results will be downloaded, also if the search term has not changed
+                // otherwise it would not load again the result string (because of WP cashing)
+                client.Headers[HttpRequestHeader.IfModifiedSince] = DateTime.Now.ToString();
+                //Download the String and add new EventHandler once the Download has completed
+                client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(seachResults);
+                client.DownloadStringAsync(new Uri(searchUri));
+            }
+        }
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            store["LocationConsent"] = true;
+            store["locChanged"] = true;
+            store.Save();
+            SearchBox.IsEnabled = false;
+        }
+        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            store["LocationConsent"] = false;
+            store["locChanged"] = true;
+            store.Save();
+            SearchBox.IsEnabled = true;
+        }
+        private void ResultListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var x = ResultListBox.SelectedIndex;
+            var resArray = locResults.ToArray()[x];
+            store["locName"] = resArray.LocName;
+            store["locUrl"] = resArray.LocUrl;
+            store["locChanged"] = true;
+            store.Save();
+
+            string googleUrl = "http://maps.googleapis.com/maps/api/geocode/xml?address=" + store["locName"] + "&sensor=true";
+
+            WebClient client = new WebClient();
+            client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(getCoordinates);
+            client.DownloadStringAsync(new Uri(googleUrl));
+
+
+            SearchBox.Text = store["locName"];
+            searchComplete = true;
+        }
+        private void getCoordinates(object sender, DownloadStringCompletedEventArgs e)
+        {
+            XDocument doc = XDocument.Parse(e.Result);
+            var location = doc.Element("GeocodeResponse").Element("result").Element("geometry").Element("location");
+            string lat = (string)location.Element("lat").Value;
+            string lng = (string)location.Element("lng").Value;
+            String[] loc = { lat, lng };
+            store["loc"] = loc;
+            store.Save();
+        }
+        private void startSearchProg()
+        {
+            SystemTray.SetIsVisible(this, true);
+            SystemTray.SetOpacity(this, 0);
+            progSearch = new ProgressIndicator();
+            progSearch.Text = "Seaching";
+            progSearch.IsIndeterminate = true;
+            progSearch.IsVisible = true;
+            SystemTray.SetProgressIndicator(this, progSearch);
+        }
+        public class LocResults
+        {
+            public string LocUrl { get; set; }
+            public string LocName { get; set; }
+        }
+
+        //Forecast Pivot
+        private void metric_Checked(object sender, RoutedEventArgs e)
+        {
+            store["forecastUnit"] = "m";
+            store["unitChanged"] = true;
+            metric.IsChecked = true;
+        }
+        private void imperial_Checked(object sender, RoutedEventArgs e)
+        {
+            store["forecastUnit"] = "i";
+            store["unitChanged"] = true;
+            imperial.IsChecked = true;
+        }
+
+        //Tile and Lock pivot
+        private void RemoveAgent(string name)
+        {
+            try
+            {
+                ScheduledActionService.Remove(name);
+            }
+            catch (Exception)
+            {
+            }
+        }
+        private void UpdateButton_Click(object sender, RoutedEventArgs e)
+        {
+            startTileProg();
+            updateData();
+        }
+        private void notifyMe_Checked(object sender, RoutedEventArgs e)
+        {
+            store["notifyMe"] = true;
+            notifyMe.IsChecked = true;
+        }
+        private void notifyMe_Unchecked(object sender, RoutedEventArgs e)
+        {
+            store["notifyMe"] = false;
+            notifyMe.IsChecked = false;
+
+        }
+        private async void btnGoToLockSettings_Click(object sender, RoutedEventArgs e)
+        {
+            // Launch URI for the lock screen settings screen.
+            var op = await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings-lock:"));
+        }
+        private void changeLoc_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/ChangeLocation.xaml", UriKind.Relative));
+        }
+        private void UpdateBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!isTrial)
+            {
+                int y = UpdateBox.SelectedIndex;
+                switch (y)
+                {
+                    case 0:
+                        store["updateRate"] = "720";
+                        break;
+                    case 1:
+                        store["updateRate"] = "360";
+                        break;
+                    case 2:
+                        store["updateRate"] = "180";
+                        break;
+                    case 3:
+                        store["updateRate"] = "60";
+                        break;
+                    case 4:
+                        store["updateRate"] = "0";
+                        break;
+                }
+            }
+            else
+            {
+                store["updateRate"] = "720";
+                UpdateBox.SelectedIndex = 0;
+            }
+            store.Save();
+        }
+        private void HiLo_Checked(object sender, RoutedEventArgs e)
+        {
+            store["tempAlert"] = true;
+        }
+        private void HiLo_Unchecked(object sender, RoutedEventArgs e)
+        {
+            store["tempAlert"] = false;
+        }
+        private void StartPeriodicAgent()
+        {
+            // Variable for tracking enabled status of background agents for this app.
+            agentsAreEnabled = true;
+
+            // Obtain a reference to the period task, if one exists
+            periodicTask = ScheduledActionService.Find(periodicTaskName) as PeriodicTask;
+
+            // If the task already exists and background agents are enabled for the
+            // application, you must remove the task and then add it again to update 
+            // the schedule
+            if (periodicTask != null)
+            {
+                RemoveAgent(periodicTaskName);
+            }
+
+            periodicTask = new PeriodicTask(periodicTaskName);
+
+            // The description is required for periodic agents. This is the string that the user
+            // will see in the background services Settings page on the device.
+            periodicTask.Description = "Updates tile and Lockscreen with weather conditions and forecast";
+
+            // Place the call to Add in a try block in case the user has disabled agents.
+            try
+            {
+                ScheduledActionService.Add(periodicTask);
+                PeriodicStackPanel.DataContext = periodicTask;
+
+            }
+            catch (InvalidOperationException exception)
+            {
+                if (exception.Message.Contains("BNS Error: The action is disabled"))
+                {
+                    MessageBox.Show("Background agents for this application have been disabled by the user.");
+                    agentsAreEnabled = false;
+                    PeriodicCheckBox.IsChecked = false;
+                    UpdateBox.IsEnabled = false;
+                }
+
+                if (exception.Message.Contains("BNS Error: The maximum number of ScheduledActions of this type have already been added."))
+                {
+                    // No user action required. The system prompts the user when the hard limit of periodic tasks has been reached.
+
+                }
+                PeriodicCheckBox.IsChecked = false;
+                UpdateBox.IsEnabled = false;
+            }
+            catch (SchedulerServiceException)
+            {
+                // No user action required.
+                PeriodicCheckBox.IsChecked = false;
+                UpdateBox.IsEnabled = false;
+            }
+        }
+        bool ignoreCheckBoxEvents = false;
+        private void PeriodicCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (ignoreCheckBoxEvents)
+                return;
+            StartPeriodicAgent();
+            if (!isTrial)
+            {
+                UpdateBox.IsEnabled = true;
+            }
+        }
+        private void PeriodicCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (ignoreCheckBoxEvents)
+                return;
+            RemoveAgent(periodicTaskName);
+            UpdateBox.IsEnabled = false;
+        }
+        private void lockCelsius_Checked(object sender, RoutedEventArgs e)
+        {
+            store["lockUnit"] = "c";
+            lockCelsius.IsChecked = true;
+        }
+        private void lockFahrenheit_Checked(object sender, RoutedEventArgs e)
+        {
+            store["lockUnit"] = "f";
+            lockFahrenheit.IsChecked = true;
+        }
+        private void startTileProg()
+        {
+            SystemTray.SetIsVisible(this, true);
+            SystemTray.SetOpacity(this, 0);
+            progTile = new ProgressIndicator();
+            progTile.Text = "Updating Tile...";
+            progTile.IsIndeterminate = true;
+            progTile.IsVisible = true;
+            SystemTray.SetProgressIndicator(this, progTile);
+        }
+
+        //Update the tile
+         #region variables
+        //Current Conditions
+        private String cityName;
+        private String tempStr;
+        private String weather;
+
+        //Forecast Conditions
+        private String todayHigh;
+        private String todayLow;
+        private String forecastToday;
+        private String forecastTomorrow;
+        private String tomorrowHigh;
+        private String tomorrowLow;
+
+        private String tempUnit;
+        private String url;
+
+        //Release Key
+        private String apiKey = "102b8ec7fbd47a05";
+
+        
+
+        private String latitude;
+        private String longitude;
+        #endregion
+        private void updateData()
+        {
+            //Testing Key
+            apiKey = "fb1dd3f4321d048d";
+
+            checkLocation();
+            checkUnits();
+            getWeatherData();
+        }
+        private void getWeatherData()
+        {
+            var client = new WebClient();
+            Uri uri = new Uri(url);
+
+            client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(WeatherStringCallback);
+            client.DownloadStringAsync(uri);
+        }
+        private void WeatherStringCallback(object sender, DownloadStringCompletedEventArgs e)
+        {
+            restoreWeather();
+            if (!e.Cancelled && e.Error == null)
+            {
+                XDocument doc = XDocument.Parse(e.Result);
+
+                //Current Conditions
+                var currentObservation = doc.Element("response").Element("current_observation");
+                this.cityName = (string)currentObservation.Element("display_location").Element("full");
+                this.weather = (string)currentObservation.Element("weather");
+
+                XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
+
+                var today = forecastDays.Element("forecastday");
+                var tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
+
+                this.forecastToday = (string)today.Element("conditions");
+                this.forecastTomorrow = (string)tomorrow.Element("conditions");
+                if (tempUnit == "c")
+                {
+                    tempStr = (string)currentObservation.Element("temp_c");
+                    this.todayLow = (string)today.Element("low").Element("celsius");
+                    this.todayHigh = (string)today.Element("high").Element("celsius");
+                    this.tomorrowLow = (string)tomorrow.Element("low").Element("celsius");
+                    this.tomorrowHigh = (string)tomorrow.Element("high").Element("celsius");
+                }
+                else
+                {
+                    tempStr = (string)currentObservation.Element("temp_f");
+                    this.todayLow = (string)today.Element("low").Element("fahrenheit");
+                    this.todayHigh = (string)today.Element("high").Element("fahrenheit");
+                    this.tomorrowHigh = (string)tomorrow.Element("high").Element("fahrenheit");
+                    this.tomorrowLow = (string)tomorrow.Element("low").Element("fahrenheit");
+                }
+
+                //convert temps to ints
+                var getTemp = new convertTempMain(tempStr);
+                int temp = getTemp.temp;
+
+                //update the tile and lockscreen
+                var updateTile = new updateTileMain(cityName, temp, weather, todayHigh, todayLow, forecastToday, forecastTomorrow, tomorrowHigh, tomorrowLow);
+
+                backupWeather();
+                //save the time of the last time the app was run
+                store["lastRun"] = DateTime.Now.ToString();
+                store["locName"] = cityName;
+                store.Save();
+            }
+            progTile.IsVisible = false;
+        }
+        private void checkUnits()
+        {
+            //check what the temp units should be
+            if (store.Contains("lockUnit"))
+            {
+                if (store["lockUnit"] == "c")
+                {
+                    tempUnit = "c";
+                }
+                else
+                {
+                    tempUnit = "f";
+                }
+            }
+            else
+            {
+                store["lockUnit"] = "c";
+                tempUnit = "c";
+            }
+        }
+        private void checkLocation()
+        {
+            //Check to see if allowed to get location
+            if (store.Contains("LocationConsent"))
+            {
+                if ((bool)store["LocationConsent"])
+                {
+                    //get location
+                    var getLocation = new getLocationMain();
+                    if (getLocation.getLat() != null)
+                    {
+                        latitude = getLocation.getLat();
+                        longitude = getLocation.getLong();
+                        String[] loc = { latitude, longitude };
+                        store["loc"] = loc;
+                    }
+                    else
+                    {
+                        if (store.Contains("loc"))
+                        {
+                            String[] latlng = new String[2];
+                            latlng = (String[])store["loc"];
+                            latitude = latlng[0];
+                            longitude = latlng[1];
+                        }
+                        else
+                        {
+                            latitude = "0";
+                            longitude = "0";
+                        }
+                    }
+                    url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast/q/" + latitude + "," + longitude + ".xml";
+                }
+                else
+                {
+                    if (store.Contains("locUrl"))
+                    {
+                        url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast" + store["locUrl"] + ".xml";
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+        public void backupWeather()
+        {
+            string[] backup = {
+                 cityName,
+                 tempStr,
+                 weather,
+                 todayHigh,
+                 todayLow,
+                 forecastToday,
+                 forecastTomorrow,
+                 tomorrowHigh,
+                 tomorrowLow
+                 };
+            store["backupTile"] = backup;
+            store.Save();
+        }
+        private void restoreWeather()
+        {
+            if (store.Contains("backupTile"))
+            {
+                String[] backupTile = new String[9];
+                backupTile = store["backupTile"];
+
+                this.cityName = backupTile[0];
+                this.tempStr = backupTile[1];
+                this.weather = backupTile[2];
+                this.todayHigh = backupTile[3];
+                this.todayLow = backupTile[4];
+                this.forecastToday = backupTile[5];
+                this.forecastTomorrow = backupTile[6];
+                this.tomorrowHigh = backupTile[7];
+                this.tomorrowLow = backupTile[8];
+            }
+        }
+
+        private void UpdateBox_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (isTrial)
+            {
+                MessageBoxResult m = MessageBox.Show("Trial Mode can only be updated every 12 hours, to save on cost. Buy now?", "Trial Mode", MessageBoxButton.OKCancel);
+                if (m == MessageBoxResult.OK)
+                {
+                    MarketplaceDetailTask task = new MarketplaceDetailTask();
+                    task.Show();
+                }
+            }
+        }
+    }
+    
+}
