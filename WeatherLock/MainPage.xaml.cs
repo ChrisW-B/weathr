@@ -213,9 +213,9 @@ namespace WeatherLock
             }
             else
             {
-                if (store.Contains("LocationConsent"))
+                if (store.Contains("isCurrent"))
                 {
-                    if ((bool)store["LocationConsent"])
+                    if ((bool)store["isCurrent"])
                     {
                         if (latitude != null && longitude != null)
                         {
@@ -252,13 +252,13 @@ namespace WeatherLock
         //Find the location
         private void findLocation()
         {
-            if (!store.Contains("LocationConsent"))
+            if (!store.Contains("isCurrent"))
             {
-                store["LocationConsent"] = true;
+                store["isCurrent"] = true;
                 findLocation();
             }
 
-            if ((bool)store["LocationConsent"])
+            if ((bool)store["isCurrent"])
             {
                 //get location
                 var getLocation = new getLocationMain();
@@ -606,6 +606,7 @@ namespace WeatherLock
                                   updateTime,
                                   tempCompareText
                               };
+            store["locationName"] = cityName;
             store["backupApp"] = backup;
 
             store["backupForecast"] = foreRes;

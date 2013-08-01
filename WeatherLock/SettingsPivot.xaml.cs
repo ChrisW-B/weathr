@@ -40,7 +40,7 @@ namespace WeatherLock
 
         public SettingsPivot()
         {
-            InitializeComponent();            
+            InitializeComponent();
         }
 
         private void setValues()
@@ -65,7 +65,8 @@ namespace WeatherLock
 
             if (store.Contains("forecastUnit"))
             {
-                if(store["forecastUnit"] == "i"){
+                if (store["forecastUnit"] == "i")
+                {
                     imperial.IsChecked = true;
                 }
                 else
@@ -211,7 +212,7 @@ namespace WeatherLock
 
             searchComplete = false;
             setValues();
-            
+
             ignoreCheckBoxEvents = true;
 
             periodicTask = ScheduledActionService.Find(periodicTaskName) as PeriodicTask;
@@ -283,7 +284,7 @@ namespace WeatherLock
         #endregion
         private void initializeLocations()
         {
-            locations.Add(new Locations() { LocName = "Current Location", currentLoc = true });           
+            locations.Add(new Locations() { LocName = "Current Location", currentLoc = true });
             LocationListBox.ItemsSource = locations;
         }
         private void restoreLocations()
@@ -312,7 +313,8 @@ namespace WeatherLock
                 {
                     store["locAdded"] = false;
                     String locationName = store["newLocation"];
-                    locations.Add(new Locations() { LocName = locationName, currentLoc = false });
+                    String locationUrl = store["newUrl"];
+                    locations.Add(new Locations() { LocName = locationName, currentLoc = false, LocUrl = locationUrl });
                     LocationListBox.ItemsSource = locations;
                     backupLocations();
                 }
@@ -325,12 +327,17 @@ namespace WeatherLock
         public class Locations
         {
             public string LocName { get; set; }
+            public string LocUrl { get; set; }
             public bool currentLoc { get; set; }
         }
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        private void delete_Click(object sender, RoutedEventArgs e)
         {
             MenuItem menuItem = (MenuItem)sender;
             removeLocation(menuItem.Tag.ToString());
+        }
+        private void pin_Click(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
         private void removeLocation(string loc)
         {
@@ -351,7 +358,18 @@ namespace WeatherLock
             {
                 var hello = "hi";
             }
-        }  
+        }
+        private void LocationListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var resArray = locations.ToArray()[LocationListBox.SelectedIndex];
+            string current = (string)resArray.LocName;
+            store["isCurrent"] = resArray.currentLoc;
+            store["locUrl"] = resArray.LocUrl;
+            store["locName"] = resArray.LocName;
+            store["locChanged"] = true;
+            store.Save();
+
+        }
 
         //Forecast Pivot
         private void metric_Checked(object sender, RoutedEventArgs e)
@@ -536,7 +554,7 @@ namespace WeatherLock
         }
 
         //Update the tile
-         #region variables
+        #region variables
         //Current Conditions
         private String cityName;
         private String tempStr;
@@ -556,7 +574,7 @@ namespace WeatherLock
         //Release Key
         private String apiKey = "102b8ec7fbd47a05";
 
-        
+
 
         private String latitude;
         private String longitude;
@@ -749,6 +767,6 @@ namespace WeatherLock
             NavigationService.Navigate(new Uri("/AddLocation.xaml", UriKind.Relative));
         }
 
-        
-    }   
+
+    }
 }

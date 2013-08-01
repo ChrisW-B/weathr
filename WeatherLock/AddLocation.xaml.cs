@@ -53,12 +53,12 @@ namespace WeatherLock
         }
         private void SearchBox_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
+            
             if (SearchBox.Text == "enter location" || SearchBox.Text == (string)store["locName"])
             {
                 SearchBox.Text = "";
             }
         }
-
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (searchComplete == false)
@@ -85,13 +85,12 @@ namespace WeatherLock
         }
         private void ResultListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
-            var x = ResultListBox.SelectedIndex;
-            if (x > -1)
+            if (ResultListBox.SelectedIndex > -1)
             {
-                var resArray = locResults.ToArray()[x];
-                store["newLocation"] = resArray.LocName;
+                var resArray = locResults.ToArray()[ResultListBox.SelectedIndex];
                 store["locAdded"] = true;
+                store["newLocation"] = resArray.LocName;
+                store["newUrl"] = resArray.LocUrl;
                 store.Save();
                 if (!"Current Location".Equals((String)(store["newLocation"])))
                 {
@@ -109,8 +108,6 @@ namespace WeatherLock
 
                 }
             }
-
-
         }
         private void getCoordinates(object sender, DownloadStringCompletedEventArgs e)
         {

@@ -60,7 +60,7 @@
 
             <!--Pivot item 2-->
             <phone:PivotItem Header="locations">
-                <ListBox x:Name="LocationListBox" Margin="10,0,0,30" HorizontalAlignment="Left" Width="436">
+                <ListBox x:Name="LocationListBox" Margin="10,0,0,30" HorizontalAlignment="Left" Width="436" SelectionChanged="LocationListBox_SelectionChanged">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Vertical">
@@ -70,7 +70,8 @@
                                        FontSize="30">
                                     <toolkit:ContextMenuService.ContextMenu>
                                         <toolkit:ContextMenu>
-                                            <toolkit:MenuItem Name="delete" Header="Delete" Tag="{Binding LocName}" Click="MenuItem_Click"/>
+                                            <toolkit:MenuItem Name="delete" Header="Delete" Tag="{Binding LocName}" Click="delete_Click"/>
+                                            <toolkit:MenuItem Name="pin" Header="Pin to Start" Tag="{Binding LocName}" Click="pin_Click"/>
                                         </toolkit:ContextMenu>
                                     </toolkit:ContextMenuService.ContextMenu>
                                 </ListBoxItem>
