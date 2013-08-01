@@ -281,29 +281,38 @@ namespace WeatherLock
         #region variables
         ObservableCollection<Locations> locations = new ObservableCollection<Locations>();
         #endregion
-
-        public void restoreLocations()
+        private void initializeLocations()
+        {
+            locations.Add(new Locations() { LocName = "Current Location", currentLoc = true });           
+            LocationListBox.ItemsSource = locations;
+        }
+        private void restoreLocations()
         {
             if (store.Contains("locations"))
             {
                 locations = (ObservableCollection<Locations>)store["locations"];
                 LocationListBox.ItemsSource = locations;
+                backupLocations();
             }
         }
-        public void backupLocations()
+        private void backupLocations()
         {
             store["locations"] = locations;
             store.Save();
         }
-        public void addLocation()
+        private void addLocation()
         {
+            if (locations.Count == 0)
+            {
+                initializeLocations();
+            }
             if (store.Contains("locAdded") && store.Contains("newLocation"))
             {
                 if ((bool)store["locAdded"])
                 {
                     store["locAdded"] = false;
                     String locationName = store["newLocation"];
-                    locations.Add(new Locations() { LocName = locationName });
+                    locations.Add(new Locations() { LocName = locationName, currentLoc = false });
                     LocationListBox.ItemsSource = locations;
                     backupLocations();
                 }
@@ -316,6 +325,7 @@ namespace WeatherLock
         public class Locations
         {
             public string LocName { get; set; }
+            public bool currentLoc { get; set; }
         }
         private void locationName_Hold(object sender, System.Windows.Input.GestureEventArgs e)
         {
