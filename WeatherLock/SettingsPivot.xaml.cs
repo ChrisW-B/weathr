@@ -337,7 +337,36 @@ namespace WeatherLock
         }
         private void pin_Click(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            MenuItem menuItem = (MenuItem)sender;
+            String[] resArray = getArray(menuItem.Tag.ToString());
+            
+            IconicTileData locTile = new IconicTileData
+            {
+                IconImage = new Uri("/IconMedium.png", UriKind.Relative),
+                SmallIconImage = new Uri("/IconSmall.png", UriKind.Relative),
+                Title = resArray[0],
+                Count = 99,
+                WideContent1 = string.Format("Currently: " + "conditions" + ", " + "temp" + " degrees"),
+                WideContent2 = string.Format("Today: " + "forecastToday" + " " + "high" + "/" + "low"),
+                WideContent3 = string.Format("Tomorrow: " + "forecastTomorrow" + " " + "forecastHigh" + "/" + "forecastLow")
+            };
+            ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + resArray[0] +"?url=" + resArray[1] +"?isCurrent=" +resArray[2], UriKind.Relative), locTile, true);   
+        }
+        private String[] getArray(string loc)
+        {
+            foreach (Locations location in locations)
+            {
+                if (location.LocName == loc)
+                {
+                    String[] thisLocation =  {
+                                               location.LocName,
+                                               location.LocUrl,
+                                              Convert.ToString(location.currentLoc)
+                                           };
+                    return thisLocation;
+                }
+            }
+            return null;
         }
         private void removeLocation(string loc)
         {

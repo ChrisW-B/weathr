@@ -95,6 +95,19 @@ namespace WeatherLock
             licInfo = new LicenseInformation();
             isTrial = licInfo.IsTrial();
 
+            base.OnNavigatedTo(e);
+            if (this.NavigationContext.QueryString.ContainsKey("cityName") && this.NavigationContext.QueryString.ContainsKey("url") && this.NavigationContext.QueryString.ContainsKey("isCurrent"))
+            {
+                string cityName = this.NavigationContext.QueryString["cityName"];
+                string url = this.NavigationContext.QueryString["url"];
+                string isCurrent = this.NavigationContext.QueryString["isCurrent"];
+                store["cityName"] = cityName;
+                store["locUrl"] = url;
+                store["isCurrent"] = isCurrent;
+                
+
+            }
+
             setUnits();
             checkUpdated();
             updateAlerts();
