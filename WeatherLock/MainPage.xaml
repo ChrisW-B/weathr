@@ -119,7 +119,6 @@
             <shell:ApplicationBar.MenuItems>
                 <shell:ApplicationBarMenuItem Text="change image" Click="ApplicationBarMenuItem_Click"/>
                 <shell:ApplicationBarMenuItem Text="about" Click="ApplicationBarMenuItem_Click_1"/>
-                <shell:ApplicationBarMenuItem Text="change location" Click="ApplicationBarMenuItem_Click_2"/>
             </shell:ApplicationBar.MenuItems>
         </shell:ApplicationBar>
     </phone:PhoneApplicationPage.ApplicationBar>

@@ -346,6 +346,11 @@ namespace WeatherLock
         }
         private void locationName_Hold(object sender, System.Windows.Input.GestureEventArgs e)
         {
+            string locationName = e.ToString();
+            if (locationName == "Current Location")
+            {
+                var hello = "hi";
+            }
         }  
 
         //Forecast Pivot

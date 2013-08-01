@@ -30,6 +30,7 @@ namespace WeatherLock
         //Location Pivot
         void seachResults(object sender, DownloadStringCompletedEventArgs e)
         {
+            locResults.Add(new LocResults() { LocName = "Current Location", LocUrl = "http://bing.com" });
             //HAP needs a HTML-Document as it is based on Linq/Xpath
             XDocument doc = new XDocument();
             doc = XDocument.Parse(e.Result);
@@ -57,20 +58,7 @@ namespace WeatherLock
                 SearchBox.Text = "";
             }
         }
-        private void SearchBox_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            if (SearchBox.Text == "")
-            {
-                if (store.Contains("locName"))
-                {
-                    SearchBox.Text = (string)store["locName"];
-                }
-                else
-                {
-                    SearchBox.Text = "enter location";
-                }
-            }
-        }
+
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (searchComplete == false)
@@ -97,21 +85,32 @@ namespace WeatherLock
         }
         private void ResultListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+
             var x = ResultListBox.SelectedIndex;
-            var resArray = locResults.ToArray()[x];
-            store["newLocation"] = resArray.LocName;
-            store["locAdded"] = true;
-            store.Save();
+            if (x > -1)
+            {
+                var resArray = locResults.ToArray()[x];
+                store["newLocation"] = resArray.LocName;
+                store["locAdded"] = true;
+                store.Save();
+                if (!"Current Location".Equals((String)(store["newLocation"])))
+                {
+                    string googleUrl = "http://maps.googleapis.com/maps/api/geocode/xml?address=" + store["newLocation"] + "&sensor=true";
 
-            string googleUrl = "http://maps.googleapis.com/maps/api/geocode/xml?address=" + store["newLocation"] + "&sensor=true";
+                    WebClient client = new WebClient();
+                    client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(getCoordinates);
+                    client.DownloadStringAsync(new Uri(googleUrl));
 
-            WebClient client = new WebClient();
-            client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(getCoordinates);
-            client.DownloadStringAsync(new Uri(googleUrl));
+                }
+                else
+                {
+                    SearchBox.Text = store["newLocation"];
+                    NavigationService.GoBack();
+
+                }
+            }
 
 
-            SearchBox.Text = store["newLocation"];
-            searchComplete = true;
         }
         private void getCoordinates(object sender, DownloadStringCompletedEventArgs e)
         {
@@ -121,7 +120,10 @@ namespace WeatherLock
             string lng = (string)location.Element("lng").Value;
             String[] loc = { lat, lng };
             store["loc"] = loc;
+            searchComplete = true;
             store.Save();
+            SearchBox.Text = store["newLocation"];
+            NavigationService.GoBack();
         }
         private void startSearchProg()
         {

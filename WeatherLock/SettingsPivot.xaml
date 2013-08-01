@@ -60,18 +60,17 @@
 
             <!--Pivot item 2-->
             <phone:PivotItem Header="locations">
-                <ListBox x:Name="LocationListBox" Margin="0,0,0,30">
+                <ListBox x:Name="LocationListBox" Margin="10,0,0,30" HorizontalAlignment="Left" Width="436">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Vertical">
                                 <ListBoxItem x:Name="locationName"
                                        Content="{Binding LocName}"
                                        FontFamily="Segoe WP SemiLight"
-                                       FontSize="30"
-                                             Hold="locationName_Hold">
+                                       FontSize="30">
                                     <toolkit:ContextMenuService.ContextMenu>
                                         <toolkit:ContextMenu>
-                                            <toolkit:MenuItem Header="Delete" Tag="{Binding LocName}" Click="MenuItem_Click"/>
+                                            <toolkit:MenuItem Name="delete" Header="Delete" Tag="{Binding LocName}" Click="MenuItem_Click"/>
                                         </toolkit:ContextMenu>
                                     </toolkit:ContextMenuService.ContextMenu>
                                 </ListBoxItem>
@@ -124,8 +123,8 @@
                     </StackPanel>
                 </Grid>
             </phone:PivotItem>
-           
-        </phone:Pivot>        
+
+        </phone:Pivot>
     </Grid>
     <phone:PhoneApplicationPage.ApplicationBar>
         <shell:ApplicationBar IsVisible="True"  IsMenuEnabled="True" Mode="Minimized"  Opacity="0.8" >
