@@ -327,14 +327,26 @@ namespace WeatherLock
             public string LocName { get; set; }
             public bool currentLoc { get; set; }
         }
-        private void locationName_Hold(object sender, System.Windows.Input.GestureEventArgs e)
-        {
-
-        }
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
-
+            MenuItem menuItem = (MenuItem)sender;
+            removeLocation(menuItem.Tag.ToString());
         }
+        private void removeLocation(string loc)
+        {
+            foreach (Locations location in locations)
+            {
+                if (location.LocName == loc)
+                {
+                    locations.Remove(location);
+                    restoreLocations();
+                    break;
+                }
+            }
+        }
+        private void locationName_Hold(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+        }  
 
         //Forecast Pivot
         private void metric_Checked(object sender, RoutedEventArgs e)
@@ -730,6 +742,8 @@ namespace WeatherLock
         private void ApplicationBarIconButton_Click(object sender, EventArgs e)
         {
             NavigationService.Navigate(new Uri("/AddLocation.xaml", UriKind.Relative));
-        }  
+        }
+
+        
     }   
 }

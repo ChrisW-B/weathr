@@ -68,16 +68,12 @@
                                        Content="{Binding LocName}"
                                        FontFamily="Segoe WP SemiLight"
                                        FontSize="30"
-                                       
-                                           >
-                                    <!--
+                                             Hold="locationName_Hold">
                                     <toolkit:ContextMenuService.ContextMenu>
                                         <toolkit:ContextMenu>
-                                            <toolkit:MenuItem Header="delete" Command="delete item" Click="MenuItem_Click" />
-                                            
+                                            <toolkit:MenuItem Header="Delete" Tag="{Binding LocName}" Click="MenuItem_Click"/>
                                         </toolkit:ContextMenu>
                                     </toolkit:ContextMenuService.ContextMenu>
-                                    -->
                                 </ListBoxItem>
                             </StackPanel>
                         </DataTemplate>
