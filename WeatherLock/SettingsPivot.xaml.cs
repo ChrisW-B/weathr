@@ -18,6 +18,7 @@ namespace WeatherLock
 {
     public partial class SettingsPivot : PhoneApplicationPage
     {
+        #region variables
         PeriodicTask periodicTask;
 
         string periodicTaskName = "PeriodicAgent";
@@ -33,12 +34,10 @@ namespace WeatherLock
         public bool isTrial;
 
 
-        ObservableCollection<LocResults> locResults = new ObservableCollection<LocResults>();
-
-
         //save some typing
         dynamic store = IsolatedStorageSettings.ApplicationSettings;
-        
+        #endregion
+
         public SettingsPivot()
         {
             InitializeComponent();            
@@ -223,27 +222,29 @@ namespace WeatherLock
             }
             ignoreCheckBoxEvents = false;
 
-            if (store.Contains("LocationConsent"))
+            addLocation();
+        }
+
+        //show/hide add button
+        private void Pivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            switch (((Pivot)sender).SelectedIndex)
             {
-                if ((bool)store["LocationConsent"])
-                {
-                    useCurrent.IsChecked = true;
-                    SearchBox.IsEnabled = false;
-                }
-                else
-                {
-                    useCurrent.IsChecked = false;
-                    SearchBox.IsEnabled = true;
-                }
+                case 0:
+                    ApplicationBar.IsVisible = false;
+                    break;
+                case 1:
+                    ApplicationBar.Mode = ApplicationBarMode.Default;
+                    ApplicationBar.IsVisible = true;
+                    break;
+                case 2:
+                    ApplicationBar.IsVisible = false;
+                    break;
+                case 3:
+                    ApplicationBar.IsVisible = false;
+                    break;
             }
-            if (store.Contains("locName"))
-            {
-                SearchBox.Text = (string)store["locName"];
-            }
-            else
-            {
-                SearchBox.Text = "enter location";
-            }
+
         }
 
         //Now Pivot
@@ -277,130 +278,52 @@ namespace WeatherLock
         }
 
         //Location Pivot
-        void seachResults(object sender, DownloadStringCompletedEventArgs e)
+        #region variables
+        ObservableCollection<Locations> locations = new ObservableCollection<Locations>();
+        #endregion
+
+        public void restoreLocations()
         {
-            //HAP needs a HTML-Document as it is based on Linq/Xpath
-            XDocument doc = new XDocument();
-            doc = XDocument.Parse(e.Result);
-
-            //search the html document for the search result, based on Xpath:
-            var locNames = doc.Descendants().Elements("name");
-            foreach (XElement elm in doc.Descendants().Elements("name"))
+            if (store.Contains("locations"))
             {
-                var locationName = (string)elm.Value;
-                var wuUrlNode = elm.NextNode.NextNode.NextNode.NextNode.NextNode.NextNode;
-                var wuUrl = wuUrlNode.ToString();
-                wuUrl = wuUrl.Replace("<l>", "");
-                wuUrl = wuUrl.Replace("</l>", "");
-
-                locResults.Add(new LocResults() { LocName = locationName, LocUrl = wuUrl });
-                ResultListBox.ItemsSource = locResults;
-
-            }
-            progSearch.IsVisible = false;
-        }
-        private void SearchBox_Tap(object sender, System.Windows.Input.GestureEventArgs e)
-        {
-            if (SearchBox.Text == "enter location" || SearchBox.Text == (string)store["locName"])
-            {
-                SearchBox.Text = "";
+                locations = (ObservableCollection<Locations>)store["locations"];
+                LocationListBox.ItemsSource = locations;
             }
         }
-        private void SearchBox_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        public void backupLocations()
         {
-            if (SearchBox.Text == "")
+            store["locations"] = locations;
+            store.Save();
+        }
+        public void addLocation()
+        {
+            if (store.Contains("locAdded") && store.Contains("newLocation"))
             {
-                if (store.Contains("locName"))
+                if ((bool)store["locAdded"])
                 {
-                    SearchBox.Text = (string)store["locName"];
+                    store["locAdded"] = false;
+                    String locationName = store["newLocation"];
+                    locations.Add(new Locations() { LocName = locationName });
+                    LocationListBox.ItemsSource = locations;
+                    backupLocations();
                 }
                 else
                 {
-                    SearchBox.Text = "enter location";
+                    restoreLocations();
                 }
             }
         }
-        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        public class Locations
         {
-            if (searchComplete == false)
-            {
-                //Start Progress Bar
-                startSearchProg();
-
-                //clear previous results, if there are any since this is a non-MVVM sample:
-                ResultListBox.ItemsSource = null;
-                locResults.Clear();
-                //create searchUri
-                //search is based on the user's CurrentCulture
-                string searchUri = string.Format("http://autocomplete.wunderground.com/aq?query={0}&format=XML", SearchBox.Text);
-
-                //start WebClient (this way it will work on WP7 & WP8)
-                WebClient client = new WebClient();
-                //Add this header to asure that new results will be downloaded, also if the search term has not changed
-                // otherwise it would not load again the result string (because of WP cashing)
-                client.Headers[HttpRequestHeader.IfModifiedSince] = DateTime.Now.ToString();
-                //Download the String and add new EventHandler once the Download has completed
-                client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(seachResults);
-                client.DownloadStringAsync(new Uri(searchUri));
-            }
-        }
-        private void CheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            store["LocationConsent"] = true;
-            store["locChanged"] = true;
-            store.Save();
-            SearchBox.IsEnabled = false;
-        }
-        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            store["LocationConsent"] = false;
-            store["locChanged"] = true;
-            store.Save();
-            SearchBox.IsEnabled = true;
-        }
-        private void ResultListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var x = ResultListBox.SelectedIndex;
-            var resArray = locResults.ToArray()[x];
-            store["locName"] = resArray.LocName;
-            store["locUrl"] = resArray.LocUrl;
-            store["locChanged"] = true;
-            store.Save();
-
-            string googleUrl = "http://maps.googleapis.com/maps/api/geocode/xml?address=" + store["locName"] + "&sensor=true";
-
-            WebClient client = new WebClient();
-            client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(getCoordinates);
-            client.DownloadStringAsync(new Uri(googleUrl));
-
-
-            SearchBox.Text = store["locName"];
-            searchComplete = true;
-        }
-        private void getCoordinates(object sender, DownloadStringCompletedEventArgs e)
-        {
-            XDocument doc = XDocument.Parse(e.Result);
-            var location = doc.Element("GeocodeResponse").Element("result").Element("geometry").Element("location");
-            string lat = (string)location.Element("lat").Value;
-            string lng = (string)location.Element("lng").Value;
-            String[] loc = { lat, lng };
-            store["loc"] = loc;
-            store.Save();
-        }
-        private void startSearchProg()
-        {
-            SystemTray.SetIsVisible(this, true);
-            SystemTray.SetOpacity(this, 0);
-            progSearch = new ProgressIndicator();
-            progSearch.Text = "Seaching";
-            progSearch.IsIndeterminate = true;
-            progSearch.IsVisible = true;
-            SystemTray.SetProgressIndicator(this, progSearch);
-        }
-        public class LocResults
-        {
-            public string LocUrl { get; set; }
             public string LocName { get; set; }
+        }
+        private void locationName_Hold(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+
+        }
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
         //Forecast Pivot
@@ -792,6 +715,11 @@ namespace WeatherLock
                 }
             }
         }
-    }
-    
+
+        //AppMenu Bar
+        private void ApplicationBarIconButton_Click(object sender, EventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/AddLocation.xaml", UriKind.Relative));
+        }  
+    }   
 }

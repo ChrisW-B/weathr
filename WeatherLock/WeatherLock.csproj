@@ -115,9 +115,6 @@
       <DependentUpon>AppResources.resx</DependentUpon>
     </Compile>
     <Compile Include="searchLocation.cs" />
-    <Compile Include="SelectLocation.xaml.cs">
-      <DependentUpon>SelectLocation.xaml</DependentUpon>
-    </Compile>
     <Compile Include="SettingsPivot.xaml.cs">
       <DependentUpon>SettingsPivot.xaml</DependentUpon>
     </Compile>
@@ -140,10 +137,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="SelectLocation.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="SettingsPivot.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -160,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\AppBar\add.png" />
+    <Content Include="Assets\AppBar\check.png" />
     <Content Include="IconMedium.png" />
     <Content Include="IconNormal.png" />
     <Content Include="IconSmall.png" />

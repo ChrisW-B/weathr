@@ -38,7 +38,7 @@
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <!--Pivot Control-->
-        <phone:Pivot Title="SETTINGS">
+        <phone:Pivot Title="SETTINGS" SelectionChanged="Pivot_SelectionChanged">
 
             <!--Pivot item 1-->
             <phone:PivotItem Header="now">
@@ -59,30 +59,30 @@
             </phone:PivotItem>
 
             <!--Pivot item 2-->
-            <phone:PivotItem Header="location">
-                <Grid>
-                    <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,490">
-                        <StackPanel Orientation="Vertical" Margin="0,-45,0,-470">
-                            <CheckBox Name="useCurrent" Content="Use Current Location" IsChecked="{Binding isChecked}" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
-                            <TextBox Name="SearchBox" Tap="SearchBox_Tap" IsEnabled="{Binding isEnabled}" MouseLeave="SearchBox_MouseLeave" HorizontalAlignment="Left" TextWrapping="Wrap" Text="enter location" VerticalAlignment="Top" TextChanged="SearchBox_TextChanged" Width="432" />
-                            <ListBox x:Name="ResultListBox" SelectionChanged="ResultListBox_SelectionChanged"  Height="519">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock x:Name="entry"
-                                    Text="{Binding LocName}" 
-                                           FontSize="32"
-                                           Margin="12,0,0,2"
-                                           Tag="{Binding LocUrl}"                                           
+            <phone:PivotItem Header="locations">
+                <ListBox x:Name="LocationListBox" Margin="0,0,0,30">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Vertical">
+                                <ListBoxItem x:Name="locationName"
+                                       Content="{Binding LocName}"
+                                       FontFamily="Segoe WP SemiLight"
+                                       FontSize="30"
+                                       
                                            >
-                                            </TextBlock>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </StackPanel>
-                    </Grid>
-                </Grid>
+                                    <!--
+                                    <toolkit:ContextMenuService.ContextMenu>
+                                        <toolkit:ContextMenu>
+                                            <toolkit:MenuItem Header="delete" Command="delete item" Click="MenuItem_Click" />
+                                            
+                                        </toolkit:ContextMenu>
+                                    </toolkit:ContextMenuService.ContextMenu>
+                                    -->
+                                </ListBoxItem>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </phone:PivotItem>
 
 
@@ -128,9 +128,12 @@
                     </StackPanel>
                 </Grid>
             </phone:PivotItem>
-            
-            
-        </phone:Pivot>
+           
+        </phone:Pivot>        
     </Grid>
-
+    <phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True"  IsMenuEnabled="True" Mode="Minimized"  Opacity="0.8" >
+            <shell:ApplicationBarIconButton IconUri="/Assets/AppBar/add.png" Text="add" Click="ApplicationBarIconButton_Click" />
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>
 </phone:PhoneApplicationPage>
