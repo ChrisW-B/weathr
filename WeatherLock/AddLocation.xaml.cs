@@ -15,11 +15,12 @@ namespace WeatherLock
 {
     public partial class AddLocation : PhoneApplicationPage
     {
-
+        #region variables
         ObservableCollection<LocResults> locResults = new ObservableCollection<LocResults>();
         ProgressIndicator progSearch;
         dynamic store = IsolatedStorageSettings.ApplicationSettings;
         bool searchComplete;
+        #endregion
 
         public AddLocation()
         {
@@ -100,8 +101,6 @@ namespace WeatherLock
             var resArray = locResults.ToArray()[x];
             store["newLocation"] = resArray.LocName;
             store["locAdded"] = true;
-            store["locUrl"] = resArray.LocUrl;
-            store["locChanged"] = true;
             store.Save();
 
             string googleUrl = "http://maps.googleapis.com/maps/api/geocode/xml?address=" + store["newLocation"] + "&sensor=true";

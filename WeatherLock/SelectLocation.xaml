@@ -35,8 +35,7 @@
                     <DataTemplate>
                         <StackPanel Orientation="Vertical">
                             <TextBlock x:Name="locationName"
-                                       Text="{Binding title}"
-                                       Foreground="White"
+                                       Text="{Binding LocName}"
                                        FontFamily="Segoe WP SemiLight"
                                        FontSize="30"/>
                         </StackPanel>

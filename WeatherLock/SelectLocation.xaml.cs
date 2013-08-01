@@ -22,11 +22,13 @@ namespace WeatherLock
         public SelectLocation()
         {
             InitializeComponent();
-            restoreLocations();
         }
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
             addLocation();
+            restoreLocations();
+            backupLocations();
+
         }
 
         public void restoreLocations()
@@ -41,6 +43,7 @@ namespace WeatherLock
         public void backupLocations()
         {
             store["locations"] = locations;
+            store.Save();
         }
 
         public void addLocation()
