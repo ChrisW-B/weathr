@@ -54,7 +54,9 @@ namespace WeatherLock
         //Wunderground Api
         //Release Key
         String apiKey = "102b8ec7fbd47a05";
-
+        String urlKey = null;
+        bool isCurrent;
+        String cityNameLoad;
         String url = null;
 
         //Flickr Api
@@ -85,7 +87,7 @@ namespace WeatherLock
 
             //Testing Key
             apiKey = "fb1dd3f4321d048d";
-
+            noParams();
             restoreWeather();
             getFlickrPic();
             this.clock = new Clock(this);
@@ -98,29 +100,41 @@ namespace WeatherLock
             base.OnNavigatedTo(e);
             if (this.NavigationContext.QueryString.ContainsKey("cityName") && this.NavigationContext.QueryString.ContainsKey("url") && this.NavigationContext.QueryString.ContainsKey("isCurrent"))
             {
-                string cityName = this.NavigationContext.QueryString["cityName"];
-                string url = this.NavigationContext.QueryString["url"];
-                string isCurrent = this.NavigationContext.QueryString["isCurrent"];
+                cityNameLoad = this.NavigationContext.QueryString["cityName"];
+                urlKey = this.NavigationContext.QueryString["url"];
+                isCurrent = Convert.ToBoolean(this.NavigationContext.QueryString["isCurrent"]);
                 store["cityName"] = cityName;
                 store["locUrl"] = url;
                 store["isCurrent"] = isCurrent;
-                
-
+                store["locChanged"] = true;
             }
-            createDefaultLoc();
+            else
+            {
+                noParams();
+            }
+
             setUnits();
             checkUpdated();
             updateAlerts();
             showAd();
         }
 
-        private void createDefaultLoc()
+        private void noParams()
         {
-            if (!store.Contains("defaultLocation") || !store.Contains("defaultUrl") || !store.Contains("defaultCurrent"))
+            if (store.Contains("defaultLocation") && store.Contains("defaultUrl") && store.Contains("defaultCurrent"))
+            {
+                cityNameLoad = store["defaultLocation"];
+                urlKey = store["defaultUrl"];
+                isCurrent = Convert.ToBoolean(store["defaultCurrent"]);
+            }
+            else
             {
                 store["defaultLocation"] = "Current Location";
-                store["defaultUrl"] = null;
+                store["defaultUrl"] = "null";
                 store["defaultCurrent"] = true;
+                cityNameLoad = "Current Location";
+                urlKey = "null";
+                isCurrent = true;
             }
         }
 
@@ -230,58 +244,44 @@ namespace WeatherLock
         //Set the URLs
         private void setURL()
         {
-            if (latitude == null || longitude == null)
+
+            if (isCurrent)
             {
-                findLocation();
+                if (latitude != null && longitude != null)
+                {
+                    url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast/q/" + latitude + "," + longitude + ".xml";
+                    fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weather + "&per_page=500&tag_mode=any&content_type=1&media=photos&radius=32&format=rest";
+                }
+                else
+                {
+                    findLocation();
+                    setURL();
+                }
             }
             else
             {
-                if (store.Contains("isCurrent"))
+                if (latitude != null && longitude != null)
                 {
-                    if ((bool)store["isCurrent"])
-                    {
-                        if (latitude != null && longitude != null)
-                        {
-                            url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast/q/" + latitude + "," + longitude + ".xml";
-                            fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weather + "&per_page=500&tag_mode=any&content_type=1&media=photos&radius=32&format=rest";
-                        }
-                        else
-                        {
-                            findLocation();
-                            setURL();
-                        }
-                    }
-                    else
-                    {
-                        if (latitude != null && longitude != null)
-                        {
-                            fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weather + "&per_page=500&tag_mode=any&content_type=1&media=photos&sort=relevance&has_geo=&format=rest";
-                        }
-                        else
-                        {
-                            findLocation();
-                            setURL();
-                        }
-
-                        if (store.Contains("locUrl"))
-                        {
-                            url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast" + store["locUrl"] + ".xml";
-                        }
-                    }
+                    fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weather + "&per_page=500&tag_mode=any&content_type=1&media=photos&sort=relevance&has_geo=&format=rest";
                 }
+                else
+                {
+                    findLocation();
+                    setURL();
+                }
+
+
+                url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast" + urlKey + ".xml";
+
+
+
             }
         }
 
         //Find the location
         private void findLocation()
         {
-            if (!store.Contains("isCurrent"))
-            {
-                store["isCurrent"] = true;
-                findLocation();
-            }
-
-            if ((bool)store["isCurrent"])
+            if (isCurrent)
             {
                 //get location
                 var getLocation = new getLocationMain();
@@ -410,11 +410,11 @@ namespace WeatherLock
             startWeatherProg();
             if ((bool)store.Contains("backupForecast"))
             {
-              forecastListBox.ItemsSource = null;
-              foreRes.Clear();
-              foreRes = (ObservableCollection<ForecastResults>)store["backupForecast"];
-             }
-            
+                forecastListBox.ItemsSource = null;
+                foreRes.Clear();
+                foreRes = (ObservableCollection<ForecastResults>)store["backupForecast"];
+            }
+
 
             if (store.Contains("backupAlerts"))
             {
@@ -647,7 +647,7 @@ namespace WeatherLock
         private void getFlickrPic()
         {
             setURL();
-            
+
             if (store.Contains("useFlickr"))
             {
                 if ((bool)store["useFlickr"])
@@ -662,7 +662,7 @@ namespace WeatherLock
                         editFlickrTags();
                         fUrl = fUrl.Replace(weather, flickrTags);
                     }
-                    
+
                     startFlickrProg();
 
                     WebClient client = new WebClient();
@@ -694,7 +694,7 @@ namespace WeatherLock
             }
             else if (weather.Contains("FOG"))
             {
-                flickrTags = "fog, foggy";
+                flickrTags = "fog, foggy, mist";
             }
             else if (weather.Contains("CLEAR"))
             {

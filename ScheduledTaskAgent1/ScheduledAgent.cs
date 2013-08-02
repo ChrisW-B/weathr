@@ -43,6 +43,8 @@ namespace ScheduledTaskAgent1
         private int tileNumber;
         private int timesRun;
         private int numPins;
+        private String[] parameters;
+
 
         private String tempUnit;
         private String url;
@@ -103,21 +105,54 @@ namespace ScheduledTaskAgent1
                 //if more than run period, update
                 if ((int)timeDiff.TotalMinutes > updateRate)
                 {
-                    
-                    if (store.Contains("listPinned"))
+                    numPins = ShellTile.ActiveTiles.Count();
+                    for (int x = 0; x < numPins; x++)
                     {
-                        pinnedList = store["listPinned"];
-                        numPins = pinnedList.Count;
-                        foreach (Pins tile in pinnedList)
+                        ShellTile tile = ShellTile.ActiveTiles.ElementAt(x);
+                        if (tile.NavigationUri.OriginalString == "/")
                         {
-                            cityName = tile.LocName;
-                            locUrl = tile.LocUrl;
-                            isCurrent = tile.currentLoc;
+                            if (store.Contains("defaultLocation") && store.Contains("defaultUrl") && store.Contains("defaultCurrent"))
+                            {
+                                cityName = store["defaultLocation"];
+                                locUrl = store["defaultUrl"];
+                                isCurrent = Convert.ToBoolean(store["defaultCurrent"]);
+                            }
+                            else
+                            {
+                                store["defaultLocation"] = "Current Location";
+                                store["defaultUrl"] = "null";
+                                store["defaultCurrent"] = true;
+                                cityName = "Current Location";
+                                locUrl = "null";
+                                isCurrent = true;
+                            }
+                            checkLocation();
+                            checkUnits();
+                            var client = new WebClient();
 
-                            updateData();
+                            client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(WeatherStringCallback);
+                            client.DownloadStringAsync(new Uri(url));
+                        }
+                        else
+                        {
+                            String uri = tile.NavigationUri.ToString();
+                            String[] uriSplit = uri.Split('&');
+
+                            cityName = uriSplit[0].Split('=')[1];
+                            locUrl = uriSplit[1].Split('=')[1];
+                            isCurrent = Convert.ToBoolean(uriSplit[2].Split('=')[1]);
+
+                            checkLocation();
+                            checkUnits();
+                            var client = new WebClient();
+
+                            client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(WeatherStringCallback);
+                            client.DownloadStringAsync(new Uri(url));
                         }
                     }
+
                 }
+
                 else
                 {
                     //if time period is too short, don't update
@@ -128,40 +163,55 @@ namespace ScheduledTaskAgent1
             //runs the app for the first time (when the background agent has never been launched)
             else if (!store.Contains("lastRun"))
             {
-                if (store.Contains("listPinned"))
+                numPins = ShellTile.ActiveTiles.Count();
+                for (int x = 0; x < numPins; x++)
                 {
-                    pinnedList = store["listPinned"];
-                    var pins = pinnedList;
-                    foreach (Pins tile in pinnedList)
+                    ShellTile tile = ShellTile.ActiveTiles.ElementAt(x);
+                    if (tile.NavigationUri.OriginalString == "/")
                     {
-                        cityName = tile.LocName;
-                        locUrl = tile.LocUrl;
-                        isCurrent = tile.currentLoc;
+                        if (store.Contains("defaultLocation") && store.Contains("defaultUrl") && store.Contains("defaultCurrent"))
+                        {
+                            cityName = store["defaultLocation"];
+                            locUrl = store["defaultUrl"];
+                            isCurrent = Convert.ToBoolean(store["defaultCurrent"]);
+                        }
+                        else
+                        {
+                            store["defaultLocation"] = "Current Location";
+                            store["defaultUrl"] = "null";
+                            store["defaultCurrent"] = true;
+                            cityName = "Current Location";
+                            locUrl = "null";
+                            isCurrent = true;
+                        }
+                        checkLocation();
+                        checkUnits();
+                        var client = new WebClient();
 
-                        updateData();
+                        client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(WeatherStringCallback);
+                        client.DownloadStringAsync(new Uri(url));
+                    }
+                    else
+                    {
+                        String uri = tile.NavigationUri.ToString();
+                        String[] uriSplit = uri.Split('&');
+                        cityName = "cityName";
+                        locUrl = "locURL";
+                        isCurrent = true;
+
+                        checkLocation();
+                        checkUnits();
+                        var client = new WebClient();
+
+                        client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(WeatherStringCallback);
+                        client.DownloadStringAsync(new Uri(url));
                     }
                 }
             }
         }
-
-        private void updateData()
-        {
-            checkLocation();
-            checkUnits();
-            getWeatherData();
-        }
-
-        private void getWeatherData()
-        {
-            var client = new WebClient();
-
-            client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(WeatherStringCallback);
-            client.DownloadStringAsync(new Uri(url));
-        }
-
         private void WeatherStringCallback(object sender, DownloadStringCompletedEventArgs e)
         {
-            
+
             if (!e.Cancelled && e.Error == null)
             {
                 XDocument doc = XDocument.Parse(e.Result);
@@ -210,6 +260,7 @@ namespace ScheduledTaskAgent1
 
                 };
                 tile.Update(TileData);
+
                 tileNumber++;
 
                 //send toast if enabled
@@ -230,7 +281,7 @@ namespace ScheduledTaskAgent1
                 store.Save();
 
                 finish();
-                
+
             }
             else
             {
@@ -240,8 +291,7 @@ namespace ScheduledTaskAgent1
 
         private void finish()
         {
-            int count = numPins;
-            if (timesRun > numPins)
+            if (timesRun >= numPins)
             {
                 NotifyComplete();
             }

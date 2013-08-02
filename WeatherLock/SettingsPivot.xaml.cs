@@ -290,6 +290,7 @@ namespace WeatherLock
         {
             locations.Add(new Locations() { LocName = "Current Location", currentLoc = true });
             LocationListBox.ItemsSource = locations;
+            createDefaultLoc();
         }
         private void restoreLocations()
         {
@@ -339,8 +340,16 @@ namespace WeatherLock
             if (!store.Contains("defaultLocation") || !store.Contains("defaultUrl") || !store.Contains("defaultCurrent"))
             {
                 store["defaultLocation"] = "Current Location";
-                store["defaultUrl"] = null;
+                store["defaultUrl"] = "null";
                 store["defaultCurrent"] = true;
+                
+                store.Save();
+            }
+            if (!store.Contains("listPinned"))
+            {
+                pinnedLocations.Add(new Pins() { LocName = store["defaultLocation"], LocUrl = store["defaultUrl"], currentLoc = Convert.ToBoolean(store["defaultCurrent"]) });
+                store["listPinned"] = pinnedLocations;
+                store.Save();
             }
         }
         private void delete_Click(object sender, RoutedEventArgs e)
@@ -358,7 +367,7 @@ namespace WeatherLock
             }
             else
             {
-                pinnedLocations.Add(new Pins() { LocName = store["defaultLocation"], LocUrl = store["defaultUrl"], currentLoc = Convert.ToBoolean(store["defaultCurrent"]) });
+                createDefaultLoc();
             }
             pinnedLocations.Add(new Pins() { LocName = resArray[0], LocUrl = resArray[1], currentLoc = Convert.ToBoolean(resArray[2]) });
             store["listPinned"] = pinnedLocations;
@@ -369,7 +378,7 @@ namespace WeatherLock
                 Title = resArray[0]
             };
 
-            ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + resArray[0] + "?url=" + resArray[1] + "?isCurrent=" + resArray[2], UriKind.Relative), locTile, true);
+            ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + resArray[0] + "&url=" + resArray[1] + "&isCurrent=" + resArray[2], UriKind.Relative), locTile, true);
         }
         private void default_Click(object sender, RoutedEventArgs e)
         {
@@ -649,6 +658,7 @@ namespace WeatherLock
         }
         private void getWeatherData()
         {
+            checkLocation();
             var client = new WebClient();
             Uri uri = new Uri(url);
 
@@ -729,9 +739,9 @@ namespace WeatherLock
         private void checkLocation()
         {
             //Check to see if allowed to get location
-            if (store.Contains("isCurrent"))
+            if (store.Contains("defaultCurrent"))
             {
-                if ((bool)store["isCurrent"])
+                if ((bool)store["defaultCurrent"])
                 {
                     //get location
                     var getLocation = new getLocationMain();
