@@ -6,23 +6,17 @@ using System.Text;
 
 namespace ScheduledTaskAgent1
 {
+    
     class updateTile
     {
-        public updateTile(
-            string cityName,
-            int temp,
-            string conditions,
-            string todayHigh,
-            string todayLow,
-            string forecastToday,
-            string forecastTomorrow,
-            string tomorrowHigh,
-            string tomorrowLow
-            )
+        private int x;
+
+        public updateTile()
         {
-            update(cityName, temp, conditions, todayHigh, todayLow, forecastToday, forecastTomorrow, tomorrowHigh, tomorrowLow);
+            x = 0;
+
         }
-        private void update(
+        public void update(
             string cityName,
             int temp,
             string conditions,
@@ -32,10 +26,12 @@ namespace ScheduledTaskAgent1
             string forecastTomorrow,
             string forecastHigh,
             string forecastLow
-            ) {
-           
-            ShellTile tile = ShellTile.ActiveTiles.FirstOrDefault();
+            )
+        {
 
+
+
+            ShellTile tile = ShellTile.ActiveTiles.ElementAt(x);
             IconicTileData TileData = new IconicTileData
             {
                 Title = cityName,
@@ -46,6 +42,8 @@ namespace ScheduledTaskAgent1
 
             };
             tile.Update(TileData);
+
+
         }
     }
 }

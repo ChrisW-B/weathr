@@ -16,6 +16,8 @@ using System.Xml;
 using System.Collections;
 using System.IO;
 using Windows.Devices.Geolocation;
+using System.Collections.ObjectModel;
+using Pinned;
 
 
 
@@ -38,15 +40,26 @@ namespace ScheduledTaskAgent1
         private String tomorrowHigh;
         private String tomorrowLow;
 
+        private int tileNumber;
+        private int timesRun;
+        private int numPins;
+
         private String tempUnit;
         private String url;
+        private String locUrl;
+        private Boolean isCurrent;
         private String apiKey = "fb1dd3f4321d048d";
 
         private String latitude;
         private String longitude;
 
+        updateTile updateTile;
+
         //save myself a bit of typing
         dynamic store = IsolatedStorageSettings.ApplicationSettings;
+
+        List<Pins> pinnedList = new List<Pins>();
+        Pins pinned;
         #endregion
 
 
@@ -71,7 +84,10 @@ namespace ScheduledTaskAgent1
 
         protected override void OnInvoke(ScheduledTask task)
         {
-
+            tileNumber = 0;
+            timesRun = 0;
+            updateTile = new updateTile();
+            pinned = new Pins();
             //updates the app after a selected time
 
             if (store.Contains("lastRun") && store.Contains("updateRate"))
@@ -87,7 +103,20 @@ namespace ScheduledTaskAgent1
                 //if more than run period, update
                 if ((int)timeDiff.TotalMinutes > updateRate)
                 {
-                    updateData();
+                    
+                    if (store.Contains("listPinned"))
+                    {
+                        pinnedList = store["listPinned"];
+                        numPins = pinnedList.Count;
+                        foreach (Pins tile in pinnedList)
+                        {
+                            cityName = tile.LocName;
+                            locUrl = tile.LocUrl;
+                            isCurrent = tile.currentLoc;
+
+                            updateData();
+                        }
+                    }
                 }
                 else
                 {
@@ -99,7 +128,19 @@ namespace ScheduledTaskAgent1
             //runs the app for the first time (when the background agent has never been launched)
             else if (!store.Contains("lastRun"))
             {
-                updateData();
+                if (store.Contains("listPinned"))
+                {
+                    pinnedList = store["listPinned"];
+                    var pins = pinnedList;
+                    foreach (Pins tile in pinnedList)
+                    {
+                        cityName = tile.LocName;
+                        locUrl = tile.LocUrl;
+                        isCurrent = tile.currentLoc;
+
+                        updateData();
+                    }
+                }
             }
         }
 
@@ -107,21 +148,20 @@ namespace ScheduledTaskAgent1
         {
             checkLocation();
             checkUnits();
-            getWeatherData(); 
+            getWeatherData();
         }
 
         private void getWeatherData()
         {
             var client = new WebClient();
-            Uri uri = new Uri(url);
 
             client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(WeatherStringCallback);
-            client.DownloadStringAsync(uri);
+            client.DownloadStringAsync(new Uri(url));
         }
 
         private void WeatherStringCallback(object sender, DownloadStringCompletedEventArgs e)
         {
-            restoreWeather();
+            
             if (!e.Cancelled && e.Error == null)
             {
                 XDocument doc = XDocument.Parse(e.Result);
@@ -159,8 +199,18 @@ namespace ScheduledTaskAgent1
                 var getTemp = new convertTemp(tempStr);
                 int temp = getTemp.temp;
 
-                //update the tile and lockscreen
-                var updateTile = new updateTile(cityName, temp, weather, todayHigh, todayLow, forecastToday, forecastTomorrow, tomorrowHigh, tomorrowLow);
+                ShellTile tile = ShellTile.ActiveTiles.ElementAt(tileNumber);
+                IconicTileData TileData = new IconicTileData
+                {
+                    Title = cityName,
+                    Count = temp,
+                    WideContent1 = string.Format("Currently: " + weather + ", " + temp + " degrees"),
+                    WideContent2 = string.Format("Today: " + forecastToday + " " + todayHigh + "/" + todayLow),
+                    WideContent3 = string.Format("Tomorrow: " + forecastTomorrow + " " + tomorrowHigh + "/" + tomorrowLow)
+
+                };
+                tile.Update(TileData);
+                tileNumber++;
 
                 //send toast if enabled
                 if (store.Contains("notifyMe"))
@@ -172,14 +222,32 @@ namespace ScheduledTaskAgent1
                     }
                 }
 
-                backupWeather();
+                //backupWeather();
 
                 //save the time of the last time the app was run
                 store["lastRun"] = DateTime.Now.ToString();
                 store["locName"] = cityName;
                 store.Save();
 
+                finish();
+                
+            }
+            else
+            {
+                //restoreWeather();
+            }
+        }
+
+        private void finish()
+        {
+            int count = numPins;
+            if (timesRun > numPins)
+            {
                 NotifyComplete();
+            }
+            else
+            {
+                timesRun++;
             }
         }
 
@@ -206,49 +274,40 @@ namespace ScheduledTaskAgent1
 
         private void checkLocation()
         {
-           //Check to see if allowed to get location
-            if (store.Contains("LocationConsent"))
+            //Check to see if allowed to get location
+            if (isCurrent)
             {
-                if ((bool)store["LocationConsent"])
+                //get location
+                var getLocation = new getLocation();
+                if (getLocation.getLat() != null)
                 {
-                    //get location
-                    var getLocation = new getLocation();
-                    if (getLocation.getLat() != null)
-                    {
-                        latitude = getLocation.getLat();
-                        longitude = getLocation.getLong();
-                        String[] loc = { latitude, longitude };
-                        store["loc"] = loc;
-                    }
-                    else
-                    {
-                        if (store.Contains("loc"))
-                        {
-                            String[] latlng = new String[2];
-                            latlng = (String[])store["loc"];
-                            latitude = latlng[0];
-                            longitude = latlng[1];
-                        }
-                        else
-                        {
-                            latitude = "0";
-                            longitude = "0";
-                        }
-                    }
-                    url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast/q/" + latitude + "," + longitude + ".xml";
+                    latitude = getLocation.getLat();
+                    longitude = getLocation.getLong();
+                    String[] loc = { latitude, longitude };
+                    store["loc"] = loc;
                 }
                 else
                 {
-                    if (store.Contains("locUrl"))
+                    if (store.Contains("loc"))
                     {
-                        url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast" + store["locUrl"] + ".xml";
+                        String[] latlng = new String[2];
+                        latlng = (String[])store["loc"];
+                        latitude = latlng[0];
+                        longitude = latlng[1];
                     }
                     else
                     {
-                        return;
+                        latitude = "0";
+                        longitude = "0";
                     }
                 }
+                url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast/q/" + latitude + "," + longitude + ".xml";
             }
+            else
+            {
+                url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast" + locUrl + ".xml";
+            }
+
         }
 
         public void backupWeather()

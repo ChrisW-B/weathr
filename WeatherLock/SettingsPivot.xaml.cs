@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define DEBUG_AGENT
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -13,6 +14,7 @@ using System.Collections.ObjectModel;
 using System.Xml.Linq;
 using Microsoft.Phone.Marketplace;
 using Microsoft.Phone.Tasks;
+using Pinned;
 
 namespace WeatherLock
 {
@@ -23,10 +25,9 @@ namespace WeatherLock
 
         string periodicTaskName = "PeriodicAgent";
         public bool agentsAreEnabled = true;
-        int selectedItem;
-        bool searchComplete;
 
-        ProgressIndicator progSearch;
+        Pins pinned;
+
         ProgressIndicator progTile;
 
         //Check to see if app is running as trial
@@ -41,6 +42,7 @@ namespace WeatherLock
         public SettingsPivot()
         {
             InitializeComponent();
+            pinned = new Pins();
         }
 
         private void setValues()
@@ -155,27 +157,27 @@ namespace WeatherLock
                 {
                     case "720":
                         UpdateBox.SelectedIndex = 0;
-                        selectedItem = 0;
+
                         store["updateRate"] = "720";
                         break;
                     case "360":
                         UpdateBox.SelectedIndex = 1;
-                        selectedItem = 1;
+
                         store["updateRate"] = "360";
                         break;
                     case "180":
                         UpdateBox.SelectedIndex = 2;
-                        selectedItem = 2;
+
                         store["updateRate"] = "180";
                         break;
                     case "60":
                         UpdateBox.SelectedIndex = 3;
-                        selectedItem = 3;
+
                         store["updateRate"] = "60";
                         break;
                     case "0":
                         UpdateBox.SelectedIndex = 4;
-                        selectedItem = 4;
+
                         store["updateRate"] = "0";
                         break;
                 }
@@ -183,7 +185,7 @@ namespace WeatherLock
             else
             {
                 UpdateBox.SelectedIndex = 0;
-                selectedItem = 0;
+
                 store["updateRate"] = "720";
             }
 
@@ -210,7 +212,7 @@ namespace WeatherLock
             licInfo = new LicenseInformation();
             isTrial = licInfo.IsTrial();
 
-            searchComplete = false;
+
             setValues();
 
             ignoreCheckBoxEvents = true;
@@ -223,6 +225,7 @@ namespace WeatherLock
             }
             ignoreCheckBoxEvents = false;
 
+            createDefaultLoc();
             addLocation();
         }
 
@@ -281,6 +284,7 @@ namespace WeatherLock
         //Location Pivot
         #region variables
         ObservableCollection<Locations> locations = new ObservableCollection<Locations>();
+        dynamic pinnedLocations = new List<Pins>();
         #endregion
         private void initializeLocations()
         {
@@ -330,6 +334,15 @@ namespace WeatherLock
             public string LocUrl { get; set; }
             public bool currentLoc { get; set; }
         }
+        private void createDefaultLoc()
+        {
+            if (!store.Contains("defaultLocation") || !store.Contains("defaultUrl") || !store.Contains("defaultCurrent"))
+            {
+                store["defaultLocation"] = "Current Location";
+                store["defaultUrl"] = null;
+                store["defaultCurrent"] = true;
+            }
+        }
         private void delete_Click(object sender, RoutedEventArgs e)
         {
             MenuItem menuItem = (MenuItem)sender;
@@ -339,18 +352,32 @@ namespace WeatherLock
         {
             MenuItem menuItem = (MenuItem)sender;
             String[] resArray = getArray(menuItem.Tag.ToString());
-            
+            if (store.Contains("listPinned"))
+            {
+                pinnedLocations = store["listPinned"];
+            }
+            else
+            {
+                pinnedLocations.Add(new Pins() { LocName = store["defaultLocation"], LocUrl = store["defaultUrl"], currentLoc = Convert.ToBoolean(store["defaultCurrent"]) });
+            }
+            pinnedLocations.Add(new Pins() { LocName = resArray[0], LocUrl = resArray[1], currentLoc = Convert.ToBoolean(resArray[2]) });
+            store["listPinned"] = pinnedLocations;
+            store.Save();
+
             IconicTileData locTile = new IconicTileData
             {
-                IconImage = new Uri("/IconMedium.png", UriKind.Relative),
-                SmallIconImage = new Uri("/IconSmall.png", UriKind.Relative),
-                Title = resArray[0],
-                Count = 99,
-                WideContent1 = string.Format("Currently: " + "conditions" + ", " + "temp" + " degrees"),
-                WideContent2 = string.Format("Today: " + "forecastToday" + " " + "high" + "/" + "low"),
-                WideContent3 = string.Format("Tomorrow: " + "forecastTomorrow" + " " + "forecastHigh" + "/" + "forecastLow")
+                Title = resArray[0]
             };
-            ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + resArray[0] +"?url=" + resArray[1] +"?isCurrent=" +resArray[2], UriKind.Relative), locTile, true);   
+
+            ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + resArray[0] + "?url=" + resArray[1] + "?isCurrent=" + resArray[2], UriKind.Relative), locTile, true);
+        }
+        private void default_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = (MenuItem)sender;
+            String[] resArray = getArray(menuItem.Tag.ToString());
+            store["defaultLocation"] = resArray[0];
+            store["defaultUrl"] = resArray[1];
+            store["defaultCurrent"] = resArray[2];
         }
         private String[] getArray(string loc)
         {
@@ -517,6 +544,9 @@ namespace WeatherLock
                 ScheduledActionService.Add(periodicTask);
                 PeriodicStackPanel.DataContext = periodicTask;
 
+#if(DEBUG_AGENT)
+                ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(60));
+#endif
             }
             catch (InvalidOperationException exception)
             {
@@ -699,9 +729,9 @@ namespace WeatherLock
         private void checkLocation()
         {
             //Check to see if allowed to get location
-            if (store.Contains("LocationConsent"))
+            if (store.Contains("isCurrent"))
             {
-                if ((bool)store["LocationConsent"])
+                if ((bool)store["isCurrent"])
                 {
                     //get location
                     var getLocation = new getLocationMain();
@@ -795,7 +825,5 @@ namespace WeatherLock
         {
             NavigationService.Navigate(new Uri("/AddLocation.xaml", UriKind.Relative));
         }
-
-
     }
 }

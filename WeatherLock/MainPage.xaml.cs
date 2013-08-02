@@ -107,11 +107,21 @@ namespace WeatherLock
                 
 
             }
-
+            createDefaultLoc();
             setUnits();
             checkUpdated();
             updateAlerts();
             showAd();
+        }
+
+        private void createDefaultLoc()
+        {
+            if (!store.Contains("defaultLocation") || !store.Contains("defaultUrl") || !store.Contains("defaultCurrent"))
+            {
+                store["defaultLocation"] = "Current Location";
+                store["defaultUrl"] = null;
+                store["defaultCurrent"] = true;
+            }
         }
 
         private void showAd()

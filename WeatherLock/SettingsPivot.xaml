@@ -72,6 +72,7 @@
                                         <toolkit:ContextMenu>
                                             <toolkit:MenuItem Name="delete" Header="Delete" Tag="{Binding LocName}" Click="delete_Click"/>
                                             <toolkit:MenuItem Name="pin" Header="Pin to Start" Tag="{Binding LocName}" Click="pin_Click"/>
+                                            <toolkit:MenuItem Name="default" Header="Make Default Location" Tag="{Binding LocName}" Click="default_Click"/>
                                         </toolkit:ContextMenu>
                                     </toolkit:ContextMenuService.ContextMenu>
                                 </ListBoxItem>
