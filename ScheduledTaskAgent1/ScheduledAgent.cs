@@ -289,9 +289,12 @@ namespace ScheduledTaskAgent1
             }
         }
 
+
+
+
         private void finish()
         {
-            if (timesRun >= numPins)
+            if (timesRun == numPins)
             {
                 NotifyComplete();
             }
