@@ -1,4 +1,4 @@
-﻿
+﻿#define DEBUG_AGENT
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -552,7 +552,9 @@ namespace WeatherLock
             {
                 ScheduledActionService.Add(periodicTask);
                 PeriodicStackPanel.DataContext = periodicTask;
-
+#if(DEBUG_AGENT)
+                ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(60));
+#endif
             }
             catch (InvalidOperationException exception)
             {

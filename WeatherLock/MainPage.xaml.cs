@@ -504,8 +504,16 @@ namespace WeatherLock
                 //Current Conditions
                 var currentObservation = doc.Element("response").Element("current_observation");
                 //location name
-                this.cityName = (string)currentObservation.Element("display_location").Element("full");
+                string city = (string)currentObservation.Element("display_location").Element("city");
+                string state = (string)currentObservation.Element("display_location").Element("state_name");
+                this.cityName = city + ", " + state;
                 this.shortCityName = (string)currentObservation.Element("display_location").Element("city");
+
+                if (store["defaultLocation"] == "Current Location")
+                {
+                    store["saveDefaultLocName"] = cityName;
+                    store.Save();
+                }
                 //Current Weather
                 this.weather = (string)currentObservation.Element("weather");
                 //Current wind
@@ -639,7 +647,6 @@ namespace WeatherLock
         {
             public string title { get; set; }
             public string fcttext { get; set; }
-
             public string pop { get; set; }
         }
 
