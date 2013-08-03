@@ -1,5 +1,4 @@
-﻿#define DEBUG_AGENT
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -361,20 +360,14 @@ namespace WeatherLock
         {
             MenuItem menuItem = (MenuItem)sender;
             String[] resArray = getArray(menuItem.Tag.ToString());
-            if (store.Contains("listPinned"))
-            {
-                pinnedLocations = store["listPinned"];
-            }
-            else
-            {
-                createDefaultLoc();
-            }
+            
             pinnedLocations.Add(new Pins() { LocName = resArray[0], LocUrl = resArray[1], currentLoc = Convert.ToBoolean(resArray[2]) });
-            store["listPinned"] = pinnedLocations;
-            store.Save();
+
 
             IconicTileData locTile = new IconicTileData
             {
+                IconImage = new Uri("IconMedium.png", UriKind.Relative),
+                SmallIconImage = new Uri("IconSmall.png", UriKind.Relative),
                 Title = resArray[0]
             };
 
@@ -552,9 +545,7 @@ namespace WeatherLock
             {
                 ScheduledActionService.Add(periodicTask);
                 PeriodicStackPanel.DataContext = periodicTask;
-#if(DEBUG_AGENT)
-                ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(60));
-#endif
+
             }
             catch (InvalidOperationException exception)
             {
