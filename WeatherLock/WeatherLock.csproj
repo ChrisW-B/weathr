@@ -154,12 +154,12 @@
   <ItemGroup>
     <Content Include="Assets\AppBar\add.png" />
     <Content Include="Assets\AppBar\check.png" />
-    <Content Include="IconMedium.png" />
-    <Content Include="IconNormal.png" />
-    <Content Include="IconSmall.png" />
     <Content Include="Images\settings.png" />
     <Content Include="Images\refresh.png" />
     <Content Include="Images\SunLS.png" />
+    <Content Include="SunDrop110.png" />
+    <Content Include="SunDrop202.png" />
+    <Content Include="SunDrop300Color.png" />
     <Content Include="Toolkit.Content\ApplicationBar.Cancel.png" />
     <Content Include="Toolkit.Content\ApplicationBar.Check.png" />
     <Content Include="Toolkit.Content\ApplicationBar.Delete.png" />

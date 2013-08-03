@@ -116,7 +116,7 @@ namespace WeatherLock
             string lat = (string)location.Element("lat").Value;
             string lng = (string)location.Element("lng").Value;
             String[] loc = { lat, lng };
-            store["loc"] = loc;
+            store["newLoc"] = loc;
             searchComplete = true;
             store.Save();
             SearchBox.Text = store["newLocation"];

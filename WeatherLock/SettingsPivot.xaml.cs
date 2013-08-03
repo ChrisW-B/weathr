@@ -287,7 +287,7 @@ namespace WeatherLock
         #endregion
         private void initializeLocations()
         {
-            locations.Add(new Locations() { LocName = "Current Location", currentLoc = true });
+            locations.Add(new Locations() { LocName = "Current Location", CurrentLoc = true });
             LocationListBox.ItemsSource = locations;
             createDefaultLoc();
         }
@@ -318,7 +318,10 @@ namespace WeatherLock
                     store["locAdded"] = false;
                     String locationName = store["newLocation"];
                     String locationUrl = store["newUrl"];
-                    locations.Add(new Locations() { LocName = locationName, currentLoc = false, LocUrl = locationUrl });
+                    String[] location = store["newLoc"];
+                    String lat = location[0];
+                    String lon = location[1];
+                    locations.Add(new Locations() { LocName = locationName, CurrentLoc = false, LocUrl = locationUrl, Lat = lat, Lon = lon });
                     LocationListBox.ItemsSource = locations;
                     backupLocations();
                 }
@@ -332,7 +335,9 @@ namespace WeatherLock
         {
             public string LocName { get; set; }
             public string LocUrl { get; set; }
-            public bool currentLoc { get; set; }
+            public bool CurrentLoc { get; set; }
+            public string Lat { get; set; }
+            public string Lon { get; set; }
         }
         private void createDefaultLoc()
         {
@@ -359,19 +364,17 @@ namespace WeatherLock
         private void pin_Click(object sender, RoutedEventArgs e)
         {
             MenuItem menuItem = (MenuItem)sender;
-            String[] resArray = getArray(menuItem.Tag.ToString());
-            
-            pinnedLocations.Add(new Pins() { LocName = resArray[0], LocUrl = resArray[1], currentLoc = Convert.ToBoolean(resArray[2]) });
 
+            String[] resArray = getArray(menuItem.Tag.ToString());
 
             IconicTileData locTile = new IconicTileData
             {
-                IconImage = new Uri("IconMedium.png", UriKind.Relative),
-                SmallIconImage = new Uri("IconSmall.png", UriKind.Relative),
+                IconImage = new Uri("SunDrop202.png", UriKind.Relative),
+                SmallIconImage = new Uri("SunDrop110.png", UriKind.Relative),
                 Title = resArray[0]
             };
 
-            ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + resArray[0] + "&url=" + resArray[1] + "&isCurrent=" + resArray[2], UriKind.Relative), locTile, true);
+            ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + resArray[0] + "&url=" + resArray[1] + "&isCurrent=" + resArray[2] + "&lat=" + resArray[3] + "&lon=" + resArray[4], UriKind.Relative), locTile, true);
         }
         private void default_Click(object sender, RoutedEventArgs e)
         {
@@ -390,7 +393,9 @@ namespace WeatherLock
                     String[] thisLocation =  {
                                                location.LocName,
                                                location.LocUrl,
-                                              Convert.ToString(location.currentLoc)
+                                               Convert.ToString(location.CurrentLoc),
+                                               location.Lat,
+                                               location.Lon
                                            };
                     return thisLocation;
                 }
@@ -421,10 +426,12 @@ namespace WeatherLock
         {
             var resArray = locations.ToArray()[LocationListBox.SelectedIndex];
             string current = (string)resArray.LocName;
-            store["isCurrent"] = resArray.currentLoc;
+            store["isCurrent"] = resArray.CurrentLoc;
             store["locUrl"] = resArray.LocUrl;
             store["locName"] = resArray.LocName;
             store["locChanged"] = true;
+            String[] location = {resArray.Lat, resArray.Lon};
+            store["loc"] = location;
             store.Save();
 
         }

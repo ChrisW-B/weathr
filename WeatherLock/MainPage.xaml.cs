@@ -98,15 +98,28 @@ namespace WeatherLock
             isTrial = licInfo.IsTrial();
 
             base.OnNavigatedTo(e);
-            if (this.NavigationContext.QueryString.ContainsKey("cityName") && this.NavigationContext.QueryString.ContainsKey("url") && this.NavigationContext.QueryString.ContainsKey("isCurrent"))
+            if (this.NavigationContext.QueryString.ContainsKey("cityName") && this.NavigationContext.QueryString.ContainsKey("url") && this.NavigationContext.QueryString.ContainsKey("isCurrent") && this.NavigationContext.QueryString.ContainsKey("lat") && this.NavigationContext.QueryString.ContainsKey("lon"))
             {
                 cityNameLoad = this.NavigationContext.QueryString["cityName"];
                 urlKey = this.NavigationContext.QueryString["url"];
                 isCurrent = Convert.ToBoolean(this.NavigationContext.QueryString["isCurrent"]);
-                store["cityName"] = cityName;
-                store["locUrl"] = url;
+                latitude = this.NavigationContext.QueryString["lat"];
+                longitude = this.NavigationContext.QueryString["lon"];
+                String[] loc = { latitude, longitude };
+                store["loc"] = loc;
+                if (store.Contains("cityName"))
+                {
+                    if (store["cityName"] != cityNameLoad)
+                    {
+                        store["locChanged"] = true;
+                    }
+                }
+                store["cityName"] = cityNameLoad;
+                store["locUrl"] = urlKey;
                 store["isCurrent"] = isCurrent;
-                store["locChanged"] = true;
+                store.Save();
+                findLocation();
+                
             }
             else
             {
@@ -123,6 +136,13 @@ namespace WeatherLock
         {
             if (store.Contains("defaultLocation") && store.Contains("defaultUrl") && store.Contains("defaultCurrent"))
             {
+                if (store.Contains("cityName"))
+                {
+                    if (store["cityName"] != cityNameLoad)
+                    {
+                        store["locChanged"] = true;
+                    }
+                }
                 cityNameLoad = store["defaultLocation"];
                 urlKey = store["defaultUrl"];
                 isCurrent = Convert.ToBoolean(store["defaultCurrent"]);
@@ -244,7 +264,6 @@ namespace WeatherLock
         //Set the URLs
         private void setURL()
         {
-
             if (isCurrent)
             {
                 if (latitude != null && longitude != null)
@@ -300,16 +319,7 @@ namespace WeatherLock
                     findLocation();
                 }
             }
-            else
-            {
-                if (store.Contains("loc"))
-                {
-                    String[] latlng = new String[2];
-                    latlng = (String[])store["loc"];
-                    this.latitude = latlng[0];
-                    this.longitude = latlng[1];
-                }
-            }
+            
             setURL();
         }
 
