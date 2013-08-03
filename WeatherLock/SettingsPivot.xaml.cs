@@ -1,4 +1,4 @@
-﻿#define DEBUG_AGENT
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -342,7 +342,7 @@ namespace WeatherLock
                 store["defaultLocation"] = "Current Location";
                 store["defaultUrl"] = "null";
                 store["defaultCurrent"] = true;
-                
+
                 store.Save();
             }
             if (!store.Contains("listPinned"))
@@ -553,9 +553,6 @@ namespace WeatherLock
                 ScheduledActionService.Add(periodicTask);
                 PeriodicStackPanel.DataContext = periodicTask;
 
-#if(DEBUG_AGENT)
-                ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(60));
-#endif
             }
             catch (InvalidOperationException exception)
             {

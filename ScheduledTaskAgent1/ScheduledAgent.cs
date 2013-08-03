@@ -50,6 +50,7 @@ namespace ScheduledTaskAgent1
         private String url;
         private String locUrl;
         private Boolean isCurrent;
+        private bool mainTilePinned;
         private String apiKey = "fb1dd3f4321d048d";
 
         private String latitude;
@@ -86,10 +87,11 @@ namespace ScheduledTaskAgent1
 
         protected override void OnInvoke(ScheduledTask task)
         {
+            numPins = ShellTile.ActiveTiles.Count();
             tileNumber = 0;
-            timesRun = 0;
-            updateTile = new updateTile();
-            pinned = new Pins();
+            timesRun = 1;
+
+
             //updates the app after a selected time
 
             if (store.Contains("lastRun") && store.Contains("updateRate"))
@@ -105,7 +107,7 @@ namespace ScheduledTaskAgent1
                 //if more than run period, update
                 if ((int)timeDiff.TotalMinutes > updateRate)
                 {
-                    numPins = ShellTile.ActiveTiles.Count();
+
                     for (int x = 0; x < numPins; x++)
                     {
                         ShellTile tile = ShellTile.ActiveTiles.ElementAt(x);
@@ -130,7 +132,7 @@ namespace ScheduledTaskAgent1
                             checkUnits();
                             var client = new WebClient();
 
-                            client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(WeatherStringCallback);
+                            client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(tileDefaultCallback);
                             client.DownloadStringAsync(new Uri(url));
                         }
                         else
@@ -188,7 +190,7 @@ namespace ScheduledTaskAgent1
                         checkUnits();
                         var client = new WebClient();
 
-                        client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(WeatherStringCallback);
+                        client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(tileDefaultCallback);
                         client.DownloadStringAsync(new Uri(url));
                     }
                     else
@@ -248,20 +250,28 @@ namespace ScheduledTaskAgent1
                 //convert temps to ints
                 var getTemp = new convertTemp(tempStr);
                 int temp = getTemp.temp;
-
-                ShellTile tile = ShellTile.ActiveTiles.ElementAt(tileNumber);
-                IconicTileData TileData = new IconicTileData
+                for (int num = 0; num < numPins; num++)
                 {
-                    Title = cityName,
-                    Count = temp,
-                    WideContent1 = string.Format("Currently: " + weather + ", " + temp + " degrees"),
-                    WideContent2 = string.Format("Today: " + forecastToday + " " + todayHigh + "/" + todayLow),
-                    WideContent3 = string.Format("Tomorrow: " + forecastTomorrow + " " + tomorrowHigh + "/" + tomorrowLow)
+                    ShellTile tile = ShellTile.ActiveTiles.ElementAtOrDefault(num);
+                    if (tile.NavigationUri.ToString() != "/")
+                    {
+                        if (cityName == tile.NavigationUri.ToString().Split('&')[0].Split('=')[1])
+                        {
+                            IconicTileData TileData = new IconicTileData
+                            {
+                                Title = cityName,
+                                Count = temp,
+                                WideContent1 = string.Format("Currently: " + weather + ", " + temp + " degrees"),
+                                WideContent2 = string.Format("Today: " + forecastToday + " " + todayHigh + "/" + todayLow),
+                                WideContent3 = string.Format("Tomorrow: " + forecastTomorrow + " " + tomorrowHigh + "/" + tomorrowLow)
 
-                };
-                tile.Update(TileData);
+                            };
+                            tile.Update(TileData);
+                            break;
+                        }
+                    }
+                }
 
-                tileNumber++;
 
                 //send toast if enabled
                 if (store.Contains("notifyMe"))
@@ -290,18 +300,108 @@ namespace ScheduledTaskAgent1
         }
 
 
+        private void tileDefaultCallback(object sender, DownloadStringCompletedEventArgs e)
+        {
 
+            if (!e.Cancelled && e.Error == null)
+            {
+                XDocument doc = XDocument.Parse(e.Result);
+
+                //Current Conditions
+                var currentObservation = doc.Element("response").Element("current_observation");
+                this.cityName = (string)currentObservation.Element("display_location").Element("full");
+                this.weather = (string)currentObservation.Element("weather");
+
+                XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
+
+                var today = forecastDays.Element("forecastday");
+                var tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
+
+                this.forecastToday = (string)today.Element("conditions");
+                this.forecastTomorrow = (string)tomorrow.Element("conditions");
+                if (tempUnit == "c")
+                {
+                    tempStr = (string)currentObservation.Element("temp_c");
+                    this.todayLow = (string)today.Element("low").Element("celsius");
+                    this.todayHigh = (string)today.Element("high").Element("celsius");
+                    this.tomorrowLow = (string)tomorrow.Element("low").Element("celsius");
+                    this.tomorrowHigh = (string)tomorrow.Element("high").Element("celsius");
+                }
+                else
+                {
+                    tempStr = (string)currentObservation.Element("temp_f");
+                    this.todayLow = (string)today.Element("low").Element("fahrenheit");
+                    this.todayHigh = (string)today.Element("high").Element("fahrenheit");
+                    this.tomorrowHigh = (string)tomorrow.Element("high").Element("fahrenheit");
+                    this.tomorrowLow = (string)tomorrow.Element("low").Element("fahrenheit");
+                }
+
+                //convert temps to ints
+                var getTemp = new convertTemp(tempStr);
+                int temp = getTemp.temp;
+                for (int num = 0; num < numPins; num++)
+                {
+                    ShellTile tile = ShellTile.ActiveTiles.ElementAtOrDefault(num);
+                    if (tile.NavigationUri.OriginalString == "/")
+                    {
+                        IconicTileData TileData = new IconicTileData
+                        {
+                            Title = cityName,
+                            Count = temp,
+                            WideContent1 = string.Format("Currently: " + weather + ", " + temp + " degrees"),
+                            WideContent2 = string.Format("Today: " + forecastToday + " " + todayHigh + "/" + todayLow),
+                            WideContent3 = string.Format("Tomorrow: " + forecastTomorrow + " " + tomorrowHigh + "/" + tomorrowLow)
+
+                        };
+                        tile.Update(TileData);
+                        break;
+                    }
+                }
+
+
+
+
+                //send toast if enabled
+                if (store.Contains("notifyMe"))
+                {
+                    if ((bool)store["notifyMe"] == true)
+                    {
+                        var newToast = new Toast();
+                        newToast.sendToast("I updated!");
+                    }
+                }
+
+                //backupWeather();
+
+                //save the time of the last time the app was run
+                store["lastRun"] = DateTime.Now.ToString();
+                store["locName"] = cityName;
+                store.Save();
+
+                finish();
+
+            }
+            else
+            {
+                //restoreWeather();
+            }
+        }
 
         private void finish()
         {
             if (timesRun == numPins)
             {
-                NotifyComplete();
+                endRun();
             }
             else
             {
                 timesRun++;
             }
+        }
+
+        private void endRun()
+        {
+            NotifyComplete();
         }
 
         private void checkUnits()
