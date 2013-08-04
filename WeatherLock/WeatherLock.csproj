@@ -157,9 +157,9 @@
     <Content Include="Images\settings.png" />
     <Content Include="Images\refresh.png" />
     <Content Include="Images\SunLS.png" />
-    <Content Include="SunDrop110.png" />
-    <Content Include="SunDrop202.png" />
-    <Content Include="SunDrop300Color.png" />
+    <Content Include="SunCloud110.png" />
+    <Content Include="SunCloud202.png" />
+    <Content Include="SunCloud300Trans.png" />
     <Content Include="Toolkit.Content\ApplicationBar.Cancel.png" />
     <Content Include="Toolkit.Content\ApplicationBar.Check.png" />
     <Content Include="Toolkit.Content\ApplicationBar.Delete.png" />

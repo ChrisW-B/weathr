@@ -22,7 +22,7 @@
     <Language code="en-AU" />
   </Languages>
   <App xmlns="" ProductID="{3bacf703-65e0-4919-89a3-ac901decf82a}" Title="WeathrDEV" RuntimeType="Silverlight" Version="1.0.1.0" Genre="apps.normal" Author="Chris Barry" Description="A new weather app for Windows Phone with not only live tile support, but also the ability to have a detailed forecast on your lockscreen, without changing your current wallpaper. Combine with other apps that can set the lockscreen to have even more glance " Publisher="WeatherLock" PublisherID="{6b72e231-93c0-4e18-b20d-449acf2b5d53}">
-    <IconPath IsRelative="true" IsResource="false">SunDrop300Color.png</IconPath>
+    <IconPath IsRelative="true" IsResource="false">SunCloud300Trans.png</IconPath>
     <Capabilities>
       <Capability Name="ID_CAP_NETWORKING" />
       <Capability Name="ID_CAP_WEBBROWSERCOMPONENT" />
@@ -38,9 +38,9 @@
     <Tokens>
       <PrimaryToken TokenID="WeatherLockToken" TaskName="_default">
         <TemplateIconic>
-          <SmallImageURI IsRelative="true" IsResource="false">SunDrop110.png</SmallImageURI>
+          <SmallImageURI IsRelative="true" IsResource="false">SunCloud110.png</SmallImageURI>
           <Count>0</Count>
-          <IconImageURI IsRelative="true" IsResource="false">SunDrop202.png</IconImageURI>
+          <IconImageURI IsRelative="true" IsResource="false">SunCloud202.png</IconImageURI>
           <Title>Weathr</Title>
           <Message>
           </Message>

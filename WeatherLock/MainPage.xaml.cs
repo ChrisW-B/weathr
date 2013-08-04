@@ -817,7 +817,7 @@ namespace WeatherLock
         }
         private void client_getAlerts(object sender, DownloadStringCompletedEventArgs e)
         {
-            if (!e.Cancelled && e.Error == null && !e.Result.Contains("javascript"))
+            if (!e.Cancelled && e.Error == null && !e.Result.Contains("javascript") && !e.Result.Contains("!DOCTYPE"))
             {
                 XDocument doc = XDocument.Parse(e.Result);
                 var hazards = doc.Element("dwml").Element("data").Element("parameters").Element("hazards");

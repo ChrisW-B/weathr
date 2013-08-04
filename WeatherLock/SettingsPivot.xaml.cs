@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define DEBUG_AGENT
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -369,8 +370,8 @@ namespace WeatherLock
 
             IconicTileData locTile = new IconicTileData
             {
-                IconImage = new Uri("SunDrop202.png", UriKind.Relative),
-                SmallIconImage = new Uri("SunDrop110.png", UriKind.Relative),
+                IconImage = new Uri("SunCloud202.png", UriKind.Relative),
+                SmallIconImage = new Uri("SunCloud110.png", UriKind.Relative),
                 Title = resArray[0]
             };
 
@@ -552,7 +553,9 @@ namespace WeatherLock
             {
                 ScheduledActionService.Add(periodicTask);
                 PeriodicStackPanel.DataContext = periodicTask;
-
+#if(DEBUG_AGENT)
+                ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
+#endif
             }
             catch (InvalidOperationException exception)
             {
@@ -738,7 +741,7 @@ namespace WeatherLock
             //Check to see if allowed to get location
             if (store.Contains("defaultCurrent"))
             {
-                if ((bool)store["defaultCurrent"])
+                if (Convert.ToBoolean(store["defaultCurrent"]))
                 {
                     //get location
                     var getLocation = new getLocationMain();
