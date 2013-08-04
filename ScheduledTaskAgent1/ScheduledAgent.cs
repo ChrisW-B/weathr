@@ -48,7 +48,6 @@ namespace ScheduledTaskAgent1
         dynamic store = IsolatedStorageSettings.ApplicationSettings;
 
         List<Pins> pinnedList = new List<Pins>();
-        Pins pinned;
         #endregion
 
 
