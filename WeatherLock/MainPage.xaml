@@ -75,7 +75,7 @@
                                         <TextBlock x:Name="forecast"
                                     Text="{Binding fcttext}" 
                                            FontSize="20"
-                                           Margin="12,0,0,2"
+                                           Margin="15,0,0,15"
                                            Foreground="White" FontFamily="Segoe UI" TextWrapping="Wrap" TextOptions.TextHintingMode="Animated" HorizontalAlignment="Left" VerticalAlignment="Top"                                          
                                            />
                                     </StackPanel>

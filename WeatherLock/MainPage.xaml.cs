@@ -28,15 +28,19 @@ namespace WeatherLock
 
         //Current Conditions
         private String cityName;
-        private String tempStr;
         private String weather;
         private String shortCityName;
         private String realFeel;
-        private String windSpeed;
+        private String windSpeedM;
+        private String windSpeedK;
         private String windDir;
         private String humidityValue;
         private String updateTime;
         private String tempCompareText;
+        private String tempC;
+        private String tempF;
+        private String realFeelC;
+        private String realFeelF;
 
         private String flickrTags;
 
@@ -96,6 +100,7 @@ namespace WeatherLock
         {
             licInfo = new LicenseInformation();
             isTrial = licInfo.IsTrial();
+            isTrial = true;
 
             base.OnNavigatedTo(e);
             if (this.NavigationContext.QueryString.ContainsKey("cityName") && this.NavigationContext.QueryString.ContainsKey("url") && this.NavigationContext.QueryString.ContainsKey("isCurrent") && this.NavigationContext.QueryString.ContainsKey("lat") && this.NavigationContext.QueryString.ContainsKey("lon"))
@@ -119,7 +124,7 @@ namespace WeatherLock
                 store["isCurrent"] = isCurrent;
                 store.Save();
                 findLocation();
-                
+
             }
             else
             {
@@ -257,7 +262,7 @@ namespace WeatherLock
             }
             else
             {
-                this.windUnit = "m";
+                this.windUnit = "k";
             }
         }
 
@@ -319,7 +324,7 @@ namespace WeatherLock
                     findLocation();
                 }
             }
-            
+
             setURL();
         }
 
@@ -394,14 +399,21 @@ namespace WeatherLock
                             store["lastUpdated"] = DateTime.Now;
                         }
                     }
-                    if (store.Contains("unitChanged") && (int)timeDiff.TotalMinutes > 45)
+                    if (store.Contains("unitChanged"))
                     {
-                        if ((bool)store["unitChanged"] == true)
+                        if ((int)timeDiff.TotalMinutes > 45)
                         {
-                            store["unitChanged"] = false;
+                            if ((bool)store["unitChanged"] == true)
+                            {
+                                store["unitChanged"] = false;
 
-                            updateWeather();
-                            store["lastUpdated"] = DateTime.Now;
+                                updateWeather();
+                                store["lastUpdated"] = DateTime.Now;
+                            }
+                        }
+                        else
+                        {
+                            restoreWeather();
                         }
                     }
                 }
@@ -446,7 +458,7 @@ namespace WeatherLock
 
                 this.cityName = savedData[0];
                 this.shortCityName = savedData[1];
-                this.tempStr = savedData[2];
+                this.realFeelF = savedData[2];
                 this.weather = savedData[3];
                 this.todayHigh = savedData[4];
                 this.todayLow = savedData[5];
@@ -454,12 +466,16 @@ namespace WeatherLock
                 this.forecastTomorrow = savedData[7];
                 this.tomorrowHigh = savedData[8];
                 this.tomorrowLow = savedData[9];
-                this.windSpeed = savedData[10];
+                this.windSpeedM = savedData[10];
                 this.realFeel = savedData[11];
                 this.humidityValue = savedData[12];
                 this.windDir = savedData[13];
                 this.updateTime = savedData[14];
                 this.tempCompareText = savedData[15];
+                this.tempC = savedData[16];
+                this.tempF = savedData[17];
+                this.realFeelC = savedData[18];
+                this.windSpeedK = savedData[19];
 
                 if (this.weather == null)
                 {
@@ -478,10 +494,28 @@ namespace WeatherLock
 
             //Restore all the data
             title.Title = cityName;
-            temp.Text = tempStr + "°";
+            if (tempUnit == "c")
+            {
+                temp.Text = tempC + "°";
+                feelsLike.Text = "Feels like: " + realFeelC + "°";
+            }
+            else
+            {
+                temp.Text = tempF + "°";
+                feelsLike.Text = "Feels like: " + realFeelF + "°";
+            }
+            if (windUnit == "m")
+            {
+                wind.Text = "Wind: " + windSpeedM + " " + windDir;
+            }
+            else
+            {
+                wind.Text = "Wind: " + windSpeedK + " " + windDir;
+            }
+
             conditions.Text = weather;
-            feelsLike.Text = "Feels like: " + realFeel + "°";
-            wind.Text = "Wind: " + windSpeed + " " + windDir;
+
+
             humidity.Text = "Humidity: " + humidityValue;
             tempCompare.Text = "TOMORROW WILL BE " + tempCompareText + " TODAY";
             forecastListBox.ItemsSource = foreRes;
@@ -527,26 +561,20 @@ namespace WeatherLock
                 //Current Weather
                 this.weather = (string)currentObservation.Element("weather");
                 //Current wind
-                if (windUnit == "m")
-                {
-                    this.windSpeed = (string)currentObservation.Element("wind_mph") + " mph";
-                }
-                else
-                {
-                    this.windSpeed = (string)currentObservation.Element("wind_kph") + " kph";
-                }
+
+                this.windSpeedM = (string)currentObservation.Element("wind_mph") + " mph";
+
+                this.windSpeedK = (string)currentObservation.Element("wind_kph") + " kph";
+
                 this.windDir = (string)currentObservation.Element("wind_dir");
                 //Current Temp and feels like
-                if (tempUnit == "c")
-                {
-                    this.tempStr = (string)currentObservation.Element("temp_c");
-                    this.realFeel = (string)currentObservation.Element("feelslike_c");
-                }
-                else
-                {
-                    this.tempStr = (string)currentObservation.Element("temp_f");
-                    this.realFeel = (string)currentObservation.Element("feelslike_f");
-                }
+
+                this.tempC = (string)currentObservation.Element("temp_c");
+                this.realFeelC = (string)currentObservation.Element("feelslike_c");
+
+                this.tempF = (string)currentObservation.Element("temp_f");
+                this.realFeelF = (string)currentObservation.Element("feelslike_f");
+
                 //current humidity
                 this.humidityValue = (string)currentObservation.Element("relative_humidity");
                 #endregion
@@ -632,7 +660,7 @@ namespace WeatherLock
         {
             String[] backup = { cityName,
                                   shortCityName,
-                                  tempStr,
+                                  realFeelF,
                                   weather,
                                   todayHigh,
                                   todayLow,
@@ -640,12 +668,16 @@ namespace WeatherLock
                                   forecastTomorrow,
                                   tomorrowHigh,
                                   tomorrowLow,
-                                  windSpeed,
+                                  windSpeedM,
                                   realFeel,
                                   humidityValue,
                                   windDir,
                                   updateTime,
-                                  tempCompareText
+                                  tempCompareText,
+                                  tempC,
+                                  tempF,
+                                  realFeelC,
+                                  windSpeedK
                               };
             store["locationName"] = cityName;
             store["backupApp"] = backup;

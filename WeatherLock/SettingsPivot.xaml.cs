@@ -128,8 +128,8 @@ namespace WeatherLock
             }
             else
             {
-                store["windUnit"] = "m";
-                unitMiles.IsChecked = true;
+                store["windUnit"] = "k";
+                unitKms.IsChecked = true;
             }
             if (store.Contains("tempAlert"))
             {
