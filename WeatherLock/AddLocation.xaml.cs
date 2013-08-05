@@ -53,7 +53,6 @@ namespace WeatherLock
         }
         private void SearchBox_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            
             if (SearchBox.Text == "enter location" || SearchBox.Text == (string)store["locName"])
             {
                 SearchBox.Text = "";
