@@ -67,7 +67,8 @@
                                 <ListBoxItem x:Name="locationName"
                                        Content="{Binding LocName}"
                                        FontFamily="Segoe WP SemiLight"
-                                       FontSize="30">
+                                       FontSize="30"
+                                             Tap="locationName_Tap">
                                     <toolkit:ContextMenuService.ContextMenu>
                                         <toolkit:ContextMenu>
                                             <toolkit:MenuItem Name="delete" Header="Delete" Tag="{Binding LocName}" Click="delete_Click"/>

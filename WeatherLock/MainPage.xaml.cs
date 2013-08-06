@@ -54,6 +54,7 @@ namespace WeatherLock
 
         String latitude = null;
         String longitude = null;
+        int locationSearchTimes;
 
         //Wunderground Api
         //Release Key
@@ -62,6 +63,7 @@ namespace WeatherLock
         bool isCurrent;
         String cityNameLoad;
         String url = null;
+
 
         //Flickr Api
         String fApiKey = "2781c025a4064160fc77a52739b552ff";
@@ -100,7 +102,8 @@ namespace WeatherLock
         {
             licInfo = new LicenseInformation();
             isTrial = licInfo.IsTrial();
-            isTrial = true;
+
+            locationSearchTimes = 0;
 
             base.OnNavigatedTo(e);
             if (this.NavigationContext.QueryString.ContainsKey("cityName") && this.NavigationContext.QueryString.ContainsKey("url") && this.NavigationContext.QueryString.ContainsKey("isCurrent") && this.NavigationContext.QueryString.ContainsKey("lat") && this.NavigationContext.QueryString.ContainsKey("lon"))
@@ -305,7 +308,7 @@ namespace WeatherLock
         //Find the location
         private void findLocation()
         {
-            if (isCurrent)
+            if (isCurrent && locationSearchTimes<=5)
             {
                 //get location
                 var getLocation = new getLocationMain();
@@ -318,11 +321,28 @@ namespace WeatherLock
                     //Save
                     String[] loc = { latitude, longitude };
                     store["loc"] = loc;
+                    store.Save();
                 }
                 else
                 {
+                    locationSearchTimes++;
                     findLocation();
                 }
+            }
+            if (locationSearchTimes > 5)
+            {
+                if (store.Contains("loc"))
+                {
+                    String[] loc = store["loc"];
+                    latitude = loc[0];
+                    longitude = loc[1];
+                }
+                else
+                {
+                    latitude = "0";
+                    longitude = "0";
+                }
+
             }
 
             setURL();
@@ -812,6 +832,7 @@ namespace WeatherLock
                     string photoUrl = "http://farm" + farm + ".staticflickr.com/" + server + "/" + id + "_" + secret + "_b.jpg";
                     Uri photoUri = new Uri(photoUrl);
                     var downloadedPhoto = new BitmapImage(photoUri);
+                   
                     ImageBrush imageBrush = new ImageBrush();
                     imageBrush.ImageSource = downloadedPhoto;
                     imageBrush.Opacity = 0.7;

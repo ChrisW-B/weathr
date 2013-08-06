@@ -297,6 +297,13 @@ namespace WeatherLock
             {
                 locations = (ObservableCollection<Locations>)store["locations"];
                 LocationListBox.ItemsSource = locations;
+                foreach (Locations location in locations)
+                {
+                    if (location.isDefault)
+                    {
+                        LocationListBox.SelectedItem = location;
+                    }
+                }
                 backupLocations();
             }
         }
@@ -338,6 +345,7 @@ namespace WeatherLock
             public bool CurrentLoc { get; set; }
             public string Lat { get; set; }
             public string Lon { get; set; }
+            public bool isDefault { get; set; }
         }
         private void createDefaultLoc()
         {
@@ -349,12 +357,6 @@ namespace WeatherLock
 
                 store.Save();
             }
-            if (!store.Contains("listPinned"))
-            {
-                pinnedLocations.Add(new Pins() { LocName = store["defaultLocation"], LocUrl = store["defaultUrl"], currentLoc = Convert.ToBoolean(store["defaultCurrent"]) });
-                store["listPinned"] = pinnedLocations;
-                store.Save();
-            }
         }
         private void delete_Click(object sender, RoutedEventArgs e)
         {
@@ -363,26 +365,56 @@ namespace WeatherLock
         }
         private void pin_Click(object sender, RoutedEventArgs e)
         {
-            MenuItem menuItem = (MenuItem)sender;
-
-            String[] resArray = getArray(menuItem.Tag.ToString());
-
-            IconicTileData locTile = new IconicTileData
+            if (!isTrial)
             {
-                IconImage = new Uri("SunCloud202.png", UriKind.Relative),
-                SmallIconImage = new Uri("SunCloud110.png", UriKind.Relative),
-                Title = resArray[0]
-            };
+                MenuItem menuItem = (MenuItem)sender;
 
-            ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + resArray[0] + "&url=" + resArray[1] + "&isCurrent=" + resArray[2] + "&lat=" + resArray[3] + "&lon=" + resArray[4], UriKind.Relative), locTile, true);
+                String[] resArray = getArray(menuItem.Tag.ToString());
+
+                IconicTileData locTile = new IconicTileData
+                {
+                    IconImage = new Uri("SunCloud202.png", UriKind.Relative),
+                    SmallIconImage = new Uri("SunCloud110.png", UriKind.Relative),
+                    Title = resArray[0]
+                };
+
+                ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + resArray[0] + "&url=" + resArray[1] + "&isCurrent=" + resArray[2] + "&lat=" + resArray[3] + "&lon=" + resArray[4], UriKind.Relative), locTile, true);
+            }
+            else
+            {
+                MessageBoxResult m = MessageBox.Show("Multiple location Pinning is only supported in the full version. Buy now?", "Trial Mode", MessageBoxButton.OKCancel);
+                if (m == MessageBoxResult.OK)
+                {
+                    MarketplaceDetailTask task = new MarketplaceDetailTask();
+                    task.Show();
+                }
+            }
         }
         private void default_Click(object sender, RoutedEventArgs e)
         {
             MenuItem menuItem = (MenuItem)sender;
             String[] resArray = getArray(menuItem.Tag.ToString());
+            changeDefault(menuItem.Tag.ToString());
             store["defaultLocation"] = resArray[0];
             store["defaultUrl"] = resArray[1];
             store["defaultCurrent"] = resArray[2];
+        }
+        private void changeDefault(string loc)
+        {
+            //clear last default
+            foreach (Locations location in locations)
+            {
+                location.isDefault = false;
+            }
+
+            //set new default
+            foreach (Locations location in locations)
+            {
+                if (location.LocName == loc)
+                {
+                    location.isDefault = true;
+                }
+            }
         }
         private String[] getArray(string loc)
         {
@@ -395,7 +427,8 @@ namespace WeatherLock
                                                location.LocUrl,
                                                Convert.ToString(location.CurrentLoc),
                                                location.Lat,
-                                               location.Lon
+                                               location.Lon,
+                                               Convert.ToString(location.isDefault)
                                            };
                     return thisLocation;
                 }
@@ -414,14 +447,6 @@ namespace WeatherLock
                 }
             }
         }
-        private void locationName_Hold(object sender, System.Windows.Input.GestureEventArgs e)
-        {
-            string locationName = e.ToString();
-            if (locationName == "Current Location")
-            {
-                var hello = "hi";
-            }
-        }
         private void LocationListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var resArray = locations.ToArray()[LocationListBox.SelectedIndex];
@@ -430,10 +455,19 @@ namespace WeatherLock
             store["locUrl"] = resArray.LocUrl;
             store["locName"] = resArray.LocName;
             store["locChanged"] = true;
-            String[] location = {resArray.Lat, resArray.Lon};
+            String[] location = { resArray.Lat, resArray.Lon };
             store["loc"] = location;
             store.Save();
 
+        }
+        private void locationName_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            ListBoxItem lbItem = (ListBoxItem)sender;
+            String loc = lbItem.Content.ToString();
+
+            String[] resArray = getArray(loc);
+
+            NavigationService.Navigate(new Uri("/MainPage.xaml?cityName=" + resArray[0] + "&url=" + resArray[1] + "&isCurrent=" + resArray[2] + "&lat=" + resArray[3] + "&lon=" + resArray[4], UriKind.Relative));
         }
 
         //Forecast Pivot
@@ -831,5 +865,7 @@ namespace WeatherLock
         {
             NavigationService.Navigate(new Uri("/AddLocation.xaml", UriKind.Relative));
         }
+
+       
     }
 }

@@ -114,6 +114,14 @@ namespace WeatherLock
             var location = doc.Element("GeocodeResponse").Element("result").Element("geometry").Element("location");
             string lat = (string)location.Element("lat").Value;
             string lng = (string)location.Element("lng").Value;
+            if (lat.Contains(","))
+            {
+                lat.Replace(',', '.');
+            }
+            if (lng.Contains(","))
+            {
+                lng.Replace(',', '.');
+            }
             String[] loc = { lat, lng };
             store["newLoc"] = loc;
             searchComplete = true;
