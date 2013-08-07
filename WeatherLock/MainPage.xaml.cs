@@ -802,7 +802,11 @@ namespace WeatherLock
             }
             else if (weather.Contains("OVERCAST"))
             {
-                flickrTags = "overcast, clouds, cloudy";
+                flickrTags = "overcast, cloudy";
+            }
+            else if (weather.Contains("CLOUDS"))
+            {
+                flickrTags = "cloudy, clouds, sky, fluffy cloud";
             }
             else
             {
