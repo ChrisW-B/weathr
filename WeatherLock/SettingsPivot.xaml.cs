@@ -14,6 +14,7 @@ using System.Xml.Linq;
 using Microsoft.Phone.Marketplace;
 using Microsoft.Phone.Tasks;
 using Pinned;
+using System.Windows.Media;
 
 namespace WeatherLock
 {
@@ -287,7 +288,7 @@ namespace WeatherLock
         #endregion
         private void initializeLocations()
         {
-            locations.Add(new Locations() { LocName = "Current Location", CurrentLoc = true });
+            locations.Add(new Locations() { LocName = "Current Location", CurrentLoc = true, ImageSource = "/Images/favs.png" });
             LocationListBox.ItemsSource = locations;
             createDefaultLoc();
         }
@@ -297,13 +298,7 @@ namespace WeatherLock
             {
                 locations = (ObservableCollection<Locations>)store["locations"];
                 LocationListBox.ItemsSource = locations;
-                foreach (Locations location in locations)
-                {
-                    if (location.isDefault)
-                    {
-                        LocationListBox.SelectedItem = location;
-                    }
-                }
+                
                 backupLocations();
             }
         }
@@ -345,7 +340,7 @@ namespace WeatherLock
             public bool CurrentLoc { get; set; }
             public string Lat { get; set; }
             public string Lon { get; set; }
-            public bool isDefault { get; set; }
+            public string ImageSource { get; set; }
         }
         private void createDefaultLoc()
         {
@@ -401,20 +396,20 @@ namespace WeatherLock
         }
         private void changeDefault(string loc)
         {
-            //clear last default
-            foreach (Locations location in locations)
-            {
-                location.isDefault = false;
-            }
-
             //set new default
             foreach (Locations location in locations)
             {
                 if (location.LocName == loc)
                 {
-                    location.isDefault = true;
+                    location.ImageSource = "/Images/favs.png";
+                }
+                else
+                {
+                    location.ImageSource = "/Images/Clear.png";
                 }
             }
+            backupLocations();
+            restoreLocations();
         }
         private String[] getArray(string loc)
         {
@@ -428,7 +423,7 @@ namespace WeatherLock
                                                Convert.ToString(location.CurrentLoc),
                                                location.Lat,
                                                location.Lon,
-                                               Convert.ToString(location.isDefault)
+                                               location.ImageSource
                                            };
                     return thisLocation;
                 }

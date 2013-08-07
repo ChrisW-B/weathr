@@ -290,9 +290,12 @@ namespace WeatherLock
         {
             if (isCurrent)
             {
-                if (store["locChanged"])
+                if (store.Contains("locChanged"))
                 {
-                    findLocation();
+                    if (store["locChanged"])
+                    {
+                        findLocation();
+                    }
                 }
                 if (latitude != null && longitude != null)
                 {

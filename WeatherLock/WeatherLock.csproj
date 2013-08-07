@@ -154,6 +154,8 @@
   <ItemGroup>
     <Content Include="Assets\AppBar\add.png" />
     <Content Include="Assets\AppBar\check.png" />
+    <Content Include="Images\Clear.png" />
+    <Content Include="Images\favs.png" />
     <Content Include="Images\settings.png" />
     <Content Include="Images\refresh.png" />
     <Content Include="Images\SunLS.png" />

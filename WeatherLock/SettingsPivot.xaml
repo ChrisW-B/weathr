@@ -63,20 +63,30 @@
                 <ListBox x:Name="LocationListBox" Margin="10,0,0,30" HorizontalAlignment="Left" Width="436" SelectionChanged="LocationListBox_SelectionChanged">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Vertical">
-                                <ListBoxItem x:Name="locationName"
+
+                            <StackPanel Orientation="Horizontal">
+                                <Rectangle Fill="{StaticResource PhoneAccentBrush}" Width="45" Height="45">
+                                    <Rectangle.OpacityMask>
+                                        <ImageBrush ImageSource="{Binding ImageSource}"/>
+                                    </Rectangle.OpacityMask>
+                                </Rectangle>
+                                
+                                <StackPanel Width="370">
+                                    <ListBoxItem x:Name="locationName"
                                        Content="{Binding LocName}"
                                        FontFamily="Segoe WP SemiLight"
                                        FontSize="30"
                                              Tap="locationName_Tap">
-                                    <toolkit:ContextMenuService.ContextMenu>
-                                        <toolkit:ContextMenu>
-                                            <toolkit:MenuItem Name="delete" Header="Delete" Tag="{Binding LocName}" Click="delete_Click"/>
-                                            <toolkit:MenuItem Name="pin" Header="Pin to Start" Tag="{Binding LocName}" Click="pin_Click"/>
-                                            <toolkit:MenuItem Name="default" Header="Make Default Location" Tag="{Binding LocName}" Click="default_Click"/>
-                                        </toolkit:ContextMenu>
-                                    </toolkit:ContextMenuService.ContextMenu>
-                                </ListBoxItem>
+
+                                        <toolkit:ContextMenuService.ContextMenu>
+                                            <toolkit:ContextMenu>
+                                                <toolkit:MenuItem Name="delete" Header="Delete" Tag="{Binding LocName}" Click="delete_Click"/>
+                                                <toolkit:MenuItem Name="pin" Header="Pin to Start" Tag="{Binding LocName}" Click="pin_Click"/>
+                                                <toolkit:MenuItem Name="default" Header="Make Default Location" Tag="{Binding LocName}" Click="default_Click"/>
+                                            </toolkit:ContextMenu>
+                                        </toolkit:ContextMenuService.ContextMenu>
+                                    </ListBoxItem>
+                                </StackPanel>
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
