@@ -72,14 +72,10 @@ namespace ScheduledTaskAgent1
 
         protected override void OnInvoke(ScheduledTask task)
         {
-            timesRun = 1;
+            numPins = 0;
             foreach (ShellTile tile in ShellTile.ActiveTiles)
             {
-                if (tile.NavigationUri.OriginalString == "/")
-                {
-                    timesRun = 0;
-                }
-                else
+                if (tile.NavigationUri.OriginalString != "/")
                 {
                     String[] uriSplit = tile.NavigationUri.ToString().Split('&');
 
@@ -88,7 +84,7 @@ namespace ScheduledTaskAgent1
                     bool isCurrentLoc = Convert.ToBoolean(uriSplit[2].Split('=')[1]);
                     pinnedList.Add(new Pins { LocName = locationName, LocUrl = locationUrl, currentLoc = isCurrentLoc });
                 }
-
+                numPins++;
             }
 
 
@@ -246,7 +242,7 @@ namespace ScheduledTaskAgent1
                     {
                         foreach (Pins tileData in pinnedList)
                         {
-                            if (tile.NavigationUri.ToString().Split('&')[0].Split('=')[1] == cityName && tileData.LocName == cityName)
+                            if ((tile.NavigationUri.ToString().Split('&')[0].Split('=')[1] == cityName && tileData.LocName == cityName) || tileData.LocName.Split(',')[0].Contains(city))
                             {
                                 IconicTileData TileData = new IconicTileData
                                 {
@@ -283,7 +279,7 @@ namespace ScheduledTaskAgent1
                 store["locName"] = cityName;
                 store.Save();
 
-                finish();
+                
 
             }
             else
@@ -389,12 +385,12 @@ namespace ScheduledTaskAgent1
                 store["lastRun"] = DateTime.Now.ToString();
                 store["locName"] = cityName;
                 store.Save();
-                finish();
+                
             }
         }
         private void finish()
         {
-            if (timesRun > numPins)
+            if (timesRun >= numPins)
             {
                 NotifyComplete();
             }
