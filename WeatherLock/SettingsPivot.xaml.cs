@@ -284,7 +284,7 @@ namespace WeatherLock
         //Location Pivot
         #region variables
         ObservableCollection<Locations> locations = new ObservableCollection<Locations>();
-        dynamic pinnedLocations = new List<Pins>();
+        
         #endregion
         private void initializeLocations()
         {
@@ -323,7 +323,7 @@ namespace WeatherLock
                     String[] location = store["newLoc"];
                     String lat = location[0];
                     String lon = location[1];
-                    locations.Add(new Locations() { LocName = locationName, CurrentLoc = false, LocUrl = locationUrl, Lat = lat, Lon = lon });
+                    locations.Add(new Locations() { LocName = locationName, CurrentLoc = false, LocUrl = locationUrl, Lat = lat, Lon = lon, ImageSource = "/Images/Clear.png" });
                     LocationListBox.ItemsSource = locations;
                     backupLocations();
                 }
@@ -408,8 +408,10 @@ namespace WeatherLock
                     location.ImageSource = "/Images/Clear.png";
                 }
             }
+            LocationListBox.ItemsSource = null;
+            LocationListBox.ItemsSource = locations;
             backupLocations();
-            restoreLocations();
+            
         }
         private String[] getArray(string loc)
         {
@@ -675,7 +677,7 @@ namespace WeatherLock
         private void updateData()
         {
             //Testing Key
-            apiKey = "fb1dd3f4321d048d";
+            //apiKey = "fb1dd3f4321d048d";
 
             checkLocation();
             checkUnits();
