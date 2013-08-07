@@ -76,6 +76,7 @@ namespace WeatherLock
         ProgressIndicator progWeather;
         ProgressIndicator progFlickr;
         ProgressIndicator progAlerts;
+        ProgressIndicator progRestore;
 
         private int hideTray;
 
@@ -122,12 +123,7 @@ namespace WeatherLock
                         store["locChanged"] = true;
                     }
                 }
-                store["cityName"] = cityNameLoad;
-                store["locUrl"] = urlKey;
-                store["isCurrent"] = isCurrent;
                 store.Save();
-                findLocation();
-
             }
             else
             {
@@ -151,19 +147,28 @@ namespace WeatherLock
                         store["locChanged"] = true;
                     }
                 }
+                else
+                {
+                    noDefaults();
+                }
                 cityNameLoad = store["defaultLocation"];
                 urlKey = store["defaultUrl"];
                 isCurrent = Convert.ToBoolean(store["defaultCurrent"]);
             }
             else
             {
-                store["defaultLocation"] = "Current Location";
-                store["defaultUrl"] = "null";
-                store["defaultCurrent"] = true;
-                cityNameLoad = "Current Location";
-                urlKey = "null";
-                isCurrent = true;
+                noDefaults(); 
             }
+        }
+
+        private void noDefaults()
+        {
+            store["defaultLocation"] = "Current Location";
+            store["defaultUrl"] = "null";
+            store["defaultCurrent"] = true;
+            cityNameLoad = "Current Location";
+            urlKey = "null";
+            isCurrent = true;
         }
 
         private void showAd()
@@ -184,6 +189,16 @@ namespace WeatherLock
 
 
         //Progress Bars
+        private void startRestoreProg()
+        {
+            SystemTray.SetIsVisible(this, true);
+            SystemTray.SetOpacity(this, 0);
+            progRestore = new ProgressIndicator();
+            progRestore.Text = "Restoring Weather";
+            progRestore.IsIndeterminate = true;
+            progRestore.IsVisible = true;
+            SystemTray.SetProgressIndicator(this, progRestore);
+        }
         private void startWeatherProg()
         {
             SystemTray.SetIsVisible(this, true);
@@ -220,7 +235,7 @@ namespace WeatherLock
             //if(progAlerts.IsVisible==false && progFlickr.IsVisible==false && progWeather.IsVisible == false){
             //  SystemTray.SetIsVisible(this, false);
             //}
-            if (hideTray > 2)
+            if (hideTray > 3)
             {
                 hideTray = 0;
                 SystemTray.SetIsVisible(this, false);
@@ -232,6 +247,7 @@ namespace WeatherLock
             }
 
         }
+        
 
         //Check the units to use
         private void setUnits()
@@ -274,6 +290,10 @@ namespace WeatherLock
         {
             if (isCurrent)
             {
+                if (store["locChanged"])
+                {
+                    findLocation();
+                }
                 if (latitude != null && longitude != null)
                 {
                     url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast/q/" + latitude + "," + longitude + ".xml";
@@ -287,6 +307,10 @@ namespace WeatherLock
             }
             else
             {
+                if (store["locChanged"])
+                {
+                    findLocation();
+                }
                 if (latitude != null && longitude != null)
                 {
                     fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weather + "&per_page=500&tag_mode=any&content_type=1&media=photos&sort=relevance&has_geo=&format=rest";
@@ -345,7 +369,7 @@ namespace WeatherLock
 
             }
 
-            setURL();
+            //setURL();
         }
 
         //Check whether weather should be updated
@@ -449,7 +473,8 @@ namespace WeatherLock
         //Getting and Setting Weather data
         private void restoreWeather()
         {
-            startWeatherProg();
+            
+            startRestoreProg();
             if ((bool)store.Contains("backupForecast"))
             {
                 forecastListBox.ItemsSource = null;
@@ -541,7 +566,9 @@ namespace WeatherLock
             forecastListBox.ItemsSource = foreRes;
             alertListBox.ItemsSource = results;
 
-            progWeather.IsVisible = false;
+            store["cityName"] = cityName;
+
+            progRestore.IsVisible = false;
             backupWeather();
             HideTray();
         }

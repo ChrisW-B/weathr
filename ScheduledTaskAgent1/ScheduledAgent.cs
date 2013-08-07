@@ -121,12 +121,9 @@ namespace ScheduledTaskAgent1
                             }
                             else
                             {
-                                store["defaultLocation"] = "Current Location";
-                                store["defaultUrl"] = "null";
-                                store["defaultCurrent"] = true;
-                                defaultCityName = "Current Location";
-                                locUrl = "null";
-                                isCurrent = true;
+                                var toast = new Toast();
+                                toast.sendToast("Please run the app first");
+                                NotifyComplete();
                             }
                             updateDefault();
                         }
@@ -160,12 +157,9 @@ namespace ScheduledTaskAgent1
                         }
                         else
                         {
-                            store["defaultLocation"] = "Current Location";
-                            store["defaultUrl"] = "null";
-                            store["defaultCurrent"] = true;
-                            defaultCityName = "Current Location";
-                            locUrl = "null";
-                            isCurrent = true;
+                            var toast = new Toast();
+                            toast.sendToast("Please run the app first");
+                            NotifyComplete();
                         }
                         updateDefault();
                     }
