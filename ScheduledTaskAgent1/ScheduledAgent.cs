@@ -1,5 +1,4 @@
-﻿#define DEBUG_AGENT
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Windows;
 using Microsoft.Phone.Scheduler;
 using System;
