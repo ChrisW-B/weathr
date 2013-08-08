@@ -242,7 +242,8 @@ namespace ScheduledTaskAgent1
                     {
                         foreach (Pins tileData in pinnedList)
                         {
-                            if ((tile.NavigationUri.ToString().Split('&')[0].Split('=')[1] == cityName && tileData.LocName == cityName) || tileData.LocName.Split(',')[0].Contains(city))
+                            String hello = tile.NavigationUri.ToString().Split('&')[0].Split('=')[1].Split(',')[0];
+                            if ((tile.NavigationUri.ToString().Split('&')[0].Split('=')[1] == cityName && tileData.LocName == cityName) || (tileData.LocName.Split(',')[0].Contains(city) && hello.Contains(city)))
                             {
                                 IconicTileData TileData = new IconicTileData
                                 {
@@ -276,7 +277,6 @@ namespace ScheduledTaskAgent1
 
                 //save the time of the last time the app was run
                 store["lastRun"] = DateTime.Now.ToString();
-                store["locName"] = cityName;
                 store.Save();
 
                 
@@ -285,6 +285,10 @@ namespace ScheduledTaskAgent1
             else
             {
                 //restoreWeather();
+            }
+            if (timesRun > numPins)
+            {
+                NotifyComplete();
             }
         }
 
@@ -385,12 +389,9 @@ namespace ScheduledTaskAgent1
                 store["lastRun"] = DateTime.Now.ToString();
                 store["locName"] = cityName;
                 store.Save();
-                
+
             }
-        }
-        private void finish()
-        {
-            if (timesRun >= numPins)
+            if (timesRun > numPins)
             {
                 NotifyComplete();
             }
