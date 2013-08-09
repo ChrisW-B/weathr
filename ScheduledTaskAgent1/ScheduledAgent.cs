@@ -249,7 +249,7 @@ namespace ScheduledTaskAgent1
                     {
                         foreach (Pins tileData in pinnedList)
                         {
-                            string tileLoc =  tile.NavigationUri.ToString().Split('&')[0].Split('=')[1];
+                            string tileLoc = tile.NavigationUri.ToString().Split('&')[0].Split('=')[1];
 
                             if ((tileLoc == cityName && tileData.LocName == cityName) || (tileData.LocName.Split(',')[0].Contains(city) && tileLoc.Split(',')[0].Contains(city) && tileData.LocName.Split(',')[1].Contains(state) && tileLoc.Split(',')[1].Contains(state)))
                             {
@@ -264,41 +264,35 @@ namespace ScheduledTaskAgent1
                                     WideContent3 = string.Format("Tomorrow: " + forecastTomorrow + " " + tomorrowHigh + "/" + tomorrowLow)
 
                                 };
+
+
                                 tile.Update(TileData);
+
+                                //send toast if enabled
+                                if (store.Contains("notifyMe"))
+                                {
+                                    if ((bool)store["notifyMe"] == true)
+                                    {
+                                        var newToast = new Toast();
+                                        newToast.sendToast("I updated!");
+                                    }
+                                }
+
+                                //save the time of the last time the app was run
+                                store["lastRun"] = DateTime.Now.ToString();
+                                store.Save();
+
+                                //check to see if done updating
                                 timesRun++;
+                                if (timesRun == numPins)
+                                {
+                                    NotifyComplete();
+                                }
                                 break;
                             }
                         }
                     }
                 }
-
-
-                //send toast if enabled
-                if (store.Contains("notifyMe"))
-                {
-                    if ((bool)store["notifyMe"] == true)
-                    {
-                        var newToast = new Toast();
-                        newToast.sendToast("I updated!");
-                    }
-                }
-
-                //backupWeather();
-
-                //save the time of the last time the app was run
-                store["lastRun"] = DateTime.Now.ToString();
-                store.Save();
-
-                
-
-            }
-            else
-            {
-                //restoreWeather();
-            }
-            if (timesRun == numPins)
-            {
-                NotifyComplete();
             }
         }
 
@@ -350,7 +344,7 @@ namespace ScheduledTaskAgent1
                 Uri[] weatherIcons = getWeatherIcons(weather);
                 normalIcon = weatherIcons[0];
                 smallIcon = weatherIcons[1];
-        
+
                 //convert temps to ints
                 var getTemp = new convertTemp(tempStr);
                 int temp = getTemp.temp;
@@ -393,31 +387,34 @@ namespace ScheduledTaskAgent1
 
                                 };
                                 tile.Update(TileData);
+                                //send toast if enabled
+                                if (store.Contains("notifyMe"))
+                                {
+                                    if ((bool)store["notifyMe"] == true)
+                                    {
+                                        var newToast = new Toast();
+                                        newToast.sendToast("I updated!");
+                                    }
+                                }
+
+                                //save the time of the last time the app was run
+                                store["lastRun"] = DateTime.Now.ToString();
+                                store.Save();
+
+                                //check to see if done updating
                                 timesRun++;
+                                if (timesRun == numPins)
+                                {
+                                    NotifyComplete();
+                                }
+                                break;
 
                             }
                         }
                     }
                 }
-                //send toast if enabled
-                if (store.Contains("notifyMe"))
-                {
-                    if ((bool)store["notifyMe"] == true)
-                    {
-                        var newToast = new Toast();
-                        newToast.sendToast("I updated!");
-                    }
-                }
-                //save the time of the last time the app was run
-                store["lastRun"] = DateTime.Now.ToString();
-                store["locName"] = cityName;
-                store.Save();
+            }
 
-            }
-            if (timesRun == numPins)
-            {
-                NotifyComplete();
-            }
         }
 
         private Uri[] getWeatherIcons(string weather)
@@ -471,7 +468,7 @@ namespace ScheduledTaskAgent1
                 normalIcon = new Uri("/TileImages/Medium/Snow202.png", UriKind.Relative);
                 smallIcon = new Uri("/TileImages/Small/Snow110.png", UriKind.Relative);
             }
-            else if (weatherLower.Contains("sun") || weatherLower.Contains("sunny"))
+            else if (weatherLower.Contains("sun") || weatherLower.Contains("sunny") || weatherLower.Contains("clear"))
             {
                 normalIcon = new Uri("/TileImages/Medium/Sun202.png", UriKind.Relative);
                 smallIcon = new Uri("/TileImages/Small/Sun110.png", UriKind.Relative);
@@ -492,7 +489,7 @@ namespace ScheduledTaskAgent1
                 smallIcon = new Uri("SunCloud110.png", UriKind.Relative);
             }
 
-            Uri[] icons = {normalIcon, smallIcon};
+            Uri[] icons = { normalIcon, smallIcon };
             return icons;
         }
 
