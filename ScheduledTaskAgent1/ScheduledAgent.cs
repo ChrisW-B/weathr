@@ -249,8 +249,9 @@ namespace ScheduledTaskAgent1
                     {
                         foreach (Pins tileData in pinnedList)
                         {
-                            String hello = tile.NavigationUri.ToString().Split('&')[0].Split('=')[1].Split(',')[0];
-                            if ((tile.NavigationUri.ToString().Split('&')[0].Split('=')[1] == cityName && tileData.LocName == cityName) || (tileData.LocName.Split(',')[0].Contains(city) && hello.Contains(city)))
+                            string tileLoc =  tile.NavigationUri.ToString().Split('&')[0].Split('=')[1];
+
+                            if ((tileLoc == cityName && tileData.LocName == cityName) || (tileData.LocName.Split(',')[0].Contains(city) && tileLoc.Split(',')[0].Contains(city) && tileData.LocName.Split(',')[1].Contains(state) && tileLoc.Split(',')[1].Contains(state)))
                             {
                                 IconicTileData TileData = new IconicTileData
                                 {
