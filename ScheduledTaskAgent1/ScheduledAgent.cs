@@ -238,74 +238,10 @@ namespace ScheduledTaskAgent1
                 var getTemp = new convertTemp(tempStr);
                 int temp = getTemp.temp;
 
-                string weatherLower = weather.ToLower();
-
-                if (weatherLower.Contains("overcast"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Cloudy202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Cloudy110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("shower") || weatherLower.Contains("drizzle"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Drizzle202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Drizzle110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("flurry") || weatherLower.Contains("snow shower"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Flurry202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Flurry110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("fog") || weatherLower.Contains("mist") || weatherLower.Contains("haz"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Fog202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Fog110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("freezing"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/FreezingRain202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/FreezingRain110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("cloudy") || weatherLower.Contains("partly") || weatherLower.Contains("mostly"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/PartlyCloudy202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/PartlyCloudy110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("rain"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Rain202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Rain110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("sleet") || weatherLower.Contains("pellet"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Sleet202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Sleet110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("snow") || weatherLower.Contains("blizzard"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Snow202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Snow110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("sun") || weatherLower.Contains("sunny"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Sun202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Sun110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("thunder") || weatherLower.Contains("storm"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Thunder202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Thunder110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("wind"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Wind202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Wind110.png", UriKind.Relative);
-                }
-                else
-                {
-                    normalIcon = new Uri("SunCloud202.png", UriKind.Relative);
-                    smallIcon = new Uri("SunCloud110.png", UriKind.Relative);
-                }
-
+                //get weather icons
+                Uri[] weatherIcons = getWeatherIcons(weather);
+                normalIcon = weatherIcons[0];
+                smallIcon = weatherIcons[1];
 
                 foreach (ShellTile tile in ShellTile.ActiveTiles)
                 {
@@ -409,77 +345,16 @@ namespace ScheduledTaskAgent1
                     tomorrowLow = (string)tomorrow.Element("low").Element("fahrenheit");
                 }
 
-                string weatherLower = weather.ToLower();
-
-                if (weatherLower.Contains("overcast"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Cloudy202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Cloudy110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("shower") || weatherLower.Contains("drizzle"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Drizzle202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Drizzle110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("flurry") || weatherLower.Contains("snow shower"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Flurry202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Flurry110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("fog") || weatherLower.Contains("mist") || weatherLower.Contains("haz"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Fog202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Fog110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("freezing"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/FreezingRain202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/FreezingRain110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("cloudy") || weatherLower.Contains("partly") || weatherLower.Contains("mostly"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/PartlyCloudy202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/PartlyCloudy110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("rain"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Rain202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Rain110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("sleet") || weatherLower.Contains("pellet"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Sleet202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Sleet110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("snow") || weatherLower.Contains("blizzard"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Snow202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Snow110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("sun") || weatherLower.Contains("sunny"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Sun202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Sun110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("thunder") || weatherLower.Contains("storm"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Thunder202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Thunder110.png", UriKind.Relative);
-                }
-                else if (weatherLower.Contains("wind"))
-                {
-                    normalIcon = new Uri("/TileImages/Medium/Wind202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Wind110.png", UriKind.Relative);
-                }
-                else
-                {
-                    normalIcon = new Uri("SunCloud202.png", UriKind.Relative);
-                    smallIcon = new Uri("SunCloud110.png", UriKind.Relative);
-                }
-    
+                //get weather icons
+                Uri[] weatherIcons = getWeatherIcons(weather);
+                normalIcon = weatherIcons[0];
+                smallIcon = weatherIcons[1];
+        
                 //convert temps to ints
                 var getTemp = new convertTemp(tempStr);
                 int temp = getTemp.temp;
+
+
                 foreach (ShellTile tile in ShellTile.ActiveTiles)
                 {
                     if (tile.NavigationUri.OriginalString == "/")
@@ -542,6 +417,82 @@ namespace ScheduledTaskAgent1
             {
                 NotifyComplete();
             }
+        }
+
+        private Uri[] getWeatherIcons(string weather)
+        {
+            Uri normalIcon;
+            Uri smallIcon;
+            string weatherLower = weather.ToLower();
+
+            if (weatherLower.Contains("overcast"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Cloudy202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Cloudy110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("shower") || weatherLower.Contains("drizzle") || weatherLower.Contains("light rain"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Drizzle202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Drizzle110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("flurry") || weatherLower.Contains("snow shower"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Flurry202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Flurry110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("fog") || weatherLower.Contains("mist") || weatherLower.Contains("haz"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Fog202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Fog110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("freezing"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/FreezingRain202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/FreezingRain110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("cloudy") || weatherLower.Contains("partly") || weatherLower.Contains("mostly"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/PartlyCloudy202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/PartlyCloudy110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("rain"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Rain202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Rain110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("sleet") || weatherLower.Contains("pellet"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Sleet202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Sleet110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("snow") || weatherLower.Contains("blizzard"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Snow202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Snow110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("sun") || weatherLower.Contains("sunny"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Sun202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Sun110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("thunder") || weatherLower.Contains("storm"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Thunder202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Thunder110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("wind"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Wind202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Wind110.png", UriKind.Relative);
+            }
+            else
+            {
+                normalIcon = new Uri("SunCloud202.png", UriKind.Relative);
+                smallIcon = new Uri("SunCloud110.png", UriKind.Relative);
+            }
+
+            Uri[] icons = {normalIcon, smallIcon};
+            return icons;
         }
 
         private void checkUnits()
