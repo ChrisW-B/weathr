@@ -1,5 +1,4 @@
-﻿#define DEBUG_AGENT
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -584,10 +583,6 @@ namespace WeatherLock
             {
                 ScheduledActionService.Add(periodicTask);
                 PeriodicStackPanel.DataContext = periodicTask;
-
-#if(DEBUG_AGENT)
-                ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
-#endif
             }
             catch (InvalidOperationException exception)
             {
@@ -682,7 +677,7 @@ namespace WeatherLock
         private void updateData()
         {
             //Testing Key
-            apiKey = "fb1dd3f4321d048d";
+            //apiKey = "fb1dd3f4321d048d";
 
             checkLocation();
             checkUnits();
