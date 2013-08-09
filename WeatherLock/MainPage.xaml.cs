@@ -95,6 +95,7 @@ namespace WeatherLock
             //Testing Key
             apiKey = "fb1dd3f4321d048d";
             noParams();
+            setUnits();
             restoreWeather();
             getFlickrPic();
             this.clock = new Clock(this);
@@ -130,7 +131,7 @@ namespace WeatherLock
                 noParams();
             }
 
-            setUnits();
+
             checkUpdated();
             updateAlerts();
             showAd();
@@ -379,6 +380,7 @@ namespace WeatherLock
         private void checkUpdated()
         {
             setURL();
+            setUnits();
             if (!isTrial)
             {
                 if (store.Contains("lastUpdated"))
@@ -539,7 +541,6 @@ namespace WeatherLock
         {
             //Convert weather text to caps
             weather = weather.ToUpper();
-
             //Restore all the data
             title.Title = cityName;
             if (tempUnit == "c")
