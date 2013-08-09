@@ -937,12 +937,15 @@ namespace WeatherLock
         {
             WebBrowserTask webBrowser = new WebBrowserTask();
             var x = alertListBox.SelectedIndex;
-            var alertArray = results.ToArray()[x];
-            var url = alertArray.TextUrl;
-            if (url != null)
+            if (x != -1)
             {
-                webBrowser.Uri = new Uri(url);
-                webBrowser.Show();
+                var alertArray = results.ToArray()[x];
+                var url = alertArray.TextUrl;
+                if (url != null)
+                {
+                    webBrowser.Uri = new Uri(url);
+                    webBrowser.Show();
+                }
             }
 
         }

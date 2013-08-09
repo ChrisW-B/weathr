@@ -295,7 +295,7 @@ namespace ScheduledTaskAgent1
             {
                 //restoreWeather();
             }
-            if (timesRun > numPins)
+            if (timesRun == numPins)
             {
                 NotifyComplete();
             }
@@ -413,7 +413,7 @@ namespace ScheduledTaskAgent1
                 store.Save();
 
             }
-            if (timesRun > numPins)
+            if (timesRun == numPins)
             {
                 NotifyComplete();
             }
