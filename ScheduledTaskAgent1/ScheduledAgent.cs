@@ -283,8 +283,15 @@ namespace ScheduledTaskAgent1
                                 store.Save();
 
                                 //check to see if done updating
-                                timesRun++;
-                                if (timesRun == numPins)
+                                try
+                                {
+                                    timesRun++;
+                                    if (timesRun == numPins)
+                                    {
+                                        NotifyComplete();
+                                    }
+                                }
+                                catch(InvalidOperationException err)
                                 {
                                     NotifyComplete();
                                 }
@@ -368,7 +375,19 @@ namespace ScheduledTaskAgent1
 
                             };
                             tile.Update(TileData);
-                            timesRun++;
+                            try
+                            {
+                                timesRun++;
+                                if (timesRun == numPins)
+                                {
+                                    NotifyComplete();
+                                }
+                            }
+                            catch (InvalidOperationException err)
+                            {
+                                NotifyComplete();
+                            }
+                            break;
 
                         }
                         else if (store.Contains("defaultLocation"))
@@ -402,8 +421,15 @@ namespace ScheduledTaskAgent1
                                 store.Save();
 
                                 //check to see if done updating
-                                timesRun++;
-                                if (timesRun == numPins)
+                                try
+                                {
+                                    timesRun++;
+                                    if (timesRun == numPins)
+                                    {
+                                        NotifyComplete();
+                                    }
+                                }
+                                catch (InvalidOperationException err)
                                 {
                                     NotifyComplete();
                                 }
