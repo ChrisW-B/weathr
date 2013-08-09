@@ -267,8 +267,8 @@ namespace ScheduledTaskAgent1
                 }
                 else if (weatherLower.Contains("cloudy") || weatherLower.Contains("partly") || weatherLower.Contains("mostly"))
                 {
-                    normalIcon = new Uri("/TileImages/Medium/Flurry202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Flurry110.png", UriKind.Relative);
+                    normalIcon = new Uri("/TileImages/Medium/PartlyCloudy202.png", UriKind.Relative);
+                    smallIcon = new Uri("/TileImages/Small/PartlyCloudy110.png", UriKind.Relative);
                 }
                 else if (weatherLower.Contains("rain"))
                 {
@@ -438,8 +438,8 @@ namespace ScheduledTaskAgent1
                 }
                 else if (weatherLower.Contains("cloudy") || weatherLower.Contains("partly") || weatherLower.Contains("mostly"))
                 {
-                    normalIcon = new Uri("/TileImages/Medium/Flurry202.png", UriKind.Relative);
-                    smallIcon = new Uri("/TileImages/Small/Flurry110.png", UriKind.Relative);
+                    normalIcon = new Uri("/TileImages/Medium/PartlyCloudy202.png", UriKind.Relative);
+                    smallIcon = new Uri("/TileImages/Small/PartlyCloudy110.png", UriKind.Relative);
                 }
                 else if (weatherLower.Contains("rain"))
                 {
