@@ -70,7 +70,7 @@
                                         <ImageBrush ImageSource="{Binding ImageSource}"/>
                                     </Rectangle.OpacityMask>
                                 </Rectangle>
-                                
+
                                 <StackPanel Width="370">
                                     <ListBoxItem x:Name="locationName"
                                        Content="{Binding LocName}"
@@ -111,29 +111,31 @@
             <!--Pivot item 4-->
             <phone:PivotItem Header="tile and lock">
                 <Grid>
-                    <StackPanel  Orientation="Vertical" Name="PeriodicStackPanel" Margin="0,0,0,40">
-                        <StackPanel>
-                            <CheckBox Content="Update in Background" x:Name="PeriodicCheckBox" IsChecked="{Binding IsEnabled}" Checked="PeriodicCheckBox_Checked" Unchecked="PeriodicCheckBox_Unchecked"/>
-                            <toolkit:ListPicker MouseLeftButtonDown="UpdateBox_MouseLeftButtonDown" SelectedIndex="{Binding selectedItem}" SelectionChanged="UpdateBox_SelectionChanged" Name="UpdateBox" Header="Update Every:" FullModeHeader="CHOOSE UPDATE RATE">
-                                <toolkit:ListPickerItem Name="twelve" Content="12 Hours"/>
-                                <toolkit:ListPickerItem Name="six" Content="6 Hours"/>
-                                <toolkit:ListPickerItem Name="three" Content="3 Hours"/>
-                                <toolkit:ListPickerItem Name="one" Content="1 Hour"/>
-                                <toolkit:ListPickerItem Name="thirty" Content="30 Minutes"/>
-                            </toolkit:ListPicker>
-                            <StackPanel Orientation="Vertical">
-                                <CheckBox Name="notifyMe" Content="Notify When Updated" IsChecked="{Binding IsEnabled}" Checked="notifyMe_Checked" Unchecked="notifyMe_Unchecked"/>
-                                <CheckBox Name="HiLo" Content="Alert if Temp is above 100 or below 1" IsChecked="{Binding IsEnabled}" Checked="HiLo_Checked" Unchecked="HiLo_Unchecked"/>
+                    <ScrollViewer>
+                        <StackPanel  Orientation="Vertical" Name="PeriodicStackPanel" Margin="0,0,0,40">
+                            <StackPanel>
+                                <CheckBox Content="Update in Background" x:Name="PeriodicCheckBox" IsChecked="{Binding IsEnabled}" Checked="PeriodicCheckBox_Checked" Unchecked="PeriodicCheckBox_Unchecked"/>
+                                <toolkit:ListPicker MouseLeftButtonDown="UpdateBox_MouseLeftButtonDown" SelectedIndex="{Binding selectedItem}" SelectionChanged="UpdateBox_SelectionChanged" Name="UpdateBox" Header="Update Every:" FullModeHeader="CHOOSE UPDATE RATE">
+                                    <toolkit:ListPickerItem Name="twelve" Content="12 Hours"/>
+                                    <toolkit:ListPickerItem Name="six" Content="6 Hours"/>
+                                    <toolkit:ListPickerItem Name="three" Content="3 Hours"/>
+                                    <toolkit:ListPickerItem Name="one" Content="1 Hour"/>
+                                    <toolkit:ListPickerItem Name="thirty" Content="30 Minutes"/>
+                                </toolkit:ListPicker>
+                                <StackPanel Orientation="Vertical">
+                                    <CheckBox Name="notifyMe" Content="Notify When Updated" IsChecked="{Binding IsEnabled}" Checked="notifyMe_Checked" Unchecked="notifyMe_Unchecked"/>
+                                    <CheckBox Name="HiLo" Content="Alert if Temp is above 100 or below 1" IsChecked="{Binding IsEnabled}" Checked="HiLo_Checked" Unchecked="HiLo_Unchecked"/>
+                                </StackPanel>
+                                <TextBlock Text="Units" Margin="12,0" Height="40" FontSize="30"/>
+                                <StackPanel x:Name="LockTempUnit" Orientation="Horizontal">
+                                    <RadioButton GroupName="changeTemp"  x:Name="lockCelsius" Content="celsius" Checked="lockCelsius_Checked"  />
+                                    <RadioButton GroupName="changeTemp" x:Name="lockFahrenheit" Content="fahrenheit" Checked="lockFahrenheit_Checked"  />
+                                </StackPanel>
+                                <Button x:Name="UpdateButton" Content="Update Tile" Click="UpdateButton_Click" Margin="0,0,6,0" HorizontalAlignment="Right" Width="450"/>
+                                <Button Name="btnGoToLockSettings"  Content="Lockscreen Settings" Click="btnGoToLockSettings_Click"/>
                             </StackPanel>
-                            <TextBlock Text="Units" Margin="12,0" Height="40" FontSize="30"/>
-                            <StackPanel x:Name="LockTempUnit" Orientation="Horizontal">
-                                <RadioButton GroupName="changeTemp"  x:Name="lockCelsius" Content="celsius" Checked="lockCelsius_Checked"  />
-                                <RadioButton GroupName="changeTemp" x:Name="lockFahrenheit" Content="fahrenheit" Checked="lockFahrenheit_Checked"  />
-                            </StackPanel>
-                            <Button x:Name="UpdateButton" Content="Update Tile" Click="UpdateButton_Click" Margin="0,0,6,0" HorizontalAlignment="Right" Width="450"/>
-                            <Button Name="btnGoToLockSettings"  Content="Lockscreen Settings" Click="btnGoToLockSettings_Click"/>
                         </StackPanel>
-                    </StackPanel>
+                    </ScrollViewer>
                 </Grid>
             </phone:PivotItem>
 
