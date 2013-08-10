@@ -27,10 +27,9 @@ namespace ScheduledTaskAgent1
     {
 
         #region variables
-        //Current Conditions
 
-
-        private int timesRun;
+        //For ending the background task
+        private int numUpdated;
         private int numPins;
 
         private String defaultCityName;
@@ -47,6 +46,14 @@ namespace ScheduledTaskAgent1
         dynamic store = IsolatedStorageSettings.ApplicationSettings;
 
         List<Pins> pinnedList = new List<Pins>();
+
+        public class Pins
+        {
+            public string LocName;
+            public string LocUrl;
+            public bool currentLoc;
+            public bool updated;
+        }
         #endregion
 
 
@@ -69,9 +76,12 @@ namespace ScheduledTaskAgent1
             }
         }
 
+        //Do this stuff first
         protected override void OnInvoke(ScheduledTask task)
         {
+            //For finishing the background task
             numPins = 0;
+
             foreach (ShellTile tile in ShellTile.ActiveTiles)
             {
                 if (tile.NavigationUri.OriginalString != "/")
@@ -81,7 +91,12 @@ namespace ScheduledTaskAgent1
                     string locationName = uriSplit[0].Split('=')[1];
                     string locationUrl = uriSplit[1].Split('=')[1];
                     bool isCurrentLoc = Convert.ToBoolean(uriSplit[2].Split('=')[1]);
-                    pinnedList.Add(new Pins { LocName = locationName, LocUrl = locationUrl, currentLoc = isCurrentLoc });
+                    pinnedList.Add(new Pins { LocName = locationName, LocUrl = locationUrl, currentLoc = isCurrentLoc, updated = false });
+                }
+                else if (tile.NavigationUri.OriginalString == "/")
+                {
+                    string locationName = "default location";
+                    pinnedList.Add(new Pins { LocName = locationName, updated = false });
                 }
                 numPins++;
             }
@@ -166,19 +181,7 @@ namespace ScheduledTaskAgent1
             }
         }
 
-        private void updateOthers()
-        {
-            foreach (Pins pinnedTile in pinnedList)
-            {
-                String pinnedUrl = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast" + pinnedTile.LocUrl + ".xml";
-                checkUnits();
-                var client = new WebClient();
-
-                client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(WeatherStringCallback);
-                client.DownloadStringAsync(new Uri(pinnedUrl));
-            }
-        }
-
+        //Update each type of tile
         private void updateDefault()
         {
             checkLocation();
@@ -188,6 +191,23 @@ namespace ScheduledTaskAgent1
             client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(updateMainTile);
             client.DownloadStringAsync(new Uri(url));
         }
+        private void updateOthers()
+        {
+            foreach (Pins pinnedTile in pinnedList)
+            {
+                if (!pinnedTile.LocName.Contains("default location"))
+                {
+                    String pinnedUrl = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast" + pinnedTile.LocUrl + ".xml";
+                    checkUnits();
+                    var client = new WebClient();
+
+                    client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(WeatherStringCallback);
+                    client.DownloadStringAsync(new Uri(pinnedUrl));
+                }
+            }
+        }
+
+        //Async Calls to get weather data for each tile type
         private void WeatherStringCallback(object sender, DownloadStringCompletedEventArgs e)
         {
 
@@ -282,27 +302,24 @@ namespace ScheduledTaskAgent1
                                 store["lastRun"] = DateTime.Now.ToString();
                                 store.Save();
 
-                                //check to see if done updating
-                                try
+                                //mark the tile as finished updating
+                                for (int x = 0; x < pinnedList.Count; x++)
                                 {
-                                    timesRun++;
-                                    if (timesRun == numPins)
+                                    Pins pin = pinnedList[x];
+                                    if ((pin.LocName == cityName) || (pin.LocName.Split(',')[0].Contains(city) && pin.LocName.Split(',')[1].Contains(state)))
                                     {
-                                        NotifyComplete();
+                                        pin.updated = true;
+                                        break;
                                     }
                                 }
-                                catch(InvalidOperationException err)
-                                {
-                                    NotifyComplete();
-                                }
-                                break;
+
+                                checkFinished();
                             }
                         }
                     }
                 }
             }
         }
-
         private void updateMainTile(object sender, DownloadStringCompletedEventArgs e)
         {
             if (!e.Cancelled && e.Error == null)
@@ -375,20 +392,32 @@ namespace ScheduledTaskAgent1
 
                             };
                             tile.Update(TileData);
-                            try
+
+                            //send toast if enabled
+                            if (store.Contains("notifyMe"))
                             {
-                                timesRun++;
-                                if (timesRun == numPins)
+                                if ((bool)store["notifyMe"] == true)
                                 {
-                                    NotifyComplete();
+                                    var newToast = new Toast();
+                                    newToast.sendToast("I updated!");
                                 }
                             }
-                            catch (InvalidOperationException err)
-                            {
-                                NotifyComplete();
-                            }
-                            break;
 
+                            //save the time of the last time the app was run
+                            store["lastRun"] = DateTime.Now.ToString();
+                            store.Save();
+
+                            for (int x = 0; x < pinnedList.Count; x++)
+                            {
+                                Pins pin = pinnedList[x];
+                                if (pin.LocName == "default location")
+                                {
+                                    pin.updated = true;
+                                    break;
+                                }
+                            }
+
+                            checkFinished();
                         }
                         else if (store.Contains("defaultLocation"))
                         {
@@ -406,6 +435,17 @@ namespace ScheduledTaskAgent1
 
                                 };
                                 tile.Update(TileData);
+
+                                //send toast if enabled
+                                if (store.Contains("notifyMe"))
+                                {
+                                    if ((bool)store["notifyMe"] == true)
+                                    {
+                                        var newToast = new Toast();
+                                        newToast.sendToast("I updated!");
+                                    }
+                                }
+
                                 //send toast if enabled
                                 if (store.Contains("notifyMe"))
                                 {
@@ -420,36 +460,37 @@ namespace ScheduledTaskAgent1
                                 store["lastRun"] = DateTime.Now.ToString();
                                 store.Save();
 
-                                //check to see if done updating
-                                try
+                                for (int x = 0; x < pinnedList.Count; x++)
                                 {
-                                    timesRun++;
-                                    if (timesRun == numPins)
+                                    Pins pin = pinnedList[x];
+                                    if (pin.LocName == "default location")
                                     {
-                                        NotifyComplete();
+                                        pin.updated = true;
+                                        break;
                                     }
                                 }
-                                catch (InvalidOperationException err)
-                                {
-                                    NotifyComplete();
-                                }
-                                break;
-
+                                checkFinished();
                             }
                         }
                     }
                 }
             }
-
         }
 
+
+        //get weather icon Uri for tiles
         private Uri[] getWeatherIcons(string weather)
         {
             Uri normalIcon;
             Uri smallIcon;
             string weatherLower = weather.ToLower();
 
-            if (weatherLower.Contains("overcast"))
+            if (weatherLower.Contains("thunder") || weatherLower.Contains("storm"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Thunder202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Thunder110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("overcast"))
             {
                 normalIcon = new Uri("/TileImages/Medium/Cloudy202.png", UriKind.Relative);
                 smallIcon = new Uri("/TileImages/Small/Cloudy110.png", UriKind.Relative);
@@ -474,7 +515,7 @@ namespace ScheduledTaskAgent1
                 normalIcon = new Uri("/TileImages/Medium/FreezingRain202.png", UriKind.Relative);
                 smallIcon = new Uri("/TileImages/Small/FreezingRain110.png", UriKind.Relative);
             }
-            else if (weatherLower.Contains("cloudy") || weatherLower.Contains("partly") || weatherLower.Contains("mostly"))
+            else if (weatherLower.Contains("cloudy") || weatherLower.Contains("partly") || weatherLower.Contains("mostly") || weatherLower.Contains("clouds"))
             {
                 normalIcon = new Uri("/TileImages/Medium/PartlyCloudy202.png", UriKind.Relative);
                 smallIcon = new Uri("/TileImages/Small/PartlyCloudy110.png", UriKind.Relative);
@@ -499,11 +540,6 @@ namespace ScheduledTaskAgent1
                 normalIcon = new Uri("/TileImages/Medium/Sun202.png", UriKind.Relative);
                 smallIcon = new Uri("/TileImages/Small/Sun110.png", UriKind.Relative);
             }
-            else if (weatherLower.Contains("thunder") || weatherLower.Contains("storm"))
-            {
-                normalIcon = new Uri("/TileImages/Medium/Thunder202.png", UriKind.Relative);
-                smallIcon = new Uri("/TileImages/Small/Thunder110.png", UriKind.Relative);
-            }
             else if (weatherLower.Contains("wind"))
             {
                 normalIcon = new Uri("/TileImages/Medium/Wind202.png", UriKind.Relative);
@@ -519,6 +555,7 @@ namespace ScheduledTaskAgent1
             return icons;
         }
 
+        //check unit settings
         private void checkUnits()
         {
             //check what the temp units should be
@@ -540,6 +577,7 @@ namespace ScheduledTaskAgent1
             }
         }
 
+        //check location settings, return location
         private void checkLocation()
         {
             //Check to see if allowed to get location
@@ -576,5 +614,27 @@ namespace ScheduledTaskAgent1
                 url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast" + locUrl + ".xml";
             }
         }
+
+        //call notifyComplete(); if needed
+        private void checkFinished()
+        {
+            numUpdated = 0;
+
+            for (int x = 0; x < pinnedList.Count; x++)
+            {
+                Pins pin = pinnedList[x];
+                if (pin.updated)
+                {
+                    numUpdated++;
+                }
+            }
+
+            if (numUpdated >= numPins)
+            {
+                NotifyComplete();
+            }
+
+        }
     }
 }
+

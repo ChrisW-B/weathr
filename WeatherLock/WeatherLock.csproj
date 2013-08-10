@@ -210,9 +210,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\WPToolkit.4.2013.06.11\lib\wp8\Microsoft.Phone.Controls.Toolkit.dll</HintPath>
     </Reference>
-    <Reference Include="Pinned">
-      <HintPath>..\..\Pinned\Pinned\Bin\Release\Pinned.dll</HintPath>
-    </Reference>
     <Reference Include="System.Windows.Interactivity, Version=3.9.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
   </ItemGroup>
   <ItemGroup>
