@@ -311,13 +311,15 @@ namespace ScheduledTaskAgent1
                                         pin.updated = true;
                                         break;
                                     }
-                                }
-
-                                checkFinished();
+                                }   
                             }
                         }
                     }
                 }
+            }
+            if (finished())
+            {
+                NotifyComplete();
             }
         }
         private void updateMainTile(object sender, DownloadStringCompletedEventArgs e)
@@ -416,8 +418,6 @@ namespace ScheduledTaskAgent1
                                     break;
                                 }
                             }
-
-                            checkFinished();
                         }
                         else if (store.Contains("defaultLocation"))
                         {
@@ -469,11 +469,14 @@ namespace ScheduledTaskAgent1
                                         break;
                                     }
                                 }
-                                checkFinished();
                             }
                         }
                     }
                 }
+            }
+            if (finished())
+            {
+                NotifyComplete();
             }
         }
 
@@ -616,24 +619,18 @@ namespace ScheduledTaskAgent1
         }
 
         //call notifyComplete(); if needed
-        private void checkFinished()
+        private bool finished()
         {
             numUpdated = 0;
 
-            for (int x = 0; x < pinnedList.Count; x++)
+            foreach (Pins pin in pinnedList)
             {
-                Pins pin = pinnedList[x];
-                if (pin.updated)
+                if (!pin.updated)
                 {
-                    numUpdated++;
+                    return false;
                 }
             }
-
-            if (numUpdated >= numPins)
-            {
-                NotifyComplete();
-            }
-
+            return true;
         }
     }
 }
