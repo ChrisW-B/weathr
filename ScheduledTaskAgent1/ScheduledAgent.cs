@@ -27,11 +27,6 @@ namespace ScheduledTaskAgent1
     {
 
         #region variables
-
-        //For ending the background task
-        private int numUpdated;
-        private int numPins;
-
         private String defaultCityName;
         private String tempUnit;
         private String url;
@@ -46,6 +41,7 @@ namespace ScheduledTaskAgent1
         dynamic store = IsolatedStorageSettings.ApplicationSettings;
 
         List<Pins> pinnedList = new List<Pins>();
+        List<Pins> pinnedListCopy = new List<Pins>();
 
         public class Pins
         {
@@ -79,9 +75,6 @@ namespace ScheduledTaskAgent1
         //Do this stuff first
         protected override void OnInvoke(ScheduledTask task)
         {
-            //For finishing the background task
-            numPins = 0;
-
             foreach (ShellTile tile in ShellTile.ActiveTiles)
             {
                 if (tile.NavigationUri.OriginalString != "/")
@@ -98,13 +91,12 @@ namespace ScheduledTaskAgent1
                     string locationName = "default location";
                     pinnedList.Add(new Pins { LocName = locationName, updated = false });
                 }
-                numPins++;
             }
+            pinnedListCopy = pinnedList;
 
 
 
             //updates the app after a selected time
-
             if (store.Contains("lastRun") && store.Contains("updateRate"))
             {
                 //get savedSettingsd time variables
@@ -132,7 +124,7 @@ namespace ScheduledTaskAgent1
                             else
                             {
                                 var toast = new Toast();
-                                toast.sendToast("Please run the app first");
+                                toast.sendToast("Weathr","Please run the app first");
                                 NotifyComplete();
                             }
                             updateDefault();
@@ -168,7 +160,7 @@ namespace ScheduledTaskAgent1
                         else
                         {
                             var toast = new Toast();
-                            toast.sendToast("Please run the app first");
+                            toast.sendToast("Weathr", "Please run the app first");
                             NotifyComplete();
                         }
                         updateDefault();
@@ -179,6 +171,9 @@ namespace ScheduledTaskAgent1
                     }
                 }
             }
+            //save the time of the last time the app was run
+            store["lastRun"] = DateTime.Now.ToString();
+            store.Save();
         }
 
         //Update each type of tile
@@ -267,12 +262,14 @@ namespace ScheduledTaskAgent1
                 {
                     if (tile.NavigationUri.ToString() != "/")
                     {
-                        foreach (Pins tileData in pinnedList)
+                        foreach (Pins pin in pinnedList)
                         {
+                            //get name and location from tile url
                             string tileLoc = tile.NavigationUri.ToString().Split('&')[0].Split('=')[1];
 
-                            if ((tileLoc == cityName && tileData.LocName == cityName) || (tileData.LocName.Split(',')[0].Contains(city) && tileLoc.Split(',')[0].Contains(city) && tileData.LocName.Split(',')[1].Contains(state) && tileLoc.Split(',')[1].Contains(state)))
+                            if ((tileLoc == cityName && pin.LocName == cityName) || (pin.LocName.Split(',')[0].Contains(city) && tileLoc.Split(',')[0].Contains(city) && pin.LocName.Split(',')[1].Contains(state) && tileLoc.Split(',')[1].Contains(state)))
                             {
+                                //Update Tile
                                 IconicTileData TileData = new IconicTileData
                                 {
                                     IconImage = normalIcon,
@@ -284,43 +281,29 @@ namespace ScheduledTaskAgent1
                                     WideContent3 = string.Format("Tomorrow: " + forecastTomorrow + " " + tomorrowHigh + "/" + tomorrowLow)
 
                                 };
-
-
                                 tile.Update(TileData);
 
-                                //send toast if enabled
-                                if (store.Contains("notifyMe"))
-                                {
-                                    if ((bool)store["notifyMe"] == true)
-                                    {
-                                        var newToast = new Toast();
-                                        newToast.sendToast("I updated!");
-                                    }
-                                }
-
-                                //save the time of the last time the app was run
-                                store["lastRun"] = DateTime.Now.ToString();
-                                store.Save();
-
                                 //mark the tile as finished updating
-                                for (int x = 0; x < pinnedList.Count; x++)
-                                {
-                                    Pins pin = pinnedList[x];
-                                    if ((pin.LocName == cityName) || (pin.LocName.Split(',')[0].Contains(city) && pin.LocName.Split(',')[1].Contains(state)))
-                                    {
-                                        pin.updated = true;
-                                        break;
-                                    }
-                                }   
+                                markUpdated(cityName, city, state);
+
+                                //send toast if enabled
+                                sendToast(cityName);
+
+                                //stop looping
+                                break;
                             }
                         }
                     }
                 }
+                if (finished())
+                {
+                    NotifyComplete();
+                }
             }
-            if (finished())
+            else
             {
                 NotifyComplete();
-            }
+            }  
         }
         private void updateMainTile(object sender, DownloadStringCompletedEventArgs e)
         {
@@ -395,29 +378,14 @@ namespace ScheduledTaskAgent1
                             };
                             tile.Update(TileData);
 
-                            //send toast if enabled
-                            if (store.Contains("notifyMe"))
-                            {
-                                if ((bool)store["notifyMe"] == true)
-                                {
-                                    var newToast = new Toast();
-                                    newToast.sendToast("I updated!");
-                                }
-                            }
+                            //mark tile as updated
+                            markUpdated("default location", city, state);
 
-                            //save the time of the last time the app was run
-                            store["lastRun"] = DateTime.Now.ToString();
-                            store.Save();
+                            //send a toast to tell that it has updated
+                            sendToast(cityName);
 
-                            for (int x = 0; x < pinnedList.Count; x++)
-                            {
-                                Pins pin = pinnedList[x];
-                                if (pin.LocName == "default location")
-                                {
-                                    pin.updated = true;
-                                    break;
-                                }
-                            }
+                            //stop looping
+                            break;
                         }
                         else if (store.Contains("defaultLocation"))
                         {
@@ -436,50 +404,41 @@ namespace ScheduledTaskAgent1
                                 };
                                 tile.Update(TileData);
 
-                                //send toast if enabled
-                                if (store.Contains("notifyMe"))
-                                {
-                                    if ((bool)store["notifyMe"] == true)
-                                    {
-                                        var newToast = new Toast();
-                                        newToast.sendToast("I updated!");
-                                    }
-                                }
+                                //mark tile as updated
+                                markUpdated("default location", city, state);
 
-                                //send toast if enabled
-                                if (store.Contains("notifyMe"))
-                                {
-                                    if ((bool)store["notifyMe"] == true)
-                                    {
-                                        var newToast = new Toast();
-                                        newToast.sendToast("I updated!");
-                                    }
-                                }
+                                //send a toast to tell that it has updated
+                                sendToast(cityName);
 
-                                //save the time of the last time the app was run
-                                store["lastRun"] = DateTime.Now.ToString();
-                                store.Save();
-
-                                for (int x = 0; x < pinnedList.Count; x++)
-                                {
-                                    Pins pin = pinnedList[x];
-                                    if (pin.LocName == "default location")
-                                    {
-                                        pin.updated = true;
-                                        break;
-                                    }
-                                }
+                                //stop looping
+                                break;
                             }
                         }
                     }
                 }
+                if (finished())
+                {
+                    NotifyComplete();
+                }
             }
-            if (finished())
+            else
             {
                 NotifyComplete();
             }
         }
 
+        private void sendToast(string cityName)
+        {
+            //send toast if enabled
+            if (store.Contains("notifyMe"))
+            {
+                if ((bool)store["notifyMe"] == true)
+                {
+                    var newToast = new Toast();
+                    newToast.sendToast(cityName , " has been updated!");
+                }
+            }
+        }
 
         //get weather icon Uri for tiles
         private Uri[] getWeatherIcons(string weather)
@@ -618,14 +577,25 @@ namespace ScheduledTaskAgent1
             }
         }
 
-        //call notifyComplete(); if needed
+        //mark a tile as updated
+        private void markUpdated(string cityName, string city, string state)
+        {
+            foreach (Pins pin in pinnedListCopy)
+            {
+                if ((pin.LocName == cityName) || (pin.LocName.Split(',')[0].Contains(city) && pin.LocName.Split(',')[1].Contains(state)))
+                {
+                    pin.updated = true;
+                    break;
+                }
+            }
+        }
+
+        //check if all tiles have been updated
         private bool finished()
         {
-            numUpdated = 0;
-
-            foreach (Pins pin in pinnedList)
+            foreach (Pins pin in pinnedListCopy)
             {
-                if (!pin.updated)
+                if (pin.updated == false)
                 {
                     return false;
                 }

@@ -14,6 +14,7 @@ namespace ScheduledTaskAgent1
         {
             tempCon(tempStr);
         }
+
         private void tempCon(string tempStr)
         {
             //convert temp into integer
@@ -31,7 +32,7 @@ namespace ScheduledTaskAgent1
                         if ((bool)store["tempAlert"])
                         {
                             var toastMessage = new Toast();
-                            toastMessage.sendToast("Temp over 99");
+                            toastMessage.sendToast("Weathr", "Temp over 99");
                         }
                     }
                     temp = 99;
@@ -43,7 +44,7 @@ namespace ScheduledTaskAgent1
                         if ((bool)store["tempAlert"])
                         {
                             var toastMessage = new Toast();
-                            toastMessage.sendToast("Temp below 1");
+                            toastMessage.sendToast("Weathr", "Temp below 1");
                         }
                     }
                     temp = 1;
@@ -51,11 +52,11 @@ namespace ScheduledTaskAgent1
             }
             catch (FormatException e)
             {
-                newToast.sendToast("Not a sequence of Digits");
+                newToast.sendToast("Weathr", "Not a sequence of Digits");
             }
             catch (OverflowException e)
             {
-                newToast.sendToast("Cannot fit into Int32");
+                newToast.sendToast("Weathr", "Cannot fit into Int32");
             }
         }
     }

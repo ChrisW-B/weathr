@@ -11,10 +11,10 @@ namespace ScheduledTaskAgent1
 {
     class Toast
     {
-        public void sendToast(string toastMessage)
+        public void sendToast(string toastTitle, string toastMessage)
         {
             ShellToast toast = new ShellToast();
-            toast.Title = "LockscreenWeather";
+            toast.Title = toastTitle;
             toast.Content = toastMessage;
             toast.Show();
         }

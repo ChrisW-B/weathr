@@ -581,7 +581,7 @@ namespace WeatherLock
                 ScheduledActionService.Add(periodicTask);
                 PeriodicStackPanel.DataContext = periodicTask;
 //#if(DEBUG_AGENT)
-                //ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
+  //              ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
 //#endif
 
             }
