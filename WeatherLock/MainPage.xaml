@@ -8,13 +8,14 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:my="clr-namespace:Microsoft.Advertising.Mobile.UI;assembly=Microsoft.Advertising.Mobile.UI"
+    xmlns:maps="clr-namespace:Microsoft.Phone.Maps.Controls;assembly=Microsoft.Phone.Maps"
     mc:Ignorable="d"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="White"
     SupportedOrientations="Portrait"  Orientation="Portrait" shell:SystemTray.ForegroundColor="LightGray"
     >
-    
+
     <toolkit:TransitionService.NavigationInTransition>
         <toolkit:NavigationInTransition>
             <toolkit:NavigationInTransition.Backward>
@@ -36,7 +37,7 @@
         </toolkit:NavigationOutTransition>
     </toolkit:TransitionService.NavigationOutTransition>
 
-    
+
     <!--LayoutRoot contains the root grid where all other page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Black">
         <Grid.RowDefinitions>
@@ -45,70 +46,77 @@
         </Grid.RowDefinitions>
         <phone:Panorama Background="{Binding}"  Name="title" Title="location" TitleTemplate="{StaticResource smallTitle}" HeaderTemplate="{StaticResource smallHeader}" Grid.RowSpan="2">
 
-                <!--Panorama item one-->
-                <phone:PanoramaItem Header="now">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="11*"/>
-                            <ColumnDefinition Width="9*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Name="temp" Text="000.0°"  FontFamily="Segoe WP Light" FontSize="100" Margin="0,0,159,0" VerticalAlignment="Top" Height="87" Width="261" HorizontalAlignment="Right" Foreground="White" TextAlignment="Right" Grid.ColumnSpan="2" LineStackingStrategy="BlockLineHeight" LineHeight="90" TextOptions.TextHintingMode="Animated"/>
-                        <TextBlock Name="conditions" Text="CURRENT CONDITIONS HERE" Margin="-13,87,10,0" Height="87" TextOptions.TextHintingMode="Animated" FontSize="36" FontFamily="Segoe WP Black" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Top" LineHeight="30" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" Width="234" Foreground="White" TextAlignment="Right"/>
-                        <TextBlock Name="feelsLike" Text="Feels Like: 000.0°" HorizontalAlignment="Left" Margin="35,0,-15,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="32" Width="169" Foreground="White" FontFamily="Segoe WP" FontSize="22" Grid.Column="1" LineStackingStrategy="BlockLineHeight" LineHeight="30" TextOptions.TextHintingMode="Animated" TextTrimming="WordEllipsis"/>
-                        <TextBlock Name="wind" HorizontalAlignment="Left" Margin="35,32,0,0" TextWrapping="Wrap" Text="Wind: 00 mph N" VerticalAlignment="Top" RenderTransformOrigin="-0.491,1.49" Height="55" Width="154" Foreground="White" FontSize="22" Grid.Column="1" LineStackingStrategy="BlockLineHeight" LineHeight="22" TextOptions.TextHintingMode="Animated"/>
-                        <TextBlock Name="humidity" Text="Humidty: 000%" Grid.Column="1" HorizontalAlignment="Left" Margin="35,79,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="34" Width="154" Foreground="White" FontSize="22" LineStackingStrategy="BlockLineHeight" LineHeight="22"/>
-                        <TextBlock Name="tempCompare" Text="TOMORROW WILL BE ABOUT THE SAME AS TODAY" Margin="0,174,0,342" TextWrapping="Wrap" FontSize="24" Grid.ColumnSpan="2" FontWeight="Bold" TextAlignment="Right" LineStackingStrategy="BlockLineHeight" LineHeight="24" Foreground="White"/>
-                        <TextBlock Name="time" HorizontalAlignment="Left" Margin="10,-92,0,0" TextWrapping="Wrap" Text="00:00" VerticalAlignment="Top" Height="69" Width="179" Foreground="White" FontSize="40" LineStackingStrategy="BlockLineHeight" TextAlignment="Right" LineHeight="50" Grid.Column="1"/>
-                    </Grid>
-                </phone:PanoramaItem>
+            <!--Panorama item one-->
+            <phone:PanoramaItem Header="now">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="11*"/>
+                        <ColumnDefinition Width="9*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Name="temp" Text="000.0°"  FontFamily="Segoe WP Light" FontSize="100" Margin="0,0,159,0" VerticalAlignment="Top" Height="87" Width="261" HorizontalAlignment="Right" Foreground="White" TextAlignment="Right" Grid.ColumnSpan="2" LineStackingStrategy="BlockLineHeight" LineHeight="90" TextOptions.TextHintingMode="Animated"/>
+                    <TextBlock Name="conditions" Text="CURRENT CONDITIONS HERE" Margin="-13,87,10,0" Height="87" TextOptions.TextHintingMode="Animated" FontSize="36" FontFamily="Segoe WP Black" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Top" LineHeight="30" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" Width="234" Foreground="White" TextAlignment="Right"/>
+                    <TextBlock Name="feelsLike" Text="Feels Like: 000.0°" HorizontalAlignment="Left" Margin="35,0,-15,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="32" Width="169" Foreground="White" FontFamily="Segoe WP" FontSize="22" Grid.Column="1" LineStackingStrategy="BlockLineHeight" LineHeight="30" TextOptions.TextHintingMode="Animated" TextTrimming="WordEllipsis"/>
+                    <TextBlock Name="wind" HorizontalAlignment="Left" Margin="35,32,0,0" TextWrapping="Wrap" Text="Wind: 00 mph N" VerticalAlignment="Top" RenderTransformOrigin="-0.491,1.49" Height="55" Width="154" Foreground="White" FontSize="22" Grid.Column="1" LineStackingStrategy="BlockLineHeight" LineHeight="22" TextOptions.TextHintingMode="Animated"/>
+                    <TextBlock Name="humidity" Text="Humidty: 000%" Grid.Column="1" HorizontalAlignment="Left" Margin="35,79,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="34" Width="154" Foreground="White" FontSize="22" LineStackingStrategy="BlockLineHeight" LineHeight="22"/>
+                    <TextBlock Name="tempCompare" Text="TOMORROW WILL BE ABOUT THE SAME AS TODAY" Margin="0,174,0,342" TextWrapping="Wrap" FontSize="24" Grid.ColumnSpan="2" FontWeight="Bold" TextAlignment="Right" LineStackingStrategy="BlockLineHeight" LineHeight="24" Foreground="White"/>
+                    <TextBlock Name="time" HorizontalAlignment="Left" Margin="10,-92,0,0" TextWrapping="Wrap" Text="00:00" VerticalAlignment="Top" Height="69" Width="179" Foreground="White" FontSize="40" LineStackingStrategy="BlockLineHeight" TextAlignment="Right" LineHeight="50" Grid.Column="1"/>
+                </Grid>
+            </phone:PanoramaItem>
 
-                <!--Panorama item two-->
-                <phone:PanoramaItem Header="forecast">
-                    <Grid>
-                        <ListBox x:Name="forecastListBox" Margin="0,0,0,30">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Vertical">
-                                        <TextBlock x:Name="title"
+            <!--Panorama item two-->
+            <phone:PanoramaItem Header="radar">
+                <Grid Name="radarGrid">
+                    
+                </Grid>
+            </phone:PanoramaItem>
+
+            <!--Panorama item three-->
+            <phone:PanoramaItem Header="forecast">
+                <Grid>
+                    <ListBox x:Name="forecastListBox" Margin="0,0,0,30">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock x:Name="title"
                                                Text="{Binding title}" Foreground="White" FontFamily="Segoe WP SemiLight" FontSize="30"
                                                />
-                                        <TextBlock x:Name="forecast"
+                                    <TextBlock x:Name="forecast"
                                     Text="{Binding fcttext}" 
                                            FontSize="20"
                                            Margin="15,0,0,15"
                                            Foreground="White" FontFamily="Segoe UI" TextWrapping="Wrap" TextOptions.TextHintingMode="Animated" HorizontalAlignment="Left" VerticalAlignment="Top"                                          
                                            />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </Grid>
-                </phone:PanoramaItem>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </phone:PanoramaItem>
 
-                <!--Panorama item three-->
-                <phone:PanoramaItem Header="alerts">
-                    <Grid>
-                        <ListBox x:Name="alertListBox" Margin="0,0,0,42" SelectionChanged="alertListBox_SelectionChanged">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock x:Name="entry"
+            <!--Panorama item four-->
+            <phone:PanoramaItem Header="alerts">
+                <Grid>
+                    <ListBox x:Name="alertListBox" Margin="0,0,0,42" SelectionChanged="alertListBox_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="entry"
                                     Text="{Binding Headline}" 
                                            FontSize="32"
                                            Margin="12,0,0,2"
                                            Tag="{Binding TextUrl}" Foreground="White" FontFamily="Segoe UI" LineHeight="48"                                          
                                            >
-                                        </TextBlock>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </Grid>
-                </phone:PanoramaItem>
+                                    </TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </phone:PanoramaItem>
 
-            
+
         </phone:Panorama>
-    <my:AdControl x:Name="adControl" IsAutoRefreshEnabled="True" ApplicationId="ff3b5777-e1f7-4e72-8b9e-300f0093c2db" AdUnitId="137381" Margin="0,548,0,27" Width="480" Grid.Row="1" Height="80" />
+        <my:AdControl x:Name="adControl" IsAutoRefreshEnabled="True" ApplicationId="ff3b5777-e1f7-4e72-8b9e-300f0093c2db" AdUnitId="137381" Margin="0,548,0,27" Width="480" Grid.Row="1" Height="80" />
     </Grid>
 
     <phone:PhoneApplicationPage.ApplicationBar>

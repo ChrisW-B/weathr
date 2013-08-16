@@ -15,6 +15,9 @@ using System.Collections.ObjectModel;
 using Microsoft.Phone.Tasks;
 using Microsoft.Phone.Marketplace;
 using Microsoft.Advertising.Mobile.UI;
+using Microsoft.Phone.Maps.Controls;
+using System.Device.Location;
+using System.Windows.Shapes;
 
 namespace WeatherLock
 {
@@ -93,12 +96,14 @@ namespace WeatherLock
             InitializeComponent();
 
             //Testing Key
-            //apiKey = "fb1dd3f4321d048d";
+            apiKey = "fb1dd3f4321d048d";
 
+            
             noParams();
             setUnits();
             restoreWeather();
             getFlickrPic();
+            createMap();
             this.clock = new Clock(this);
         }
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
@@ -159,7 +164,7 @@ namespace WeatherLock
             }
             else
             {
-                noDefaults(); 
+                noDefaults();
             }
         }
 
@@ -188,6 +193,70 @@ namespace WeatherLock
 
         }
 
+        //Maps Page
+        private void createMap()
+        {
+            
+            if (latitude != null && longitude != null)
+            {
+                Map MyMap = new Map();
+                double lat = Convert.ToDouble(latitude);
+                double lon = Convert.ToDouble(longitude);
+                MyMap.Center = new GeoCoordinate(lat, lon);
+                MyMap.CartographicMode = MapCartographicMode.Road;
+                MyMap.ZoomLevel = 10;
+                showLocation(MyMap);
+                radarGrid.Children.Add(MyMap);
+            }
+            else
+            {
+                findLocation();
+                createMap();
+            }
+
+            
+        }
+
+        private void showLocation(Map MyMap)
+        {
+            if (latitude != null && longitude != null)
+            {
+                //create a triangle
+
+                Polygon triangle = new Polygon();
+                triangle.Fill = new SolidColorBrush(Colors.Black);
+
+                triangle.Points.Add(new Point(0, 0));
+
+                triangle.Points.Add((new Point(40, 0)));
+
+                triangle.Points.Add((new Point(40, 40.0)));
+               
+
+                // Create a MapOverlay to contain the circle.
+                MapOverlay myLocationOverlay = new MapOverlay();
+
+                double lat = Convert.ToDouble(latitude);
+                double lon = Convert.ToDouble(longitude);
+
+                myLocationOverlay.Content = triangle;
+                myLocationOverlay.PositionOrigin = new Point(1, 1);
+                
+                myLocationOverlay.GeoCoordinate = new GeoCoordinate(lat, lon);
+
+                // Create a MapLayer to contain the MapOverlay.
+                MapLayer myLocationLayer = new MapLayer();
+                myLocationLayer.Add(myLocationOverlay);
+
+                // Add the MapLayer to the Map.
+                MyMap.Layers.Add(myLocationLayer);
+            }
+            else 
+            { 
+                findLocation();
+                createMap();
+            }
+        }
 
 
         //Progress Bars
@@ -249,7 +318,7 @@ namespace WeatherLock
             }
 
         }
-        
+
 
         //Check the units to use
         private void setUnits()
@@ -337,7 +406,7 @@ namespace WeatherLock
         //Find the location
         private void findLocation()
         {
-            if (isCurrent && locationSearchTimes<=5)
+            if (isCurrent && locationSearchTimes <= 5)
             {
                 //get location
                 var getLocation = new getLocationMain();
@@ -479,7 +548,7 @@ namespace WeatherLock
         //Getting and Setting Weather data
         private void restoreWeather()
         {
-            
+
             startRestoreProg();
             if ((bool)store.Contains("backupForecast"))
             {
@@ -868,7 +937,7 @@ namespace WeatherLock
                     string photoUrl = "http://farm" + farm + ".staticflickr.com/" + server + "/" + id + "_" + secret + "_b.jpg";
                     Uri photoUri = new Uri(photoUrl);
                     var downloadedPhoto = new BitmapImage(photoUri);
-                   
+
                     ImageBrush imageBrush = new ImageBrush();
                     imageBrush.ImageSource = downloadedPhoto;
                     imageBrush.Opacity = 0.7;
