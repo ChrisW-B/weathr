@@ -13,11 +13,11 @@ using System.Text;
 
 namespace WeatherLock
 {
-    public class CurrentRadar : TileSource
+    public class AnimatedRadar : TileSource
     {
         public const int TILE_SIZE = 256;
 
-        public CurrentRadar()
+        public AnimatedRadar()
             : base(@"http://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/{0}/{1}/{2}.png") { }
 
         public override Uri GetUri(int tilePositionX, int tilePositionY, int tileLevel)

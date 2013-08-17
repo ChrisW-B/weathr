@@ -264,7 +264,7 @@ namespace WeatherLock
         }
         void radarMap_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            NavigationService.Navigate(new Uri("/Radar.xaml", UriKind.Relative));
+            NavigationService.Navigate(new Uri("/Radar.xaml?isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative));
         } 
             //Sat
         private void setupSat()
@@ -332,7 +332,7 @@ namespace WeatherLock
         }
         void satMap_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            NavigationService.Navigate(new Uri("/Sat.xaml", UriKind.Relative));
+            NavigationService.Navigate(new Uri("/Sat.xaml?isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative));
         }
 
 

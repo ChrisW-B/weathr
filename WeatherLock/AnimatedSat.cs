@@ -13,11 +13,11 @@ using System.Text;
 
 namespace WeatherLock
 {
-    public class CurrentSat : TileSource
+    public class AnimatedSat : TileSource
     {
         public const int TILE_SIZE = 256;
 
-        public CurrentSat()
+        public AnimatedSat()
             : base(@"http://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/goes-ir-4km-900913/{0}/{1}/{2}.png") { }
 
         public override Uri GetUri(int tilePositionX, int tilePositionY, int tileLevel)
