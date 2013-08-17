@@ -29,6 +29,7 @@ namespace WeatherLock
         public Radar()
         {
             InitializeComponent();
+            
         }
 
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
@@ -44,6 +45,7 @@ namespace WeatherLock
                 String[] loc = { latitude, longitude };
                 store["loc"] = loc;
             }
+            setupRadar();
         }
 
         private void setupRadar()
@@ -56,7 +58,6 @@ namespace WeatherLock
                 map.Center = new GeoCoordinate(lat, lon);
                 map.CartographicMode = MapCartographicMode.Road;
                 map.ZoomLevel = 5;
-                map.IsEnabled = false;
 
                 showRadarLocation();
                 map.Loaded += addRadar;

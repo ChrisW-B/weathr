@@ -30,6 +30,7 @@ namespace WeatherLock
         public Sat()
         {
             InitializeComponent();
+            
         }
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
@@ -44,6 +45,8 @@ namespace WeatherLock
                 String[] loc = { latitude, longitude };
                 store["loc"] = loc;
             }
+
+            setupSat();
         }
 
         private void setupSat()
@@ -55,7 +58,6 @@ namespace WeatherLock
                 map.Center = new GeoCoordinate(lat, lon);
                 map.CartographicMode = MapCartographicMode.Road;
                 map.ZoomLevel = 5;
-                map.IsEnabled = false;
 
                 showSatLocation();
                 map.Loaded += addSat;
