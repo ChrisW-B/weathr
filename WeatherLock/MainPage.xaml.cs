@@ -18,6 +18,8 @@ using Microsoft.Advertising.Mobile.UI;
 using Microsoft.Phone.Maps.Controls;
 using System.Device.Location;
 using System.Windows.Shapes;
+using Microsoft.Phone.Maps;
+
 
 namespace WeatherLock
 {
@@ -98,12 +100,11 @@ namespace WeatherLock
             //Testing Key
             apiKey = "fb1dd3f4321d048d";
 
-            
+
             noParams();
             setUnits();
             restoreWeather();
             getFlickrPic();
-            createMap();
             this.clock = new Clock(this);
         }
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
@@ -140,6 +141,7 @@ namespace WeatherLock
 
             checkUpdated();
             updateAlerts();
+            createMap();
             showAd();
         }
 
@@ -196,67 +198,72 @@ namespace WeatherLock
         //Maps Page
         private void createMap()
         {
-            
             if (latitude != null && longitude != null)
             {
-                Map MyMap = new Map();
+                
                 double lat = Convert.ToDouble(latitude);
                 double lon = Convert.ToDouble(longitude);
                 MyMap.Center = new GeoCoordinate(lat, lon);
                 MyMap.CartographicMode = MapCartographicMode.Road;
-                MyMap.ZoomLevel = 10;
+
                 showLocation(MyMap);
-                radarGrid.Children.Add(MyMap);
+                MyMap.Loaded += MyMap_Loaded;
             }
             else
             {
                 findLocation();
                 createMap();
             }
+        }
 
+        void MyMap_Loaded(object sender, RoutedEventArgs e)
+        {
+            MapsSettings.ApplicationContext.ApplicationId = "<applicationid>";
+            MapsSettings.ApplicationContext.AuthenticationToken = "<authenticationtoken>";
+
+            TileSource wmsTileSource = new WMSTile();
+            
+
+            MyMap.TileSources.Add(wmsTileSource);
             
         }
-
         private void showLocation(Map MyMap)
         {
-            if (latitude != null && longitude != null)
-            {
-                //create a triangle
 
-                Polygon triangle = new Polygon();
-                triangle.Fill = new SolidColorBrush(Colors.Black);
+            //create a marker
 
-                triangle.Points.Add(new Point(0, 0));
+            Polygon triangle = new Polygon();
+            triangle.Fill = new SolidColorBrush(Colors.Black);
+            triangle.Points.Add((new Point(0, 0)));
+            triangle.Points.Add((new Point(0, 80)));
+            triangle.Points.Add((new Point(40, 80)));
+            triangle.Points.Add((new Point(40, 40)));
 
-                triangle.Points.Add((new Point(40, 0)));
 
-                triangle.Points.Add((new Point(40, 40.0)));
-               
 
-                // Create a MapOverlay to contain the circle.
-                MapOverlay myLocationOverlay = new MapOverlay();
+            ScaleTransform flip = new ScaleTransform();
+            flip.ScaleY = -1;
+            triangle.RenderTransform = flip;
 
-                double lat = Convert.ToDouble(latitude);
-                double lon = Convert.ToDouble(longitude);
+            // Create a MapOverlay to contain the marker
+            MapOverlay myLocationOverlay = new MapOverlay();
 
-                myLocationOverlay.Content = triangle;
-                myLocationOverlay.PositionOrigin = new Point(1, 1);
-                
-                myLocationOverlay.GeoCoordinate = new GeoCoordinate(lat, lon);
+            double lat = Convert.ToDouble(latitude);
+            double lon = Convert.ToDouble(longitude);
 
-                // Create a MapLayer to contain the MapOverlay.
-                MapLayer myLocationLayer = new MapLayer();
-                myLocationLayer.Add(myLocationOverlay);
+            myLocationOverlay.Content = triangle;
+            myLocationOverlay.PositionOrigin = new Point(0, 0);
 
-                // Add the MapLayer to the Map.
-                MyMap.Layers.Add(myLocationLayer);
-            }
-            else 
-            { 
-                findLocation();
-                createMap();
-            }
+            myLocationOverlay.GeoCoordinate = new GeoCoordinate(lat, lon);
+
+            // Create a MapLayer to contain the MapOverlay.
+            MapLayer myLocationLayer = new MapLayer();
+            myLocationLayer.Add(myLocationOverlay);
+
+            // Add the MapLayer to the Map.
+            MyMap.Layers.Add(myLocationLayer);
         }
+        
 
 
         //Progress Bars
@@ -472,6 +479,7 @@ namespace WeatherLock
 
                             updateWeather();
                             getFlickrPic();
+                            createMap();
                             store["lastUpdated"] = DateTime.Now;
                         }
                     }

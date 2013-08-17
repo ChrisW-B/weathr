@@ -66,7 +66,10 @@
             <!--Panorama item two-->
             <phone:PanoramaItem Header="radar">
                 <Grid Name="radarGrid">
-                    
+                    <maps:Map Name="MyMap"
+                              Center="49.320574,16.68942" 
+                     ZoomLevel="14"/>
+
                 </Grid>
             </phone:PanoramaItem>
 

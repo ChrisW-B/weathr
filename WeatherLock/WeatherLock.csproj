@@ -119,6 +119,7 @@
       <DependentUpon>SettingsPivot.xaml</DependentUpon>
     </Compile>
     <Compile Include="updateTileMain.cs" />
+    <Compile Include="WMSTile.cs" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
