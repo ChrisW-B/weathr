@@ -64,12 +64,24 @@
             </phone:PanoramaItem>
 
             <!--Panorama item two-->
-            <phone:PanoramaItem Header="radar">
-                <Grid Name="radarGrid">
-                    <maps:Map Name="MyMap"
-                              Center="49.320574,16.68942" 
-                     ZoomLevel="14"/>
+            <phone:PanoramaItem Header="maps">
+                <Grid>
+                    <Grid>
+                        <StackPanel>
+                            <Rectangle Opacity=".3" Name="radarMapBox" Height="250" Tap="radarMap_Tap" Fill="Black"/>
+                            <Rectangle Opacity=".3" Name="satMapBox" Height="250" Margin="0,20,0,0" Tap="satMap_Tap" Fill="Black" />
+                        </StackPanel>
 
+                        <TextBlock Text="radar" Margin="270,100,32,454" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="30" Tap="radarMap_Tap"/>
+                        <TextBlock Text="satellite" Margin="270,369,32,185" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="30" Tap="satMap_Tap"/>
+                        
+                    </Grid>
+                    <Grid Name="maps">
+                        <StackPanel>
+                            <maps:Map Name="radarMap" Height="250" Width="250" HorizontalAlignment="Left" VerticalAlignment="Top" Tap="radarMap_Tap"/>
+                            <maps:Map Name="satMap" Height="250" Width="250" Margin="0,20,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Tap="satMap_Tap" />
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </phone:PanoramaItem>
 

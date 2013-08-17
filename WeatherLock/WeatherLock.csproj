@@ -97,10 +97,13 @@
     <Compile Include="AddLocation.xaml.cs">
       <DependentUpon>AddLocation.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AnimatedRadar.cs" />
+    <Compile Include="AnimatedSat.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Clock.cs" />
+    <Compile Include="CurrentSat.cs" />
     <Compile Include="getDataMain.cs" />
     <Compile Include="getLocationMain.cs" />
     <Compile Include="convertTempMain.cs" />
@@ -109,17 +112,23 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Radar.xaml.cs">
+      <DependentUpon>Radar.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Resources\AppResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>AppResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Sat.xaml.cs">
+      <DependentUpon>Sat.xaml</DependentUpon>
     </Compile>
     <Compile Include="searchLocation.cs" />
     <Compile Include="SettingsPivot.xaml.cs">
       <DependentUpon>SettingsPivot.xaml</DependentUpon>
     </Compile>
     <Compile Include="updateTileMain.cs" />
-    <Compile Include="WMSTile.cs" />
+    <Compile Include="CurrentRadar.cs" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -135,6 +144,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MainPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Radar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Sat.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

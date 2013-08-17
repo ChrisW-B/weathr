@@ -141,7 +141,8 @@ namespace WeatherLock
 
             checkUpdated();
             updateAlerts();
-            createMap();
+            setupRadar();
+            setupSat();
             showAd();
         }
 
@@ -196,38 +197,36 @@ namespace WeatherLock
         }
 
         //Maps Page
-        private void createMap()
+            //Radar
+        private void setupRadar()
         {
             if (latitude != null && longitude != null)
             {
                 
                 double lat = Convert.ToDouble(latitude);
                 double lon = Convert.ToDouble(longitude);
-                MyMap.Center = new GeoCoordinate(lat, lon);
-                MyMap.CartographicMode = MapCartographicMode.Road;
+                radarMap.Center = new GeoCoordinate(lat, lon);
+                radarMap.CartographicMode = MapCartographicMode.Road;
+                radarMap.ZoomLevel = 5;
+                radarMap.IsEnabled = false;                
 
-                showLocation(MyMap);
-                MyMap.Loaded += MyMap_Loaded;
+                showRadarLocation();
+                radarMap.Loaded += addRadar;
             }
             else
             {
                 findLocation();
-                createMap();
+                setupRadar();
             }
-        }
-
-        void MyMap_Loaded(object sender, RoutedEventArgs e)
+        }             
+        void addRadar(object sender, RoutedEventArgs e)
         {
             MapsSettings.ApplicationContext.ApplicationId = "<applicationid>";
             MapsSettings.ApplicationContext.AuthenticationToken = "<authenticationtoken>";
-
-            TileSource wmsTileSource = new WMSTile();
-            
-
-            MyMap.TileSources.Add(wmsTileSource);
-            
+            TileSource radar = new CurrentRadar();
+            radarMap.TileSources.Add(radar);  
         }
-        private void showLocation(Map MyMap)
+        private void showRadarLocation()
         {
 
             //create a marker
@@ -261,9 +260,80 @@ namespace WeatherLock
             myLocationLayer.Add(myLocationOverlay);
 
             // Add the MapLayer to the Map.
-            MyMap.Layers.Add(myLocationLayer);
+            radarMap.Layers.Add(myLocationLayer);
         }
-        
+        void radarMap_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/Radar.xaml", UriKind.Relative));
+        } 
+            //Sat
+        private void setupSat()
+        {
+            if (latitude != null && longitude != null)
+            {
+                double lat = Convert.ToDouble(latitude);
+                double lon = Convert.ToDouble(longitude);
+                satMap.Center = new GeoCoordinate(lat, lon);
+                satMap.CartographicMode = MapCartographicMode.Road;
+                satMap.ZoomLevel = 5;
+                satMap.IsEnabled = false;
+
+                showSatLocation();
+                satMap.Loaded += addSat;
+            }
+            else
+            {
+                findLocation();
+                setupSat();
+            }
+        }
+        private void addSat(object sender, RoutedEventArgs e)
+        {
+            MapsSettings.ApplicationContext.ApplicationId = "<applicationid>";
+            MapsSettings.ApplicationContext.AuthenticationToken = "<authenticationtoken>";
+            TileSource sat = new CurrentSat();
+            satMap.TileSources.Add(sat); 
+        }
+        private void showSatLocation()
+        {
+
+            //create a marker
+
+            Polygon triangle = new Polygon();
+            triangle.Fill = new SolidColorBrush(Colors.Black);
+            triangle.Points.Add((new Point(0, 0)));
+            triangle.Points.Add((new Point(0, 80)));
+            triangle.Points.Add((new Point(40, 80)));
+            triangle.Points.Add((new Point(40, 40)));
+
+
+
+            ScaleTransform flip = new ScaleTransform();
+            flip.ScaleY = -1;
+            triangle.RenderTransform = flip;
+
+            // Create a MapOverlay to contain the marker
+            MapOverlay myLocationOverlay = new MapOverlay();
+
+            double lat = Convert.ToDouble(latitude);
+            double lon = Convert.ToDouble(longitude);
+
+            myLocationOverlay.Content = triangle;
+            myLocationOverlay.PositionOrigin = new Point(0, 0);
+
+            myLocationOverlay.GeoCoordinate = new GeoCoordinate(lat, lon);
+
+            // Create a MapLayer to contain the MapOverlay.
+            MapLayer myLocationLayer = new MapLayer();
+            myLocationLayer.Add(myLocationOverlay);
+
+            // Add the MapLayer to the Map
+            satMap.Layers.Add(myLocationLayer);
+        }
+        void satMap_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/Sat.xaml", UriKind.Relative));
+        }
 
 
         //Progress Bars
@@ -479,7 +549,7 @@ namespace WeatherLock
 
                             updateWeather();
                             getFlickrPic();
-                            createMap();
+                            setupRadar();
                             store["lastUpdated"] = DateTime.Now;
                         }
                     }
