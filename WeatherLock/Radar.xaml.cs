@@ -13,6 +13,7 @@ using Microsoft.Phone.Maps;
 using Microsoft.Phone.Maps.Controls;
 using System.Device.Location;
 using System.IO.IsolatedStorage;
+using System.Threading;
 
 namespace WeatherLock
 {
@@ -22,9 +23,12 @@ namespace WeatherLock
         String latitude = null;
         String longitude = null;
         int locationSearchTimes;
+        int age;
         bool isCurrent;
 
         dynamic store = IsolatedStorageSettings.ApplicationSettings;
+        List<RadarCache> radarHistory = new List<RadarCache>();
+
         #endregion
         public Radar()
         {
@@ -33,7 +37,7 @@ namespace WeatherLock
         }
 
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
-        { 
+        {
             locationSearchTimes = 0;
 
             base.OnNavigatedTo(e);
@@ -45,6 +49,7 @@ namespace WeatherLock
                 String[] loc = { latitude, longitude };
                 store["loc"] = loc;
             }
+            age = 0;
             setupRadar();
         }
 
@@ -57,7 +62,9 @@ namespace WeatherLock
                 double lon = Convert.ToDouble(longitude);
                 map.Center = new GeoCoordinate(lat, lon);
                 map.CartographicMode = MapCartographicMode.Road;
-                map.ZoomLevel = 5;
+                map.ZoomLevel = 7;
+
+                map.Tap += map_Tap;
 
                 showRadarLocation();
                 map.Loaded += addRadar;
@@ -68,18 +75,152 @@ namespace WeatherLock
                 setupRadar();
             }
         }
+
+        void map_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            //animate();
+        }
         void addRadar(object sender, RoutedEventArgs e)
         {
             MapsSettings.ApplicationContext.ApplicationId = "<applicationid>";
             MapsSettings.ApplicationContext.AuthenticationToken = "<authenticationtoken>";
-            TileSource radar = new AnimatedRadar();
-            map.TileSources.Add(radar);
+
+
+            RadarCache radarCache = new RadarCache();
+            for (int i = 0; i < 51; i = i + 5)
+            {
+                TileSource radar = new AnimatedRadar();
+                string radarAge;
+                if (i == 0)
+                {
+                    radarAge = "nexrad-n0q-900913";
+                }
+                else if (i == 5)
+                {
+                    radarAge = "nexrad-n0q-900913-m05m";
+                }
+                else
+                {
+                    radarAge = "nexrad-n0q-900913-m" + i + "m";
+                }
+                radar.UriFormat = "http://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/" + radarAge + "/{0}/{1}/{2}.png";
+
+                switch (i)
+                {
+                    case 0:
+                        radarCache.current = radar;
+                        break;
+                    case 5:
+                        radarCache.five = radar;
+                        break;
+                    case 10:
+                        radarCache.ten = radar;
+                        break;
+                    case 15:
+                        radarCache.fifteen = radar;
+                        break;
+                    case 20:
+                        radarCache.twenty = radar;
+                        break;
+                    case 25:
+                        radarCache.twentyfive = radar;
+                        break;
+                    case 30:
+                        radarCache.thirty = radar;
+                        break;
+                    case 35:
+                        radarCache.thirtyfive = radar;
+                        break;
+                    case 40:
+                        radarCache.forty = radar;
+                        break;
+                    case 45:
+                        radarCache.fortyfive = radar;
+                        break;
+                    case 50:
+                        radarCache.fifty = radar;
+                        break;
+                }
+            }
+            radarHistory.Add(radarCache);
+            map.TileSources.Add(radarCache.current);
+        }
+
+        private void animate()
+        {
+            foreach (RadarCache radarCache in radarHistory)
+            {
+                
+               // map.TileSources.Remove(map.TileSources.Last());
+
+                TileSource radar = new AnimatedRadar();
+                switch (age)
+                {
+                    case 0:
+                        radar = radarCache.current;
+                        break;
+                    case 5:
+                        radar = radarCache.five;
+                        break;
+                    case 10:
+                        radar = radarCache.ten;
+                        break;
+                    case 15:
+                        radar = radarCache.fifteen;
+                        break;
+                    case 20:
+                        radar = radarCache.twenty;
+                        break;
+                    case 25:
+                        radar = radarCache.twentyfive;
+                        break;
+                    case 30:
+                        radar = radarCache.thirty;
+                        break;
+                    case 35:
+                        radar = radarCache.thirtyfive;
+                        break;
+                    case 40:
+                        radar = radarCache.forty;
+                        break;
+                    case 45:
+                        radar = radarCache.fortyfive;
+                        break;
+                    case 50:
+                        radar = radarCache.fifty;
+                        age = 0;
+                        break;
+                }
+                map.TileSources.Add(radar);
+                age = +5;
+                break;
+            }
+            //System.Threading.Thread.Sleep(500);
+            animate();
+        }
+
+
+
+
+        public class RadarCache
+        {
+            public TileSource current { get; set; }
+            public TileSource five { get; set; }
+            public TileSource ten { get; set; }
+            public TileSource fifteen { get; set; }
+            public TileSource twenty { get; set; }
+            public TileSource twentyfive { get; set; }
+            public TileSource thirty { get; set; }
+            public TileSource thirtyfive { get; set; }
+            public TileSource forty { get; set; }
+            public TileSource fortyfive { get; set; }
+            public TileSource fifty { get; set; }
+
         }
         private void showRadarLocation()
         {
 
             //create a marker
-
             Polygon triangle = new Polygon();
             triangle.Fill = new SolidColorBrush(Colors.Black);
             triangle.Points.Add((new Point(0, 0)));
