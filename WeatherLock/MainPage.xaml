@@ -115,7 +115,7 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock x:Name="entry"
+                                    <TextBlock toolkit:TiltEffect.IsTiltEnabled="True"  x:Name="entry"
                                     Text="{Binding Headline}" 
                                            FontSize="32"
                                            Margin="12,0,0,2"

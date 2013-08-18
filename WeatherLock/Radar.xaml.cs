@@ -64,7 +64,7 @@ namespace WeatherLock
                 map.CartographicMode = MapCartographicMode.Road;
                 map.ZoomLevel = 7;
 
-                map.Tap += map_Tap;
+                //map.Tap += map_Tap;
 
                 showRadarLocation();
                 map.Loaded += addRadar;
