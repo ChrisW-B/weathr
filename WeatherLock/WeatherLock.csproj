@@ -172,6 +172,7 @@
   <ItemGroup>
     <Content Include="Assets\AppBar\add.png" />
     <Content Include="Assets\AppBar\check.png" />
+    <Content Include="Images\appbar.pin.png" />
     <Content Include="Images\Clear.png" />
     <Content Include="Images\favs.png" />
     <Content Include="Images\settings.png" />

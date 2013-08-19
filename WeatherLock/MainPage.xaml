@@ -68,18 +68,18 @@
                 <Grid>
                     <Grid>
                         <StackPanel>
-                            <Rectangle Opacity=".3" Name="radarMapBox" Height="250" Tap="radarMap_Tap" Fill="Black"/>
-                            <Rectangle Opacity=".3" Name="satMapBox" Height="250" Margin="0,20,0,0" Tap="satMap_Tap" Fill="Black" />
+                            <Rectangle toolkit:TiltEffect.IsTiltEnabled="True"  Opacity=".3" Name="radarMapBox" Height="250" Tap="radarMap_Tap" Fill="Black"/>
+                            <Rectangle toolkit:TiltEffect.IsTiltEnabled="True" Opacity=".3" Name="satMapBox" Height="250" Margin="0,20,0,0" Tap="satMap_Tap" Fill="Black" />
                         </StackPanel>
 
-                        <TextBlock Text="radar" Margin="270,100,32,454" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="30" Tap="radarMap_Tap"/>
-                        <TextBlock Text="satellite" Margin="270,369,32,185" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="30" Tap="satMap_Tap"/>
+                        <TextBlock toolkit:TiltEffect.IsTiltEnabled="True" Text="radar" Margin="270,100,32,454" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="30" Tap="radarMap_Tap" Foreground="White"/>
+                        <TextBlock toolkit:TiltEffect.IsTiltEnabled="True" Text="satellite" Margin="270,369,32,185" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="30" Tap="satMap_Tap" Foreground="White"/>
                         
                     </Grid>
                     <Grid Name="maps">
                         <StackPanel>
-                            <maps:Map Name="radarMap" Height="250" Width="250" HorizontalAlignment="Left" VerticalAlignment="Top" Tap="radarMap_Tap"/>
-                            <maps:Map Name="satMap" Height="250" Width="250" Margin="0,20,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Tap="satMap_Tap" />
+                            <maps:Map toolkit:TiltEffect.IsTiltEnabled="True" Name="radarMap" Height="250" Width="250" HorizontalAlignment="Left" VerticalAlignment="Top" Tap="radarMap_Tap"/>
+                            <maps:Map toolkit:TiltEffect.IsTiltEnabled="True" Name="satMap" Height="250" Width="250" Margin="0,20,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Tap="satMap_Tap" />
                         </StackPanel>
                     </Grid>
                 </Grid>
@@ -139,6 +139,7 @@
 
             <shell:ApplicationBarIconButton IconUri="/Images/refresh.png" Text="refresh" Click="refresh_Click" />
             <shell:ApplicationBarIconButton IconUri="/Images/settings.png" Text="settings" Click="settings_Click" />
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar.pin.png" Text="pin" Click="pin_Click"/>
             <shell:ApplicationBar.MenuItems>
                 <shell:ApplicationBarMenuItem Text="change image" Click="ApplicationBarMenuItem_Click"/>
                 <shell:ApplicationBarMenuItem Text="about" Click="ApplicationBarMenuItem_Click_1"/>

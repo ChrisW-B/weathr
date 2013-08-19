@@ -1154,5 +1154,31 @@ namespace WeatherLock
         {
             NavigationService.Navigate(new Uri("/SelectLocation.xaml", UriKind.Relative));
         }
+
+        private void pin_Click(object sender, EventArgs e)
+        {
+            if (!isTrial)
+            {
+               
+
+                IconicTileData locTile = new IconicTileData
+                {
+                    IconImage = new Uri("SunCloud202.png", UriKind.Relative),
+                    SmallIconImage = new Uri("SunCloud110.png", UriKind.Relative),
+                    Title = cityName
+                };
+
+                ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + cityName + "&url=" + urlKey + "&isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative), locTile, true);
+            }
+            else
+            {
+                MessageBoxResult m = MessageBox.Show("Multiple location Pinning is only supported in the full version. Buy now?", "Trial Mode", MessageBoxButton.OKCancel);
+                if (m == MessageBoxResult.OK)
+                {
+                    MarketplaceDetailTask task = new MarketplaceDetailTask();
+                    task.Show();
+                }
+            }
+        }
     }
 }
