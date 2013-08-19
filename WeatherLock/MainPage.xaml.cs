@@ -60,6 +60,7 @@ namespace WeatherLock
         String latitude = null;
         String longitude = null;
         int locationSearchTimes;
+        int numFlickrAttempts;
 
         //Wunderground Api
         //Release Key
@@ -72,6 +73,7 @@ namespace WeatherLock
 
         //Flickr Api
         String fApiKey = "2781c025a4064160fc77a52739b552ff";
+        String weatherGroup = "1463451@N25";
         String fUrl = null;
 
         ObservableCollection<HazardResults> results = new ObservableCollection<HazardResults>();
@@ -100,11 +102,9 @@ namespace WeatherLock
             //Testing Key
             apiKey = "fb1dd3f4321d048d";
 
-
             noParams();
             setUnits();
             restoreWeather();
-            getFlickrPic();
             this.clock = new Clock(this);
         }
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
@@ -141,8 +141,7 @@ namespace WeatherLock
 
             checkUpdated();
             updateAlerts();
-            setupRadar();
-            setupSat();
+            
             showAd();
         }
 
@@ -197,18 +196,18 @@ namespace WeatherLock
         }
 
         //Maps Page
-            //Radar
+        //Radar
         private void setupRadar()
         {
             if (latitude != null && longitude != null)
             {
-                
+
                 double lat = Convert.ToDouble(latitude);
                 double lon = Convert.ToDouble(longitude);
                 radarMap.Center = new GeoCoordinate(lat, lon);
                 radarMap.CartographicMode = MapCartographicMode.Road;
                 radarMap.ZoomLevel = 5;
-                radarMap.IsEnabled = false;                
+                radarMap.IsEnabled = false;
 
                 showRadarLocation();
                 radarMap.Loaded += addRadar;
@@ -218,13 +217,13 @@ namespace WeatherLock
                 findLocation();
                 setupRadar();
             }
-        }             
+        }
         void addRadar(object sender, RoutedEventArgs e)
         {
             MapsSettings.ApplicationContext.ApplicationId = "<applicationid>";
             MapsSettings.ApplicationContext.AuthenticationToken = "<authenticationtoken>";
             TileSource radar = new CurrentRadar();
-            radarMap.TileSources.Add(radar);  
+            radarMap.TileSources.Add(radar);
         }
         private void showRadarLocation()
         {
@@ -265,8 +264,8 @@ namespace WeatherLock
         void radarMap_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             NavigationService.Navigate(new Uri("/Radar.xaml?isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative));
-        } 
-            //Sat
+        }
+        //Sat
         private void setupSat()
         {
             if (latitude != null && longitude != null)
@@ -292,7 +291,7 @@ namespace WeatherLock
             MapsSettings.ApplicationContext.ApplicationId = "<applicationid>";
             MapsSettings.ApplicationContext.AuthenticationToken = "<authenticationtoken>";
             TileSource sat = new CurrentSat();
-            satMap.TileSources.Add(sat); 
+            satMap.TileSources.Add(sat);
         }
         private void showSatLocation()
         {
@@ -448,7 +447,7 @@ namespace WeatherLock
                 if (latitude != null && longitude != null)
                 {
                     url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast/q/" + latitude + "," + longitude + ".xml";
-                    fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weather + "&per_page=500&tag_mode=any&content_type=1&media=photos&radius=32&format=rest";
+                    fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&group_id=" + weatherGroup + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weather + "&per_page=500&tag_mode=any&content_type=1&media=photos&radius=32&format=rest";
                 }
                 else
                 {
@@ -464,7 +463,7 @@ namespace WeatherLock
                 }
                 if (latitude != null && longitude != null)
                 {
-                    fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weather + "&per_page=500&tag_mode=any&content_type=1&media=photos&sort=relevance&has_geo=&format=rest";
+                    fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&group_id=" + weatherGroup + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weather + "&per_page=500&tag_mode=any&content_type=1&media=photos&sort=relevance&has_geo=&format=rest";
                 }
                 else
                 {
@@ -537,8 +536,8 @@ namespace WeatherLock
                     TimeSpan timeDiff = now.Subtract(appLastRun);
                     if ((int)timeDiff.TotalMinutes > 15)
                     {
-
                         updateWeather();
+                        getFlickrPic();
                         store["lastUpdated"] = DateTime.Now;
                     }
                     if (store.Contains("locChanged"))
@@ -549,7 +548,6 @@ namespace WeatherLock
 
                             updateWeather();
                             getFlickrPic();
-                            setupRadar();
                             store["lastUpdated"] = DateTime.Now;
                         }
                     }
@@ -566,8 +564,8 @@ namespace WeatherLock
                 }
                 else
                 {
-
                     updateWeather();
+                    getFlickrPic();
                     store["lastUpdated"] = DateTime.Now;
                 }
             }
@@ -895,7 +893,7 @@ namespace WeatherLock
         private void getFlickrPic()
         {
             setURL();
-
+            numFlickrAttempts = 0;
             if (store.Contains("useFlickr"))
             {
                 if ((bool)store["useFlickr"])
@@ -940,25 +938,25 @@ namespace WeatherLock
             {
                 flickrTags = "rain, drizzle";
             }
-            else if (weather.Contains("FOG"))
+            else if (weather.Contains("SNOW") || weather.Contains("FLURRY"))
+            {
+                flickrTags = "snow, flurry, snowing";
+            }
+            else if (weather.Contains("FOG") || weather.Contains("MIST"))
             {
                 flickrTags = "fog, foggy, mist";
             }
             else if (weather.Contains("CLEAR"))
             {
-                flickrTags = "sky, clear, sun, sunny, blue sky";
-            }
-            else if (weather.Contains("CLOUDY"))
-            {
-                flickrTags = "cloudy, clouds, sky, fluffy cloud";
+                flickrTags = "clear, sun, sunny, blue sky";
             }
             else if (weather.Contains("OVERCAST"))
             {
                 flickrTags = "overcast, cloudy";
             }
-            else if (weather.Contains("CLOUDS"))
+            else if (weather.Contains("CLOUDS") || weather.Contains("CLOUDY"))
             {
-                flickrTags = "cloudy, clouds, sky, fluffy cloud";
+                flickrTags = "cloudy, clouds, fluffy cloud";
             }
             else
             {
@@ -980,9 +978,9 @@ namespace WeatherLock
                 var rand = new Random();
 
                 int numPhotos = Convert.ToInt32(photos.Attribute("total").Value);
-                if (numPhotos == 0)
+                if (numPhotos == 0 && numFlickrAttempts <= 5)
                 {
-                    this.fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&tags=" + flickrTags + "&per_page=500&tag_mode=any&content_type=1&media=photos&accuracy=11&sort=relevance&has_geo=&format=rest";
+                    this.fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&group_id=" + weatherGroup + "&tags=" + flickrTags + "&per_page=500&tag_mode=any&content_type=1&media=photos&accuracy=11&sort=relevance&has_geo=&format=rest";
                     WebClient client = new WebClient();
                     client.Headers[HttpRequestHeader.IfModifiedSince] = DateTime.Now.ToString();
                     client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(getFlickrXml);
@@ -990,6 +988,10 @@ namespace WeatherLock
                 }
                 else
                 {
+                    if (numFlickrAttempts > 5)
+                    {
+                        return;
+                    }
                     int randValue;
                     if (numPhotos < 251)
                     {
@@ -1159,7 +1161,7 @@ namespace WeatherLock
         {
             if (!isTrial)
             {
-               
+
 
                 IconicTileData locTile = new IconicTileData
                 {
@@ -1178,6 +1180,24 @@ namespace WeatherLock
                     MarketplaceDetailTask task = new MarketplaceDetailTask();
                     task.Show();
                 }
+            }
+        }
+
+        private void title_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (((Panorama)sender).SelectedIndex == 0)
+            {
+                ApplicationBar.Mode = ApplicationBarMode.Default;
+            }
+            else
+            {
+                ApplicationBar.Mode = ApplicationBarMode.Minimized;
+            }
+
+            if (((Panorama)sender).SelectedIndex == 1)
+            {
+                setupRadar();
+                setupSat();
             }
         }
     }
