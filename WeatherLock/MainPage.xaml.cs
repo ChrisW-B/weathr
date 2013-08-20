@@ -65,6 +65,7 @@ namespace WeatherLock
         bool getBackground;
         int locationSearchTimes;
         int numFlickrAttempts;
+        int timesWeatherBroke;
 
         //Wunderground Api
         String apiKey = "102b8ec7fbd47a05";
@@ -142,9 +143,15 @@ namespace WeatherLock
                 longitude = this.NavigationContext.QueryString["lon"];
                 String[] loc = { latitude, longitude };
                 store["loc"] = loc;
+                                            
                 if (store.Contains("cityName"))
                 {
-                    if (store["cityName"] != cityNameLoad)
+                    string citySplit = (string)store["cityName"].Split(',')[0];
+                    string stateSplit = (string)store["cityName"].Split(',')[1];
+                    string cityLoadSplit = cityNameLoad.Split(',')[0];
+                    string stateLoadSplit = cityNameLoad.Split(',')[1];
+
+                    if (!(cityLoadSplit.Contains(citySplit) && stateLoadSplit.Contains(stateSplit)))
                     {
                         store["locChanged"] = true;
                     }
@@ -590,7 +597,7 @@ namespace WeatherLock
         }
         private void client_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
-            if (!e.Cancelled && e.Error == null)
+            if (!e.Cancelled && e.Error == null && e.Result != null)
             {
                 XDocument doc = XDocument.Parse(e.Result);
 
@@ -702,7 +709,13 @@ namespace WeatherLock
 
                 //Back it all up
                 backupWeather();
+                timesWeatherBroke = 0;
 
+            }
+            else if(timesWeatherBroke<5)
+            {
+                timesWeatherBroke++;
+                updateWeather();
             }
 
         }
@@ -1128,6 +1141,7 @@ namespace WeatherLock
                     TimeSpan timeDiff = now.Subtract(appLastRun);
                     if ((int)timeDiff.TotalMinutes > 45)
                     {
+                        getBackground = true;
                         updateWeather();
                         updateAlerts();
                     }
@@ -1144,6 +1158,7 @@ namespace WeatherLock
             }
             else
             {
+                getBackground = true;
                 updateWeather();
                 updateAlerts();
             }

@@ -299,7 +299,6 @@ namespace WeatherLock
             store["useWeatherGroup"] = true;
             store["groupChanged"] = true;
         }
-
         private void weatherGroup_Unchecked(object sender, RoutedEventArgs e)
         {
             store["useWeatherGroup"] = false;
