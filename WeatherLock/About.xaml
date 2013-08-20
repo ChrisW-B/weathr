@@ -50,7 +50,7 @@
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
             <ScrollViewer>
-                <RichTextBox HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{x:Null}" ContentChanged="RichTextBox_ContentChanged" >
+                <RichTextBox HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{x:Null}">
                     <Paragraph>
                         <Run Text="Weathr was developed by Chris Barry "/>
                     </Paragraph>
