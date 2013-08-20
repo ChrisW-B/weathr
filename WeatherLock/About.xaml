@@ -50,40 +50,56 @@
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
             <ScrollViewer>
-                <RichTextBox HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{x:Null}" >
+                <RichTextBox HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{x:Null}" ContentChanged="RichTextBox_ContentChanged" >
                     <Paragraph>
                         <Run Text="Weathr was developed by Chris Barry "/>
                     </Paragraph>
                     <Paragraph>
-                        <Hyperlink TargetName="mailTo" NavigateUri="mailto:ChrisApps@outlook.com">Email</Hyperlink>
+                        <Hyperlink NavigateUri="mailto:ChrisApps@outlook.com" TargetName="mailTo">
+                            <Run Text="Email"/>
+                        </Hyperlink>
                     </Paragraph>
                     <Paragraph>
-                        <Hyperlink TargetName="twitter" NavigateUri="http://twitter.com/CB_27">Twitter</Hyperlink>
+                        <Hyperlink NavigateUri="http://twitter.com/CB_27" TargetName="twitter">
+                            <Run Text="Twitter"/>
+                        </Hyperlink>
                     </Paragraph>
                     <Paragraph/>
                     <Paragraph>
-                        <Run FontSize="26">Privacy:</Run>
+                        <Run FontSize="26" Text="Privacy:"/>
                     </Paragraph>
                     <Paragraph>
-                        <Run Text="When Use Current Location is enabled, rough GPS coordinates are saved for use in finding your location. These coordinates are sent to " />
-                        <Hyperlink TargetName="flickrApi" NavigateUri="http://www.flickr.com/services/developer/">Flickr</Hyperlink>
+                        <Run Text="When Use Current Location is enabled, rough GPS coordinates are saved for use in finding your location. These coordinates are sent to "/>
+                        <Hyperlink NavigateUri="http://www.flickr.com/services/developer/" TargetName="flickrApi">
+                            <Run Text="Flickr"/>
+                        </Hyperlink>
                         <Run Text=", to get a local picture, "/>
-                        <Hyperlink TargetName="wunderApi" NavigateUri="http://www.wunderground.com/?apiref=cdd8be6583b62f40">Weather Underground</Hyperlink>
+                        <Hyperlink NavigateUri="http://www.wunderground.com/?apiref=cdd8be6583b62f40" TargetName="wunderApi">
+                            <Run Text="Weather Underground"/>
+                        </Hyperlink>
                         <Run Text=" for current weather data, as well as forecasts, and the "/>
-                        <Hyperlink TargetName="NWSapi" NavigateUri="http://graphical.weather.gov/xml/">
-                            National Weather Service
+                        <Hyperlink NavigateUri="http://graphical.weather.gov/xml/" TargetName="NWSapi">
+                            <Run Text="National Weather Service"/>
                         </Hyperlink>
                         <Run Text=" to get weather alerts."/>
                     </Paragraph>
                     <Paragraph/>
                     <Paragraph>
                         <Run Text="Additionally, when a location is added manually, rough coordinates are obtained for the town/city via the "/>
-                        <Hyperlink TargetName="googleApi" NavigateUri="https://developers.google.com/maps/documentation/geocoding/?hl=en">Google Maps API</Hyperlink>
-                        <Run Text=" and then used to find local photos through Flickr. "></Run>
+                        <Hyperlink NavigateUri="https://developers.google.com/maps/documentation/geocoding/?hl=en" TargetName="googleApi">
+                            <Run Text="Google Maps API"/>
+                        </Hyperlink>
+                        <Run Text=" and then used to find local photos through Flickr. "/>
                     </Paragraph>
                     <Paragraph/>
                     <Paragraph>
                         <Run Text="Coordinates are also stored on your phone in case the GPS service is inaccessible, and in that case, the last known location can be used. None of this data is saved off your phone, and I (the developer) do not have access to any of it"/>
+                    </Paragraph>
+                    <Paragraph>
+                        <Run/>
+                    </Paragraph>
+                    <Paragraph>
+                        <Run Text="Radar is provided through the Iowa State University Department of Agronomy's Iowa Environmental Mesonet project, and comes from the National Weather Service"/>
                     </Paragraph>
                 </RichTextBox>
             </ScrollViewer>

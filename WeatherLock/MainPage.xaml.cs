@@ -118,7 +118,6 @@ namespace WeatherLock
         {
             licInfo = new LicenseInformation();
             isTrial = licInfo.IsTrial();
-            isTrial = true;
 
             locationSearchTimes = 0;
             mapsSet = false;
