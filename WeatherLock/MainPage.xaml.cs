@@ -47,8 +47,6 @@ namespace WeatherLock
         private String realFeelC;
         private String realFeelF;
 
-
-
         //Forecast Conditions
         private String todayHigh;
         private String todayLow;
@@ -56,24 +54,24 @@ namespace WeatherLock
         private String forecastTomorrow;
         private String tomorrowHigh;
         private String tomorrowLow;
-
+        
+        //location data
         String latitude = null;
         String longitude = null;
 
+        //flags 
         bool mapsSet;
         bool alertSet;
+        bool getBackground;
         int locationSearchTimes;
         int numFlickrAttempts;
 
         //Wunderground Api
-
-        //Release Key
         String apiKey = "102b8ec7fbd47a05";
         String urlKey = null;
         bool isCurrent;
         String cityNameLoad;
         String url = null;
-
 
         //Flickr Api
         private String flickrTags;
@@ -82,16 +80,20 @@ namespace WeatherLock
         String weatherGroup = "1463451@N25";
         String fUrl = null;
 
+        //collections of alerts and forecast
         ObservableCollection<HazardResults> results = new ObservableCollection<HazardResults>();
         ObservableCollection<ForecastResults> foreRes = new ObservableCollection<ForecastResults>();
 
+        //create a clock
         private Clock clock;
 
+        //Progress Indicators and flags
         private bool progIndicatorsCreated = false;
         ProgressIndicator progWeather;
         ProgressIndicator progFlickr;
         ProgressIndicator progAlerts;
 
+        //Save typing every time
         dynamic store = IsolatedStorageSettings.ApplicationSettings;
 
         //Check to see if app is running as trial
@@ -120,6 +122,7 @@ namespace WeatherLock
 
             locationSearchTimes = 0;
             mapsSet = false;
+            getBackground = false;
 
             checkUseWeatherGroup();
 
@@ -365,8 +368,8 @@ namespace WeatherLock
                 TimeSpan timeDiff = now.Subtract(appLastRun);
                 if ((int)timeDiff.TotalMinutes > 15)
                 {
+                    getBackground = true;
                     updateWeather();
-                    getFlickrPic();
                     store["lastUpdated"] = DateTime.Now;
                 }
                 if (store.Contains("locChanged"))
@@ -374,9 +377,8 @@ namespace WeatherLock
                     if ((bool)store["locChanged"] == true)
                     {
                         store["locChanged"] = false;
-
+                        getBackground = true;
                         updateWeather();
-                        getFlickrPic();
                         store["lastUpdated"] = DateTime.Now;
                     }
                 }
@@ -385,9 +387,6 @@ namespace WeatherLock
                     if ((bool)store["unitChanged"] == true)
                     {
                         store["unitChanged"] = false;
-
-                        updateWeather();
-                        store["lastUpdated"] = DateTime.Now;
                     }
                 }
                 if (store.Contains("groupChanged"))
@@ -402,7 +401,6 @@ namespace WeatherLock
             else
             {
                 updateWeather();
-                getFlickrPic();
                 store["lastUpdated"] = DateTime.Now;
             }
         }
@@ -571,6 +569,11 @@ namespace WeatherLock
             backupWeather();
             progWeather.IsVisible = false;
             HideTray();
+            if (getBackground)
+            {
+                getBackground = false;
+                getFlickrPic();
+            }
         }
         private void updateWeather()
         {
@@ -959,6 +962,10 @@ namespace WeatherLock
                 var stat = doc.Element("rsp").Attribute("stat");
                 if ((string)stat == "fail")
                 {
+                    progFlickr.Text = "Could not find any relevant pictures";
+                    System.Threading.Thread.Sleep(500);
+                    progFlickr.IsVisible = false;
+                    HideTray();
                     return;
                 }
                 var photos = doc.Element("rsp").Element("photos");
@@ -971,11 +978,11 @@ namespace WeatherLock
                     numFlickrAttempts++;
                     if (useWeatherGroup)
                     {
-                        this.fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&group_id=" + weatherGroup + "&tags=" + flickrTags + "&per_page=500&tag_mode=any&content_type=1&media=photos&&sort=relevance&format=rest";
+                        this.fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&group_id=" + weatherGroup + "&tags=" + flickrTags + "&per_page=500&tag_mode=any&content_type=1&media=photos&sort=relevance&format=rest";
                     }
                     else
                     {
-                        this.fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&tags=" + flickrTags + "&per_page=500&tag_mode=any&content_type=1&media=photos&&sort=relevance&format=rest";
+                        this.fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&tags=" + flickrTags + "&per_page=500&tag_mode=any&content_type=1&media=photos&sort=relevance&format=rest";
                     }
                         WebClient client = new WebClient();
                     client.Headers[HttpRequestHeader.IfModifiedSince] = DateTime.Now.ToString();
