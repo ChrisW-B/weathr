@@ -297,11 +297,13 @@ namespace WeatherLock
         private void weatherGroup_Checked(object sender, RoutedEventArgs e)
         {
             store["useWeatherGroup"] = true;
+            store["groupChanged"] = true;
         }
 
         private void weatherGroup_Unchecked(object sender, RoutedEventArgs e)
         {
             store["useWeatherGroup"] = false;
+            store["groupChanged"] = true;
         }
 
         //Location Pivot
@@ -704,7 +706,7 @@ namespace WeatherLock
         private void updateData()
         {
             //Testing Key
-            //apiKey = "fb1dd3f4321d048d";
+            apiKey = "fb1dd3f4321d048d";
 
             checkLocation();
             checkUnits();

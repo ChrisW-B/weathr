@@ -79,7 +79,6 @@ namespace WeatherLock
         private String flickrTags;
         String fApiKey = "2781c025a4064160fc77a52739b552ff";
         bool useWeatherGroup;
-        bool useWeatherGroupChecked = false;
         String weatherGroup = "1463451@N25";
         String fUrl = null;
 
@@ -106,7 +105,7 @@ namespace WeatherLock
             InitializeComponent();
 
             //Testing Key
-            //apiKey = "fb1dd3f4321d048d";
+            apiKey = "fb1dd3f4321d048d";
 
             initializeProgIndicators();
             noParams();
@@ -122,11 +121,7 @@ namespace WeatherLock
             locationSearchTimes = 0;
             mapsSet = false;
 
-            if (!useWeatherGroupChecked)
-            {
-                useWeatherGroupChecked = true;
-                checkUseWeatherGroup();
-            }
+            checkUseWeatherGroup();
 
             if (!progIndicatorsCreated)
             {
@@ -357,11 +352,12 @@ namespace WeatherLock
             }
         }
 
-        //Check whether weather should be updated
+        //Check whether everything should be updated
         private void checkUpdated()
         {
             setURL();
             setUnits();
+
             if (store.Contains("lastUpdated"))
             {
                 var appLastRun = Convert.ToDateTime(store["lastUpdated"]);
@@ -392,6 +388,14 @@ namespace WeatherLock
 
                         updateWeather();
                         store["lastUpdated"] = DateTime.Now;
+                    }
+                }
+                if (store.Contains("groupChanged"))
+                {
+                    if ((bool)store["groupChanged"])
+                    {
+                        store["groupChanged"] = false;
+                        getFlickrPic();
                     }
                 }
             }
@@ -964,8 +968,16 @@ namespace WeatherLock
                 int numPhotos = Convert.ToInt32(photos.Attribute("total").Value);
                 if (numPhotos == 0 && numFlickrAttempts <= 5)
                 {
-                    this.fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&group_id=" + weatherGroup + "&tags=" + flickrTags + "&per_page=500&tag_mode=any&content_type=1&media=photos&accuracy=11&sort=relevance&has_geo=&format=rest";
-                    WebClient client = new WebClient();
+                    numFlickrAttempts++;
+                    if (useWeatherGroup)
+                    {
+                        this.fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&group_id=" + weatherGroup + "&tags=" + flickrTags + "&per_page=500&tag_mode=any&content_type=1&media=photos&&sort=relevance&format=rest";
+                    }
+                    else
+                    {
+                        this.fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&tags=" + flickrTags + "&per_page=500&tag_mode=any&content_type=1&media=photos&&sort=relevance&format=rest";
+                    }
+                        WebClient client = new WebClient();
                     client.Headers[HttpRequestHeader.IfModifiedSince] = DateTime.Now.ToString();
                     client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(getFlickrXml);
                     client.DownloadStringAsync(new Uri(fUrl));
@@ -974,6 +986,10 @@ namespace WeatherLock
                 {
                     if (numFlickrAttempts > 5)
                     {
+                        progFlickr.Text = "Could not find any relevant pictures";
+                        System.Threading.Thread.Sleep(500);
+                        progFlickr.IsVisible = false;
+                        HideTray();
                         return;
                     }
                     int randValue;
