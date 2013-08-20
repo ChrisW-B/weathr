@@ -54,6 +54,10 @@
                             <RadioButton Checked="unitMiles_Checked" Name="unitMiles" Content="miles" GroupName="changeDist"/>
                         </StackPanel>
                         <CheckBox Name="flickrPics" Content="Use Pictures from Flickr" IsChecked="{Binding flickrChecked}" Checked="flickrPics_Checked" Unchecked="flickrPics_Unchecked"/>
+                        <StackPanel>
+                        <CheckBox Name="weatherGroup" Content="Use Pictures from Yahoo Weather App" IsChecked="{Binding weatherChecked}" Checked="weatherGroup_Checked" Unchecked="weatherGroup_Unchecked"/>
+                            <TextBlock Text="using pictures from the yahoo weather app group should increase relevant pictures, but there may be fewer overall" FontSize="16" TextWrapping="Wrap" Width="407" Height="61" Foreground="#FF9E9E9E" HorizontalAlignment="Right" VerticalAlignment="Top" LineStackingStrategy="BlockLineHeight"/>
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
             </phone:PivotItem>

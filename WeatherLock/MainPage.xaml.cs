@@ -47,7 +47,7 @@ namespace WeatherLock
         private String realFeelC;
         private String realFeelF;
 
-        private String flickrTags;
+
 
         //Forecast Conditions
         private String todayHigh;
@@ -59,10 +59,14 @@ namespace WeatherLock
 
         String latitude = null;
         String longitude = null;
+
+        bool mapsSet;
+        bool alertSet;
         int locationSearchTimes;
         int numFlickrAttempts;
 
         //Wunderground Api
+
         //Release Key
         String apiKey = "102b8ec7fbd47a05";
         String urlKey = null;
@@ -72,7 +76,10 @@ namespace WeatherLock
 
 
         //Flickr Api
+        private String flickrTags;
         String fApiKey = "2781c025a4064160fc77a52739b552ff";
+        bool useWeatherGroup;
+        bool useWeatherGroupChecked = false;
         String weatherGroup = "1463451@N25";
         String fUrl = null;
 
@@ -80,21 +87,20 @@ namespace WeatherLock
         ObservableCollection<ForecastResults> foreRes = new ObservableCollection<ForecastResults>();
 
         private Clock clock;
+
+        private bool progIndicatorsCreated = false;
         ProgressIndicator progWeather;
         ProgressIndicator progFlickr;
         ProgressIndicator progAlerts;
-        ProgressIndicator progRestore;
-
-        private int hideTray;
 
         dynamic store = IsolatedStorageSettings.ApplicationSettings;
 
         //Check to see if app is running as trial
         LicenseInformation licInfo;
         public bool isTrial;
-
         #endregion
 
+        //Initialize the main page
         public MainPage()
         {
             InitializeComponent();
@@ -102,6 +108,7 @@ namespace WeatherLock
             //Testing Key
             apiKey = "fb1dd3f4321d048d";
 
+            initializeProgIndicators();
             noParams();
             setUnits();
             restoreWeather();
@@ -111,12 +118,26 @@ namespace WeatherLock
         {
             licInfo = new LicenseInformation();
             isTrial = licInfo.IsTrial();
+            isTrial = true;
 
             locationSearchTimes = 0;
+            mapsSet = false;
+
+            if (!useWeatherGroupChecked)
+            {
+                useWeatherGroupChecked = true;
+                checkUseWeatherGroup();
+            }
+
+            if (!progIndicatorsCreated)
+            {
+                initializeProgIndicators();
+            }
 
             base.OnNavigatedTo(e);
             if (this.NavigationContext.QueryString.ContainsKey("cityName") && this.NavigationContext.QueryString.ContainsKey("url") && this.NavigationContext.QueryString.ContainsKey("isCurrent") && this.NavigationContext.QueryString.ContainsKey("lat") && this.NavigationContext.QueryString.ContainsKey("lon"))
             {
+
                 cityNameLoad = this.NavigationContext.QueryString["cityName"];
                 urlKey = this.NavigationContext.QueryString["url"];
                 isCurrent = Convert.ToBoolean(this.NavigationContext.QueryString["isCurrent"]);
@@ -137,14 +158,33 @@ namespace WeatherLock
             {
                 noParams();
             }
-
-
+            title.Title = cityNameLoad;
             checkUpdated();
-            updateAlerts();
-            
             showAd();
         }
 
+        private void checkUseWeatherGroup()
+        {
+            if (store.Contains("useWeatherGroup"))
+            {
+                if ((bool)store["useWeatherGroup"])
+                {
+                    useWeatherGroup = true;
+                }
+                else
+                {
+                    useWeatherGroup = false;
+                }
+            }
+            else
+            {
+                store["useWeatherGroup"] = true;
+                useWeatherGroup = true;
+            }
+        }
+
+
+        //Set up location info
         private void noParams()
         {
             if (store.Contains("defaultLocation") && store.Contains("defaultUrl") && store.Contains("defaultCurrent"))
@@ -169,7 +209,6 @@ namespace WeatherLock
                 noDefaults();
             }
         }
-
         private void noDefaults()
         {
             store["defaultLocation"] = "Current Location";
@@ -179,222 +218,6 @@ namespace WeatherLock
             urlKey = "null";
             isCurrent = true;
         }
-
-        private void showAd()
-        {
-
-            if (isTrial)
-            {
-                adControl.Visibility = System.Windows.Visibility.Visible;
-                forecastListBox.Margin = new Thickness(0, 0, 0, 110);
-            }
-            else
-            {
-                adControl.Visibility = System.Windows.Visibility.Collapsed;
-            }
-
-        }
-
-        //Maps Page
-        //Radar
-        private void setupRadar()
-        {
-            if (latitude != null && longitude != null)
-            {
-
-                double lat = Convert.ToDouble(latitude);
-                double lon = Convert.ToDouble(longitude);
-                radarMap.Center = new GeoCoordinate(lat, lon);
-                radarMap.CartographicMode = MapCartographicMode.Road;
-                radarMap.ZoomLevel = 5;
-                radarMap.IsEnabled = false;
-
-                showRadarLocation();
-                radarMap.Loaded += addRadar;
-            }
-            else
-            {
-                findLocation();
-                setupRadar();
-            }
-        }
-        void addRadar(object sender, RoutedEventArgs e)
-        {
-            MapsSettings.ApplicationContext.ApplicationId = "<applicationid>";
-            MapsSettings.ApplicationContext.AuthenticationToken = "<authenticationtoken>";
-            TileSource radar = new CurrentRadar();
-            radarMap.TileSources.Add(radar);
-        }
-        private void showRadarLocation()
-        {
-
-            //create a marker
-
-            Polygon triangle = new Polygon();
-            triangle.Fill = new SolidColorBrush(Colors.Black);
-            triangle.Points.Add((new Point(0, 0)));
-            triangle.Points.Add((new Point(0, 80)));
-            triangle.Points.Add((new Point(40, 80)));
-            triangle.Points.Add((new Point(40, 40)));
-
-
-
-            ScaleTransform flip = new ScaleTransform();
-            flip.ScaleY = -1;
-            triangle.RenderTransform = flip;
-
-            // Create a MapOverlay to contain the marker
-            MapOverlay myLocationOverlay = new MapOverlay();
-
-            double lat = Convert.ToDouble(latitude);
-            double lon = Convert.ToDouble(longitude);
-
-            myLocationOverlay.Content = triangle;
-            myLocationOverlay.PositionOrigin = new Point(0, 0);
-
-            myLocationOverlay.GeoCoordinate = new GeoCoordinate(lat, lon);
-
-            // Create a MapLayer to contain the MapOverlay.
-            MapLayer myLocationLayer = new MapLayer();
-            myLocationLayer.Add(myLocationOverlay);
-
-            // Add the MapLayer to the Map.
-            radarMap.Layers.Add(myLocationLayer);
-        }
-        void radarMap_Tap(object sender, System.Windows.Input.GestureEventArgs e)
-        {
-            NavigationService.Navigate(new Uri("/Radar.xaml?isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative));
-        }
-        //Sat
-        private void setupSat()
-        {
-            if (latitude != null && longitude != null)
-            {
-                double lat = Convert.ToDouble(latitude);
-                double lon = Convert.ToDouble(longitude);
-                satMap.Center = new GeoCoordinate(lat, lon);
-                satMap.CartographicMode = MapCartographicMode.Road;
-                satMap.ZoomLevel = 5;
-                satMap.IsEnabled = false;
-
-                showSatLocation();
-                satMap.Loaded += addSat;
-            }
-            else
-            {
-                findLocation();
-                setupSat();
-            }
-        }
-        private void addSat(object sender, RoutedEventArgs e)
-        {
-            MapsSettings.ApplicationContext.ApplicationId = "<applicationid>";
-            MapsSettings.ApplicationContext.AuthenticationToken = "<authenticationtoken>";
-            TileSource sat = new CurrentSat();
-            satMap.TileSources.Add(sat);
-        }
-        private void showSatLocation()
-        {
-
-            //create a marker
-
-            Polygon triangle = new Polygon();
-            triangle.Fill = new SolidColorBrush(Colors.Black);
-            triangle.Points.Add((new Point(0, 0)));
-            triangle.Points.Add((new Point(0, 80)));
-            triangle.Points.Add((new Point(40, 80)));
-            triangle.Points.Add((new Point(40, 40)));
-
-
-
-            ScaleTransform flip = new ScaleTransform();
-            flip.ScaleY = -1;
-            triangle.RenderTransform = flip;
-
-            // Create a MapOverlay to contain the marker
-            MapOverlay myLocationOverlay = new MapOverlay();
-
-            double lat = Convert.ToDouble(latitude);
-            double lon = Convert.ToDouble(longitude);
-
-            myLocationOverlay.Content = triangle;
-            myLocationOverlay.PositionOrigin = new Point(0, 0);
-
-            myLocationOverlay.GeoCoordinate = new GeoCoordinate(lat, lon);
-
-            // Create a MapLayer to contain the MapOverlay.
-            MapLayer myLocationLayer = new MapLayer();
-            myLocationLayer.Add(myLocationOverlay);
-
-            // Add the MapLayer to the Map
-            satMap.Layers.Add(myLocationLayer);
-        }
-        void satMap_Tap(object sender, System.Windows.Input.GestureEventArgs e)
-        {
-            NavigationService.Navigate(new Uri("/Sat.xaml?isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative));
-        }
-
-
-        //Progress Bars
-        private void startRestoreProg()
-        {
-            SystemTray.SetIsVisible(this, true);
-            SystemTray.SetOpacity(this, 0);
-            progRestore = new ProgressIndicator();
-            progRestore.Text = "Restoring Weather";
-            progRestore.IsIndeterminate = true;
-            progRestore.IsVisible = true;
-            SystemTray.SetProgressIndicator(this, progRestore);
-        }
-        private void startWeatherProg()
-        {
-            SystemTray.SetIsVisible(this, true);
-            SystemTray.SetOpacity(this, 0);
-            progWeather = new ProgressIndicator();
-            progWeather.Text = "Updating Weather";
-            progWeather.IsIndeterminate = true;
-            progWeather.IsVisible = true;
-            SystemTray.SetProgressIndicator(this, progWeather);
-        }
-        private void startFlickrProg()
-        {
-            SystemTray.SetIsVisible(this, true);
-            SystemTray.SetOpacity(this, 0);
-            progFlickr = new ProgressIndicator();
-            progFlickr.Text = "Updating Background";
-            progFlickr.IsIndeterminate = true;
-            progFlickr.IsVisible = true;
-            SystemTray.SetProgressIndicator(this, progFlickr);
-        }
-        private void startAlertProg()
-        {
-            SystemTray.SetIsVisible(this, true);
-            SystemTray.SetOpacity(this, 0);
-            progAlerts = new ProgressIndicator();
-            progAlerts.Text = "Updating Alerts";
-            progAlerts.IsIndeterminate = true;
-            progAlerts.IsVisible = true;
-            SystemTray.SetProgressIndicator(this, progAlerts);
-
-        }
-        private void HideTray()
-        {
-            //if(progAlerts.IsVisible==false && progFlickr.IsVisible==false && progWeather.IsVisible == false){
-            //  SystemTray.SetIsVisible(this, false);
-            //}
-            if (hideTray > 3)
-            {
-                hideTray = 0;
-                SystemTray.SetIsVisible(this, false);
-
-            }
-            else
-            {
-                hideTray++;
-            }
-
-        }
-
 
         //Check the units to use
         private void setUnits()
@@ -447,7 +270,15 @@ namespace WeatherLock
                 if (latitude != null && longitude != null)
                 {
                     url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast/q/" + latitude + "," + longitude + ".xml";
-                    fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&group_id=" + weatherGroup + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weather + "&per_page=500&tag_mode=any&content_type=1&media=photos&radius=32&format=rest";
+                    if (useWeatherGroup)
+                    {
+                        fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&group_id=" + weatherGroup + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weather + "&per_page=500&tag_mode=any&content_type=1&media=photos&radius=32&format=rest";
+
+                    }
+                    else
+                    {
+                        fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weather + "&per_page=500&tag_mode=any&content_type=1&media=photos&radius=32&format=rest";
+                    }
                 }
                 else
                 {
@@ -463,7 +294,14 @@ namespace WeatherLock
                 }
                 if (latitude != null && longitude != null)
                 {
-                    fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&group_id=" + weatherGroup + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weather + "&per_page=500&tag_mode=any&content_type=1&media=photos&sort=relevance&has_geo=&format=rest";
+                    if (useWeatherGroup)
+                    {
+                        fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&group_id=" + weatherGroup + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weather + "&per_page=500&tag_mode=any&content_type=1&media=photos&sort=relevance&has_geo=&format=rest";
+                    }
+                    else
+                    {
+                        fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weather + "&per_page=500&tag_mode=any&content_type=1&media=photos&sort=relevance&has_geo=&format=rest";
+                    }
                 }
                 else
                 {
@@ -518,8 +356,6 @@ namespace WeatherLock
                 }
 
             }
-
-            //setURL();
         }
 
         //Check whether weather should be updated
@@ -527,105 +363,115 @@ namespace WeatherLock
         {
             setURL();
             setUnits();
-            if (!isTrial)
+            if (store.Contains("lastUpdated"))
             {
-                if (store.Contains("lastUpdated"))
-                {
-                    var appLastRun = Convert.ToDateTime(store["lastUpdated"]);
-                    var now = DateTime.Now;
-                    TimeSpan timeDiff = now.Subtract(appLastRun);
-                    if ((int)timeDiff.TotalMinutes > 15)
-                    {
-                        updateWeather();
-                        getFlickrPic();
-                        store["lastUpdated"] = DateTime.Now;
-                    }
-                    if (store.Contains("locChanged"))
-                    {
-                        if ((bool)store["locChanged"] == true)
-                        {
-                            store["locChanged"] = false;
-
-                            updateWeather();
-                            getFlickrPic();
-                            store["lastUpdated"] = DateTime.Now;
-                        }
-                    }
-                    if (store.Contains("unitChanged") == true)
-                    {
-                        if ((bool)store["unitChanged"] == true)
-                        {
-                            store["unitChanged"] = false;
-
-                            updateWeather();
-                            store["lastUpdated"] = DateTime.Now;
-                        }
-                    }
-                }
-                else
+                var appLastRun = Convert.ToDateTime(store["lastUpdated"]);
+                var now = DateTime.Now;
+                TimeSpan timeDiff = now.Subtract(appLastRun);
+                if ((int)timeDiff.TotalMinutes > 15)
                 {
                     updateWeather();
                     getFlickrPic();
                     store["lastUpdated"] = DateTime.Now;
                 }
-            }
-            //Only allow updating every 45 min if in trial
-            else
-            {
-                if (store.Contains("lastUpdated"))
+                if (store.Contains("locChanged"))
                 {
-                    var appLastRun = Convert.ToDateTime(store["lastUpdated"]);
-                    var now = DateTime.Now;
-                    TimeSpan timeDiff = now.Subtract(appLastRun);
-                    if ((int)timeDiff.TotalMinutes > 45)
+                    if ((bool)store["locChanged"] == true)
                     {
+                        store["locChanged"] = false;
+
+                        updateWeather();
+                        getFlickrPic();
+                        store["lastUpdated"] = DateTime.Now;
+                    }
+                }
+                if (store.Contains("unitChanged") == true)
+                {
+                    if ((bool)store["unitChanged"] == true)
+                    {
+                        store["unitChanged"] = false;
 
                         updateWeather();
                         store["lastUpdated"] = DateTime.Now;
                     }
-                    if (store.Contains("locChanged") && (int)timeDiff.TotalMinutes > 45)
-                    {
-                        if ((bool)store["locChanged"] == true)
-                        {
-                            store["locChanged"] = false;
-
-                            updateWeather();
-                            getFlickrPic();
-                            store["lastUpdated"] = DateTime.Now;
-                        }
-                    }
-                    if (store.Contains("unitChanged"))
-                    {
-                        if ((int)timeDiff.TotalMinutes > 45)
-                        {
-                            if ((bool)store["unitChanged"] == true)
-                            {
-                                store["unitChanged"] = false;
-
-                                updateWeather();
-                                store["lastUpdated"] = DateTime.Now;
-                            }
-                        }
-                        else
-                        {
-                            restoreWeather();
-                        }
-                    }
                 }
-                else
-                {
+            }
+            else
+            {
+                updateWeather();
+                getFlickrPic();
+                store["lastUpdated"] = DateTime.Now;
+            }
+        }
 
-                    updateWeather();
-                    store["lastUpdated"] = DateTime.Now;
-                }
+        //Show ad if nessecary
+        private void showAd()
+        {
+
+            if (isTrial)
+            {
+                adControl.Visibility = System.Windows.Visibility.Visible;
+                forecastListBox.Margin = new Thickness(0, 0, 0, 110);
+            }
+            else
+            {
+                adControl.Visibility = System.Windows.Visibility.Collapsed;
+            }
+
+        }
+
+        //Progress Bars
+        private void initializeProgIndicators()
+        {
+            progIndicatorsCreated = true;
+            progWeather = new ProgressIndicator();
+            progWeather.Text = "Updating Weather";
+            progWeather.IsIndeterminate = true;
+            progWeather.IsVisible = false;
+
+            progAlerts = new ProgressIndicator();
+            progAlerts.Text = "Updating Alerts";
+            progAlerts.IsIndeterminate = true;
+            progAlerts.IsVisible = false;
+
+            progFlickr = new ProgressIndicator();
+            progFlickr.Text = "Updating Image";
+            progFlickr.IsIndeterminate = true;
+            progFlickr.IsVisible = false;
+        }
+        private void startWeatherProg()
+        {
+            SystemTray.SetIsVisible(this, true);
+            SystemTray.SetOpacity(this, 0);
+            progWeather.IsVisible = true;
+            SystemTray.SetProgressIndicator(this, progWeather);
+        }
+        private void startFlickrProg()
+        {
+            SystemTray.SetIsVisible(this, true);
+            SystemTray.SetOpacity(this, 0);
+            progFlickr.IsVisible = true;
+            SystemTray.SetProgressIndicator(this, progFlickr);
+        }
+        private void startAlertProg()
+        {
+            SystemTray.SetIsVisible(this, true);
+            SystemTray.SetOpacity(this, 0);
+            progAlerts.IsVisible = true;
+            SystemTray.SetProgressIndicator(this, progAlerts);
+
+        }
+        private void HideTray()
+        {
+            if (progAlerts.IsVisible == false && progFlickr.IsVisible == false && progWeather.IsVisible == false)
+            {
+                SystemTray.SetIsVisible(this, false);
             }
         }
 
         //Getting and Setting Weather data
         private void restoreWeather()
         {
-
-            startRestoreProg();
             if ((bool)store.Contains("backupForecast"))
             {
                 forecastListBox.ItemsSource = null;
@@ -718,14 +564,15 @@ namespace WeatherLock
 
             store["cityName"] = cityName;
 
-            progRestore.IsVisible = false;
+
             backupWeather();
+            progWeather.IsVisible = false;
             HideTray();
         }
         private void updateWeather()
         {
-            setURL();
             startWeatherProg();
+            setURL();
 
             forecastListBox.ItemsSource = null;
             foreRes.Clear();
@@ -889,6 +736,145 @@ namespace WeatherLock
             public string pop { get; set; }
         }
 
+        //Maps Pane
+        //Radar
+        private void setupRadar()
+        {
+            if (latitude != null && longitude != null)
+            {
+
+                double lat = Convert.ToDouble(latitude);
+                double lon = Convert.ToDouble(longitude);
+                radarMap.Center = new GeoCoordinate(lat, lon);
+                radarMap.CartographicMode = MapCartographicMode.Road;
+                radarMap.ZoomLevel = 5;
+                radarMap.IsEnabled = false;
+
+                showRadarLocation();
+                radarMap.Loaded += addRadar;
+            }
+            else
+            {
+                findLocation();
+                setupRadar();
+            }
+        }
+        void addRadar(object sender, RoutedEventArgs e)
+        {
+            MapsSettings.ApplicationContext.ApplicationId = "<applicationid>";
+            MapsSettings.ApplicationContext.AuthenticationToken = "<authenticationtoken>";
+            TileSource radar = new CurrentRadar();
+            radarMap.TileSources.Add(radar);
+        }
+        private void showRadarLocation()
+        {
+
+            //create a marker
+
+            Polygon triangle = new Polygon();
+            triangle.Fill = new SolidColorBrush(Colors.Black);
+            triangle.Points.Add((new Point(0, 0)));
+            triangle.Points.Add((new Point(0, 80)));
+            triangle.Points.Add((new Point(40, 80)));
+            triangle.Points.Add((new Point(40, 40)));
+
+
+
+            ScaleTransform flip = new ScaleTransform();
+            flip.ScaleY = -1;
+            triangle.RenderTransform = flip;
+
+            // Create a MapOverlay to contain the marker
+            MapOverlay myLocationOverlay = new MapOverlay();
+
+            double lat = Convert.ToDouble(latitude);
+            double lon = Convert.ToDouble(longitude);
+
+            myLocationOverlay.Content = triangle;
+            myLocationOverlay.PositionOrigin = new Point(0, 0);
+
+            myLocationOverlay.GeoCoordinate = new GeoCoordinate(lat, lon);
+
+            // Create a MapLayer to contain the MapOverlay.
+            MapLayer myLocationLayer = new MapLayer();
+            myLocationLayer.Add(myLocationOverlay);
+
+            // Add the MapLayer to the Map.
+            radarMap.Layers.Add(myLocationLayer);
+        }
+        void radarMap_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/Radar.xaml?isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative));
+        }
+        //Sat
+        private void setupSat()
+        {
+            if (latitude != null && longitude != null)
+            {
+                double lat = Convert.ToDouble(latitude);
+                double lon = Convert.ToDouble(longitude);
+                satMap.Center = new GeoCoordinate(lat, lon);
+                satMap.CartographicMode = MapCartographicMode.Road;
+                satMap.ZoomLevel = 5;
+                satMap.IsEnabled = false;
+
+                showSatLocation();
+                satMap.Loaded += addSat;
+            }
+            else
+            {
+                findLocation();
+                setupSat();
+            }
+        }
+        private void addSat(object sender, RoutedEventArgs e)
+        {
+            MapsSettings.ApplicationContext.ApplicationId = "<applicationid>";
+            MapsSettings.ApplicationContext.AuthenticationToken = "<authenticationtoken>";
+            TileSource sat = new CurrentSat();
+            satMap.TileSources.Add(sat);
+        }
+        private void showSatLocation()
+        {
+
+            //create a marker
+
+            Polygon triangle = new Polygon();
+            triangle.Fill = new SolidColorBrush(Colors.Black);
+            triangle.Points.Add((new Point(0, 0)));
+            triangle.Points.Add((new Point(0, 80)));
+            triangle.Points.Add((new Point(40, 80)));
+            triangle.Points.Add((new Point(40, 40)));
+
+
+
+            ScaleTransform flip = new ScaleTransform();
+            flip.ScaleY = -1;
+            triangle.RenderTransform = flip;
+
+            // Create a MapOverlay to contain the marker
+            MapOverlay myLocationOverlay = new MapOverlay();
+
+            double lat = Convert.ToDouble(latitude);
+            double lon = Convert.ToDouble(longitude);
+
+            myLocationOverlay.Content = triangle;
+            myLocationOverlay.PositionOrigin = new Point(0, 0);
+
+            myLocationOverlay.GeoCoordinate = new GeoCoordinate(lat, lon);
+
+            // Create a MapLayer to contain the MapOverlay.
+            MapLayer myLocationLayer = new MapLayer();
+            myLocationLayer.Add(myLocationOverlay);
+
+            // Add the MapLayer to the Map
+            satMap.Layers.Add(myLocationLayer);
+        }
+        void satMap_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/Sat.xaml?isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative));
+        }
+
         //Getting and Setting the background photo
         private void getFlickrPic()
         {
@@ -904,7 +890,6 @@ namespace WeatherLock
                     }
                     else
                     {
-
                         editFlickrTags();
                         fUrl = fUrl.Replace(weather, flickrTags);
                     }
@@ -1072,7 +1057,6 @@ namespace WeatherLock
                         var hazardHeadline = (string)hazard.Attribute("headline").Value;
                         var hazardUrl = (string)hazard.Element("hazardTextURL").Value;
                         results.Add(new HazardResults() { Headline = hazardHeadline, TextUrl = hazardUrl });
-                        alertListBox.ItemsSource = results;
                     }
                 }
             }
@@ -1080,6 +1064,7 @@ namespace WeatherLock
             {
                 results.Add(new HazardResults() { Headline = "Can't get alerts for your area", TextUrl = null });
             }
+            alertListBox.ItemsSource = results;
             progAlerts.IsVisible = false;
             HideTray();
         }
@@ -1121,8 +1106,8 @@ namespace WeatherLock
                     TimeSpan timeDiff = now.Subtract(appLastRun);
                     if ((int)timeDiff.TotalMinutes > 45)
                     {
-                        hideTray = 4;
                         updateWeather();
+                        updateAlerts();
                     }
                     else
                     {
@@ -1137,26 +1122,11 @@ namespace WeatherLock
             }
             else
             {
-                hideTray = 4;
                 updateWeather();
+                updateAlerts();
             }
 
         }
-        private void ApplicationBarMenuItem_Click(object sender, EventArgs e)
-        {
-            hideTray = 4;
-            getFlickrPic();
-        }
-        private void ApplicationBarMenuItem_Click_1(object sender, EventArgs e)
-        {
-            NavigationService.Navigate(new Uri("/About.xaml", UriKind.Relative));
-        }
-
-        private void ApplicationBarMenuItem_Click_2(object sender, EventArgs e)
-        {
-            NavigationService.Navigate(new Uri("/SelectLocation.xaml", UriKind.Relative));
-        }
-
         private void pin_Click(object sender, EventArgs e)
         {
             if (!isTrial)
@@ -1182,22 +1152,47 @@ namespace WeatherLock
                 }
             }
         }
+        private void ApplicationBarMenuItem_Click(object sender, EventArgs e)
+        {
+            getFlickrPic();
+        }
+        private void ApplicationBarMenuItem_Click_1(object sender, EventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/About.xaml", UriKind.Relative));
+        }
+        private void ApplicationBarMenuItem_Click_2(object sender, EventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/SelectLocation.xaml", UriKind.Relative));
+        }
 
+        //Change stuff in panorama as you move through
         private void title_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (((Panorama)sender).SelectedIndex == 0)
+            switch (((Panorama)sender).SelectedIndex)
             {
-                ApplicationBar.Mode = ApplicationBarMode.Default;
-            }
-            else
-            {
-                ApplicationBar.Mode = ApplicationBarMode.Minimized;
-            }
-
-            if (((Panorama)sender).SelectedIndex == 1)
-            {
-                setupRadar();
-                setupSat();
+                case 0:
+                    ApplicationBar.Mode = ApplicationBarMode.Default;
+                    break;
+                case 1:
+                    ApplicationBar.Mode = ApplicationBarMode.Minimized;
+                    if (!mapsSet)
+                    {
+                        mapsSet = true;
+                        setupRadar();
+                        setupSat();
+                    }
+                    break;
+                case 2:
+                    ApplicationBar.Mode = ApplicationBarMode.Minimized;
+                    break;
+                case 3:
+                    ApplicationBar.Mode = ApplicationBarMode.Minimized;
+                    if (!alertSet)
+                    {
+                        alertSet = true;
+                        updateAlerts();
+                    }
+                    break;
             }
         }
     }

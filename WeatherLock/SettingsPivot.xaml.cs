@@ -96,6 +96,23 @@ namespace WeatherLock
                 flickrPics.IsChecked = true;
             }
 
+            if (store.Contains("useWeatherGroup"))
+            {
+                if ((bool)store["useWeatherGroup"])
+                {
+                    weatherGroup.IsChecked = true;
+                }
+                else
+                {
+                    weatherGroup.IsChecked = false;
+                }
+            }
+            else
+            {
+                store["useWeatherGroup"] = true;
+                weatherGroup.IsChecked = true;
+            }
+
             if (store.Contains("tempIsC"))
             {
                 if ((bool)store["tempIsC"])
@@ -276,6 +293,15 @@ namespace WeatherLock
         private void flickrPics_Unchecked(object sender, RoutedEventArgs e)
         {
             store["useFlickr"] = false;
+        }
+        private void weatherGroup_Checked(object sender, RoutedEventArgs e)
+        {
+            store["useWeatherGroup"] = true;
+        }
+
+        private void weatherGroup_Unchecked(object sender, RoutedEventArgs e)
+        {
+            store["useWeatherGroup"] = false;
         }
 
         //Location Pivot
@@ -863,7 +889,5 @@ namespace WeatherLock
         {
             NavigationService.Navigate(new Uri("/AddLocation.xaml", UriKind.Relative));
         }
-
-       
     }
 }
