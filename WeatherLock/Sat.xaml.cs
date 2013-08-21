@@ -21,6 +21,8 @@ namespace WeatherLock
         #region variables
         String latitude = null;
         String longitude = null;
+
+        int satTries;
         int locationSearchTimes;
         bool isCurrent;
 
@@ -35,6 +37,7 @@ namespace WeatherLock
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
             locationSearchTimes = 0;
+            satTries=0;
 
             base.OnNavigatedTo(e);
             if (this.NavigationContext.QueryString.ContainsKey("isCurrent") && this.NavigationContext.QueryString.ContainsKey("lat") && this.NavigationContext.QueryString.ContainsKey("lon"))
@@ -51,7 +54,11 @@ namespace WeatherLock
 
         private void setupSat()
         {
-            if (latitude != null && longitude != null)
+            if (satTries == 0)
+            {
+                map.Loaded += addSat;
+            }
+            if (latitude != null && longitude != null && latitude != "" && longitude != "" && satTries < 5)
             {
                 double lat = Convert.ToDouble(latitude);
                 double lon = Convert.ToDouble(longitude);
@@ -60,12 +67,18 @@ namespace WeatherLock
                 map.ZoomLevel = 5;
 
                 showSatLocation();
-                map.Loaded += addSat;
+                
+            }
+            else if (satTries >= 5)
+            {
+                return;
             }
             else
             {
+                satTries++;
                 findLocation();
                 setupSat();
+
             }
         }
         private void addSat(object sender, RoutedEventArgs e)
@@ -115,41 +128,55 @@ namespace WeatherLock
         //Find the location
         private void findLocation()
         {
-            if (isCurrent && locationSearchTimes <= 5)
-            {
-                //get location
-                var getLocation = new getLocationMain();
-                if (getLocation.getLat() != null && getLocation.getLat() != "NA")
-                {
-                    //Set long and lat
-                    this.latitude = getLocation.getLat();
-                    this.longitude = getLocation.getLong();
 
-                    //Save
-                    String[] loc = { latitude, longitude };
-                    store["loc"] = loc;
-                    store.Save();
-                }
-                else
+            if (store.Contains("enableLocation"))
+            {
+                if ((bool)store["enableLocation"])
                 {
-                    locationSearchTimes++;
-                    findLocation();
+
+                    if (isCurrent && locationSearchTimes <= 5)
+                    {
+                        //get location
+                        var getLocation = new getLocationMain();
+                        if (getLocation.getLat() != null && getLocation.getLat() != "NA")
+                        {
+                            //Set long and lat
+                            this.latitude = getLocation.getLat();
+                            this.longitude = getLocation.getLong();
+
+                            //Save
+                            String[] loc = { latitude, longitude };
+                            store["loc"] = loc;
+                            store.Save();
+                        }
+                        else
+                        {
+                            locationSearchTimes++;
+                            findLocation();
+                        }
+                    }
+                    if (locationSearchTimes > 5)
+                    {
+                        if (store.Contains("loc"))
+                        {
+                            String[] loc = store["loc"];
+                            latitude = loc[0];
+                            longitude = loc[1];
+                        }
+                       
+                        else
+                        {
+                            latitude = "0";
+                            longitude = "0";
+                        }
+                    }
                 }
+               
             }
-            if (locationSearchTimes > 5)
+            else
             {
-                if (store.Contains("loc"))
-                {
-                    String[] loc = store["loc"];
-                    latitude = loc[0];
-                    longitude = loc[1];
-                }
-                else
-                {
-                    latitude = "0";
-                    longitude = "0";
-                }
-
+                store["enableLocation"] = true;
+                findLocation();
             }
         }
     }

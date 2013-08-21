@@ -64,7 +64,9 @@
 
             <!--Pivot item 2-->
             <phone:PivotItem Header="locations">
-                <ListBox x:Name="LocationListBox" Margin="10,0,0,30" HorizontalAlignment="Left" Width="436" SelectionChanged="LocationListBox_SelectionChanged">
+                <StackPanel>
+                    <CheckBox Name="enableLocation" Content="Enable location services" Checked="enableLocation_Checked" Unchecked="enableLocation_Unchecked" />
+                    <ListBox x:Name="LocationListBox" Margin="10,0,0,30" HorizontalAlignment="Left" Width="436" SelectionChanged="LocationListBox_SelectionChanged">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
 
@@ -97,6 +99,7 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+                </StackPanel>
             </phone:PivotItem>
 
 
@@ -137,7 +140,9 @@
                                     <RadioButton GroupName="changeTemp"  x:Name="lockCelsius" Content="celsius" Checked="lockCelsius_Checked"  />
                                     <RadioButton GroupName="changeTemp" x:Name="lockFahrenheit" Content="fahrenheit" Checked="lockFahrenheit_Checked"  />
                                 </StackPanel>
+                                <!--
                                 <Button x:Name="UpdateButton" Content="Update Tile" Click="UpdateButton_Click" Margin="0,0,6,0" HorizontalAlignment="Right" Width="450"/>
+                                -->
                                 <Button Name="btnGoToLockSettings"  Content="Lockscreen Settings" Click="btnGoToLockSettings_Click"/>
                             </StackPanel>
                         </StackPanel>

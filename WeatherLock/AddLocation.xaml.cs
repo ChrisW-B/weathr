@@ -30,7 +30,13 @@ namespace WeatherLock
         //Location Pivot
         void seachResults(object sender, DownloadStringCompletedEventArgs e)
         {
-            locResults.Add(new LocResults() { LocName = "Current Location", LocUrl = "http://bing.com" });
+            if (store.Contains("enableLocation"))
+            {
+                if ((bool)store["enableLocation"])
+                {
+                    locResults.Add(new LocResults() { LocName = "Current Location", LocUrl = "http://bing.com" });
+                }
+            }
             //HAP needs a HTML-Document as it is based on Linq/Xpath
             XDocument doc = new XDocument();
             doc = XDocument.Parse(e.Result);

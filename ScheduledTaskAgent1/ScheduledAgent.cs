@@ -37,6 +37,10 @@ namespace ScheduledTaskAgent1
         private String latitude;
         private String longitude;
 
+        private int locationSearchTimes;
+        private Boolean error;
+        private string errorText;
+
         //save myself a bit of typing
         dynamic store = IsolatedStorageSettings.ApplicationSettings;
 
@@ -75,6 +79,9 @@ namespace ScheduledTaskAgent1
         //Do this stuff first
         protected override void OnInvoke(ScheduledTask task)
         {
+            error = false;
+            checkUnits();
+
             foreach (ShellTile tile in ShellTile.ActiveTiles)
             {
                 if (tile.NavigationUri.OriginalString != "/")
@@ -117,14 +124,14 @@ namespace ScheduledTaskAgent1
                         {
                             if (store.Contains("defaultLocation") && store.Contains("defaultUrl") && store.Contains("defaultCurrent"))
                             {
-                                defaultCityName = store["defaultLocation"];
-                                locUrl = store["defaultUrl"];
+                                defaultCityName = (string)store["defaultLocation"];
+                                locUrl = (string)store["defaultUrl"];
                                 isCurrent = Convert.ToBoolean(store["defaultCurrent"]);
                             }
                             else
                             {
                                 var toast = new Toast();
-                                toast.sendToast("Weathr","Please run the app first");
+                                toast.sendToast("Weathr", "Please run the app first");
                                 NotifyComplete();
                             }
                             updateDefault();
@@ -153,8 +160,8 @@ namespace ScheduledTaskAgent1
                     {
                         if (store.Contains("defaultLocation") && store.Contains("defaultUrl") && store.Contains("defaultCurrent"))
                         {
-                            defaultCityName = store["defaultLocation"];
-                            locUrl = store["defaultUrl"];
+                            defaultCityName = (string)store["defaultLocation"];
+                            locUrl = (string)store["defaultUrl"];
                             isCurrent = Convert.ToBoolean(store["defaultCurrent"]);
                         }
                         else
@@ -179,6 +186,7 @@ namespace ScheduledTaskAgent1
         //Update each type of tile
         private void updateDefault()
         {
+            locationSearchTimes = 0;
             checkLocation();
             checkUnits();
             var client = new WebClient();
@@ -303,13 +311,12 @@ namespace ScheduledTaskAgent1
             else
             {
                 NotifyComplete();
-            }  
+            }
         }
         private void updateMainTile(object sender, DownloadStringCompletedEventArgs e)
         {
             if (!e.Cancelled && e.Error == null)
             {
-                XDocument doc = XDocument.Parse(e.Result);
                 string tempStr = "0";
                 string todayHigh = "0";
                 string todayLow = "0";
@@ -318,78 +325,56 @@ namespace ScheduledTaskAgent1
                 Uri normalIcon = new Uri("/SunCloud202.png", UriKind.Relative);
                 Uri smallIcon = new Uri("/SunCloud110.png", UriKind.Relative);
 
-                //Current Conditions
-                var currentObservation = doc.Element("response").Element("current_observation");
-                string city = (string)currentObservation.Element("display_location").Element("city");
-                string state = (string)currentObservation.Element("display_location").Element("state_name");
-                string cityName = city + ", " + state;
-                string weather = (string)currentObservation.Element("weather");
-
-                XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
-
-                var today = forecastDays.Element("forecastday");
-                var tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
-
-                string forecastToday = (string)today.Element("conditions");
-                string forecastTomorrow = (string)tomorrow.Element("conditions");
-                if (tempUnit == "c")
+                XDocument doc = XDocument.Parse(e.Result);
+                XElement weatherError = doc.Element("response").Element("error");
+                if (weatherError == null && !error)
                 {
-                    tempStr = (string)currentObservation.Element("temp_c");
-                    todayLow = (string)today.Element("low").Element("celsius");
-                    todayHigh = (string)today.Element("high").Element("celsius");
-                    tomorrowLow = (string)tomorrow.Element("low").Element("celsius");
-                    tomorrowHigh = (string)tomorrow.Element("high").Element("celsius");
-                }
-                else
-                {
-                    tempStr = (string)currentObservation.Element("temp_f");
-                    todayLow = (string)today.Element("low").Element("fahrenheit");
-                    todayHigh = (string)today.Element("high").Element("fahrenheit");
-                    tomorrowHigh = (string)tomorrow.Element("high").Element("fahrenheit");
-                    tomorrowLow = (string)tomorrow.Element("low").Element("fahrenheit");
-                }
+                    //Current Conditions
+                    var currentObservation = doc.Element("response").Element("current_observation");
+                    string city = (string)currentObservation.Element("display_location").Element("city");
+                    string state = (string)currentObservation.Element("display_location").Element("state_name");
+                    string cityName = city + ", " + state;
+                    string weather = (string)currentObservation.Element("weather");
 
-                //get weather icons
-                Uri[] weatherIcons = getWeatherIcons(weather);
-                normalIcon = weatherIcons[0];
-                smallIcon = weatherIcons[1];
+                    XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
 
-                //convert temps to ints
-                var getTemp = new convertTemp(tempStr);
-                int temp = getTemp.temp;
+                    var today = forecastDays.Element("forecastday");
+                    var tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
 
-
-                foreach (ShellTile tile in ShellTile.ActiveTiles)
-                {
-                    if (tile.NavigationUri.OriginalString == "/")
+                    string forecastToday = (string)today.Element("conditions");
+                    string forecastTomorrow = (string)tomorrow.Element("conditions");
+                    if (tempUnit == "c")
                     {
-                        if (isCurrent)
+                        tempStr = (string)currentObservation.Element("temp_c");
+                        todayLow = (string)today.Element("low").Element("celsius");
+                        todayHigh = (string)today.Element("high").Element("celsius");
+                        tomorrowLow = (string)tomorrow.Element("low").Element("celsius");
+                        tomorrowHigh = (string)tomorrow.Element("high").Element("celsius");
+                    }
+                    else
+                    {
+                        tempStr = (string)currentObservation.Element("temp_f");
+                        todayLow = (string)today.Element("low").Element("fahrenheit");
+                        todayHigh = (string)today.Element("high").Element("fahrenheit");
+                        tomorrowHigh = (string)tomorrow.Element("high").Element("fahrenheit");
+                        tomorrowLow = (string)tomorrow.Element("low").Element("fahrenheit");
+                    }
+
+                    //get weather icons
+                    Uri[] weatherIcons = getWeatherIcons(weather);
+                    normalIcon = weatherIcons[0];
+                    smallIcon = weatherIcons[1];
+
+                    //convert temps to ints
+                    var getTemp = new convertTemp(tempStr);
+                    int temp = getTemp.temp;
+
+
+                    foreach (ShellTile tile in ShellTile.ActiveTiles)
+                    {
+                        if (tile.NavigationUri.OriginalString == "/")
                         {
-                            IconicTileData TileData = new IconicTileData
-                            {
-                                IconImage = normalIcon,
-                                SmallIconImage = smallIcon,
-                                Title = cityName,
-                                Count = temp,
-                                WideContent1 = string.Format("Currently: " + weather + ", " + temp + " degrees"),
-                                WideContent2 = string.Format("Today: " + forecastToday + " " + todayHigh + "/" + todayLow),
-                                WideContent3 = string.Format("Tomorrow: " + forecastTomorrow + " " + tomorrowHigh + "/" + tomorrowLow)
-
-                            };
-                            tile.Update(TileData);
-
-                            //mark tile as updated
-                            markUpdated("default location", city, state);
-
-                            //send a toast to tell that it has updated
-                            sendToast(cityName);
-
-                            //stop looping
-                            break;
-                        }
-                        else if (store.Contains("defaultLocation"))
-                        {
-                            if (store["defaultLocation"] == cityName && store["defaultLocation"] != "Current Location")
+                            if (isCurrent)
                             {
                                 IconicTileData TileData = new IconicTileData
                                 {
@@ -413,6 +398,93 @@ namespace ScheduledTaskAgent1
                                 //stop looping
                                 break;
                             }
+                            else if (store.Contains("defaultLocation"))
+                            {
+                                if (store["defaultLocation"] == cityName && store["defaultLocation"] != "Current Location")
+                                {
+                                    IconicTileData TileData = new IconicTileData
+                                    {
+                                        IconImage = normalIcon,
+                                        SmallIconImage = smallIcon,
+                                        Title = cityName,
+                                        Count = temp,
+                                        WideContent1 = string.Format("Currently: " + weather + ", " + temp + " degrees"),
+                                        WideContent2 = string.Format("Today: " + forecastToday + " " + todayHigh + "/" + todayLow),
+                                        WideContent3 = string.Format("Tomorrow: " + forecastTomorrow + " " + tomorrowHigh + "/" + tomorrowLow)
+
+                                    };
+                                    tile.Update(TileData);
+
+                                    //mark tile as updated
+                                    markUpdated("default location", city, state);
+
+                                    //send a toast to tell that it has updated
+                                    sendToast(cityName);
+
+                                    //stop looping
+                                    break;
+                                }
+
+                            }
+                        }
+                    }
+                }
+                else if (!error)
+                {
+                    errorText = (string)weatherError.Element("description");
+                    error = true;
+
+                    foreach (ShellTile tile in ShellTile.ActiveTiles)
+                    {
+                        if (tile.NavigationUri.OriginalString == "/")
+                        {
+                            IconicTileData TileData = new IconicTileData
+                            {
+                                IconImage = normalIcon,
+                                SmallIconImage = smallIcon,
+                                Title = "Error",
+                                Count = 0,
+                                WideContent1 = errorText,
+                            };
+                            tile.Update(TileData);
+
+                            //mark tile as updated
+                            markUpdated("default location", "null", "null");
+
+                            //send a toast to tell that it has updated
+                            sendToast("Error");
+
+                            //stop looping
+                            break;
+                        }
+                    }
+                }
+                else if (error)
+                {
+                    foreach (ShellTile tile in ShellTile.ActiveTiles)
+                    {
+                        if (tile.NavigationUri.OriginalString == "/")
+                        {
+                            IconicTileData TileData = new IconicTileData
+                            {
+                                IconImage = normalIcon,
+                                SmallIconImage = smallIcon,
+                                Title = "Error",
+                                Count = 0,
+                                WideContent1 = errorText,
+                                WideContent2 = null,
+                                WideContent3 = null
+                            };
+                            tile.Update(TileData);
+
+                            //mark tile as updated
+                            markUpdated("default location", "null", "null");
+
+                            //send a toast to tell that it has updated
+                            sendToast("Error");
+
+                            //stop looping
+                            break;
                         }
                     }
                 }
@@ -435,7 +507,7 @@ namespace ScheduledTaskAgent1
                 if ((bool)store["notifyMe"] == true)
                 {
                     var newToast = new Toast();
-                    newToast.sendToast(cityName , " has been updated!");
+                    newToast.sendToast(cityName, " has been updated!");
                 }
             }
         }
@@ -523,7 +595,7 @@ namespace ScheduledTaskAgent1
             //check what the temp units should be
             if (store.Contains("lockUnit"))
             {
-                if (store["lockUnit"] == "c")
+                if ((string)store["lockUnit"] == "c")
                 {
                     tempUnit = "c";
                 }
@@ -543,30 +615,53 @@ namespace ScheduledTaskAgent1
         private void checkLocation()
         {
             //Check to see if allowed to get location
+
             if (isCurrent)
             {
-                //get location
-                var getLocation = new getLocation();
-                if (getLocation.getLat() != null)
+                if (store.Contains("enableLocation"))
                 {
-                    latitude = getLocation.getLat();
-                    longitude = getLocation.getLong();
-                    String[] loc = { latitude, longitude };
-                    store["loc"] = loc;
-                }
-                else
-                {
-                    if (store.Contains("loc"))
+                    if ((bool)store["enableLocation"])
                     {
-                        String[] latlng = new String[2];
-                        latlng = (String[])store["loc"];
-                        latitude = latlng[0];
-                        longitude = latlng[1];
+                        if (locationSearchTimes <= 5)
+                        {
+                            //get location
+                            var getLocation = new getLocation();
+                            if (getLocation.getLat() != null && getLocation.getLat() != "NA")
+                            {
+                                latitude = getLocation.getLat();
+                                longitude = getLocation.getLong();
+                                String[] loc = { latitude, longitude };
+                                store["loc"] = loc;
+                            }
+                            else
+                            {
+                                locationSearchTimes++;
+                                checkLocation();
+                            }
+                        }
+                        if (locationSearchTimes > 5)
+                        {
+                            if (store.Contains("loc"))
+                            {
+                                String[] latlng = new String[2];
+                                latlng = (String[])store["loc"];
+                                latitude = latlng[0];
+                                longitude = latlng[1];
+
+                                //stop reuse of the location too many times
+                                store.Remove("loc");
+                            }
+                            else
+                            {
+                                error = true;
+                                errorText = "Cannot get location";
+                            }
+                        }
                     }
                     else
                     {
-                        latitude = "0";
-                        longitude = "0";
+                        error = true;
+                        errorText = "Cannot get location";
                     }
                 }
                 url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast/q/" + latitude + "," + longitude + ".xml";

@@ -54,7 +54,7 @@ namespace WeatherLock
         private String forecastTomorrow;
         private String tomorrowHigh;
         private String tomorrowLow;
-        
+
         //location data
         String latitude = null;
         String longitude = null;
@@ -63,6 +63,9 @@ namespace WeatherLock
         bool mapsSet;
         bool alertSet;
         bool getBackground;
+        bool errorSet = false;
+        int radTries;
+        int satTries;
         int locationSearchTimes;
         int numFlickrAttempts;
         int timesWeatherBroke;
@@ -84,6 +87,9 @@ namespace WeatherLock
         //collections of alerts and forecast
         ObservableCollection<HazardResults> results = new ObservableCollection<HazardResults>();
         ObservableCollection<ForecastResults> foreRes = new ObservableCollection<ForecastResults>();
+
+        //List of photo data
+        List<FlickrImage> photoList = new List<FlickrImage>();
 
         //create a clock
         private Clock clock;
@@ -108,7 +114,7 @@ namespace WeatherLock
             InitializeComponent();
 
             //Testing Key
-            apiKey = "fb1dd3f4321d048d";
+            //apiKey = "fb1dd3f4321d048d";
 
             initializeProgIndicators();
             noParams();
@@ -118,9 +124,12 @@ namespace WeatherLock
         }
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
+
             licInfo = new LicenseInformation();
             isTrial = licInfo.IsTrial();
 
+            satTries = 0;
+            radTries = 0;
             locationSearchTimes = 0;
             mapsSet = false;
             getBackground = false;
@@ -143,8 +152,8 @@ namespace WeatherLock
                 longitude = this.NavigationContext.QueryString["lon"];
                 String[] loc = { latitude, longitude };
                 store["loc"] = loc;
-                                            
-                if (store.Contains("cityName"))
+
+                if (store.Contains("cityName") && !cityNameLoad.Contains("Current Location"))
                 {
                     string citySplit = (string)store["cityName"].Split(',')[0];
                     string stateSplit = (string)store["cityName"].Split(',')[1];
@@ -155,6 +164,10 @@ namespace WeatherLock
                     {
                         store["locChanged"] = true;
                     }
+                }
+                else if (cityNameLoad.Contains("Current Location"))
+                {
+                    store["locChanged"] = true;
                 }
                 store.Save();
             }
@@ -204,8 +217,8 @@ namespace WeatherLock
                 {
                     noDefaults();
                 }
-                cityNameLoad = store["defaultLocation"];
-                urlKey = store["defaultUrl"];
+                cityNameLoad = (string)store["defaultLocation"];
+                urlKey = (string)store["defaultUrl"];
                 isCurrent = Convert.ToBoolean(store["defaultCurrent"]);
             }
             else
@@ -266,7 +279,7 @@ namespace WeatherLock
             {
                 if (store.Contains("locChanged"))
                 {
-                    if (store["locChanged"])
+                    if ((bool)store["locChanged"])
                     {
                         findLocation();
                     }
@@ -292,7 +305,7 @@ namespace WeatherLock
             }
             else
             {
-                if (store["locChanged"])
+                if ((bool)store["locChanged"])
                 {
                     findLocation();
                 }
@@ -324,41 +337,69 @@ namespace WeatherLock
         //Find the location
         private void findLocation()
         {
-            if (isCurrent && locationSearchTimes <= 5)
-            {
-                //get location
-                var getLocation = new getLocationMain();
-                if (getLocation.getLat() != null && getLocation.getLat() != "NA")
-                {
-                    //Set long and lat
-                    this.latitude = getLocation.getLat();
-                    this.longitude = getLocation.getLong();
 
-                    //Save
-                    String[] loc = { latitude, longitude };
-                    store["loc"] = loc;
-                    store.Save();
+            if (store.Contains("enableLocation"))
+            {
+                if ((bool)store["enableLocation"])
+                {
+
+                    if (isCurrent && locationSearchTimes <= 5)
+                    {
+                        //get location
+                        var getLocation = new getLocationMain();
+                        if (getLocation.getLat() != null && getLocation.getLat() != "NA")
+                        {
+                            errorSet = false;
+                            //Set long and lat
+                            this.latitude = getLocation.getLat();
+                            this.longitude = getLocation.getLong();
+
+                            //Save
+                            String[] loc = { latitude, longitude };
+                            store["loc"] = loc;
+                            store.Save();
+                        }
+                        else
+                        {
+                            locationSearchTimes++;
+                            findLocation();
+                        }
+                    }
+                    if (locationSearchTimes > 5)
+                    {
+                        if (store.Contains("loc"))
+                        {
+                            String[] loc = (string[])store["loc"];
+                            latitude = loc[0];
+                            longitude = loc[1];
+
+                            //prevent reuse of same location
+                            store.Remove("loc");
+                        }
+                        else if (!errorSet)
+                        {
+                            errorSet = true;
+                            errorText.Text = "Cannot get current location. Check to make sure location services are enabled";
+                            clearWeather();
+                        }
+                        else
+                        {
+                            latitude = "0";
+                            longitude = "0";
+                        }
+                    }
                 }
                 else
                 {
-                    locationSearchTimes++;
-                    findLocation();
+                    errorSet = true;
+                    errorText.Text = "Cannot get current location. Check to make sure location services are enabled";
+                    clearWeather();
                 }
             }
-            if (locationSearchTimes > 5)
+            else
             {
-                if (store.Contains("loc"))
-                {
-                    String[] loc = store["loc"];
-                    latitude = loc[0];
-                    longitude = loc[1];
-                }
-                else
-                {
-                    latitude = "0";
-                    longitude = "0";
-                }
-
+                store["enableLocation"] = true;
+                findLocation();
             }
         }
 
@@ -394,6 +435,7 @@ namespace WeatherLock
                     if ((bool)store["unitChanged"] == true)
                     {
                         store["unitChanged"] = false;
+                        restoreWeather();
                     }
                 }
                 if (store.Contains("groupChanged"))
@@ -478,65 +520,6 @@ namespace WeatherLock
         }
 
         //Getting and Setting Weather data
-        private void restoreWeather()
-        {
-            if ((bool)store.Contains("backupForecast"))
-            {
-                forecastListBox.ItemsSource = null;
-                foreRes.Clear();
-                foreRes = (ObservableCollection<ForecastResults>)store["backupForecast"];
-            }
-
-
-            if (store.Contains("backupAlerts"))
-            {
-                results = (ObservableCollection<HazardResults>)store["backupAlerts"];
-            }
-
-            if (store.Contains("loc"))
-            {
-                String[] latlng = new String[2];
-                latlng = (String[])store["loc"];
-                this.latitude = latlng[0];
-                this.longitude = latlng[1];
-            }
-
-            String[] savedData = new String[15];
-            if ((bool)store.Contains("backupApp"))
-            {
-                savedData = store["backupApp"];
-
-                this.cityName = savedData[0];
-                this.shortCityName = savedData[1];
-                this.realFeelF = savedData[2];
-                this.weather = savedData[3];
-                this.todayHigh = savedData[4];
-                this.todayLow = savedData[5];
-                this.forecastToday = savedData[6];
-                this.forecastTomorrow = savedData[7];
-                this.tomorrowHigh = savedData[8];
-                this.tomorrowLow = savedData[9];
-                this.windSpeedM = savedData[10];
-                this.realFeel = savedData[11];
-                this.humidityValue = savedData[12];
-                this.windDir = savedData[13];
-                this.updateTime = savedData[14];
-                this.tempCompareText = savedData[15];
-                this.tempC = savedData[16];
-                this.tempF = savedData[17];
-                this.realFeelC = savedData[18];
-                this.windSpeedK = savedData[19];
-
-                if (this.weather == null)
-                {
-                    updateWeather();
-                }
-                else
-                {
-                    setWeather();
-                }
-            }
-        }
         private void setWeather()
         {
             //Convert weather text to caps
@@ -572,6 +555,10 @@ namespace WeatherLock
 
             store["cityName"] = cityName;
 
+            if (!errorSet)
+            {
+                errorText.Text = null;
+            }
 
             backupWeather();
             progWeather.IsVisible = false;
@@ -582,137 +569,235 @@ namespace WeatherLock
                 getFlickrPic();
             }
         }
+        private void clearWeather()
+        {
+            //Clear old location data
+            temp.Text = null;
+            feelsLike.Text = null;
+            wind.Text = null;
+            conditions.Text = null;
+            humidity.Text = null;
+            tempCompare.Text = null;
+            forecastListBox.ItemsSource = null;
+            alertListBox.ItemsSource = null;
+        }
+        private void restoreWeather()
+        {
+            if ((bool)store.Contains("backupForecast"))
+            {
+                forecastListBox.ItemsSource = null;
+                foreRes.Clear();
+                foreRes = (ObservableCollection<ForecastResults>)store["backupForecast"];
+            }
+
+
+            if (store.Contains("backupAlerts"))
+            {
+                results = (ObservableCollection<HazardResults>)store["backupAlerts"];
+            }
+
+            if (store.Contains("loc"))
+            {
+                String[] latlng = new String[2];
+                latlng = (String[])store["loc"];
+                this.latitude = latlng[0];
+                this.longitude = latlng[1];
+            }
+
+            String[] savedData = new String[15];
+            if ((bool)store.Contains("backupApp"))
+            {
+                savedData = (string[])store["backupApp"];
+
+                this.cityName = savedData[0];
+                this.shortCityName = savedData[1];
+                this.realFeelF = savedData[2];
+                this.weather = savedData[3];
+                this.todayHigh = savedData[4];
+                this.todayLow = savedData[5];
+                this.forecastToday = savedData[6];
+                this.forecastTomorrow = savedData[7];
+                this.tomorrowHigh = savedData[8];
+                this.tomorrowLow = savedData[9];
+                this.windSpeedM = savedData[10];
+                this.realFeel = savedData[11];
+                this.humidityValue = savedData[12];
+                this.windDir = savedData[13];
+                this.updateTime = savedData[14];
+                this.tempCompareText = savedData[15];
+                this.tempC = savedData[16];
+                this.tempF = savedData[17];
+                this.realFeelC = savedData[18];
+                this.windSpeedK = savedData[19];
+
+                if (this.weather == null)
+                {
+                    updateWeather();
+                }
+                else if (!errorSet)
+                {
+                    setWeather();
+                }
+            }
+        }
         private void updateWeather()
         {
+
             startWeatherProg();
             setURL();
 
             forecastListBox.ItemsSource = null;
             foreRes.Clear();
-
-            WebClient client = new WebClient();
-            client.Headers[HttpRequestHeader.IfModifiedSince] = DateTime.Now.ToString();
-            client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadStringCompleted);
-            client.DownloadStringAsync(new Uri(url));
+            if (!errorSet)
+            {
+                clearWeather();
+                WebClient client = new WebClient();
+                client.Headers[HttpRequestHeader.IfModifiedSince] = DateTime.Now.ToString();
+                client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadStringCompleted);
+                client.DownloadStringAsync(new Uri(url));
+            }
+            else if (errorSet)
+            {
+                progWeather.IsVisible = false;
+                HideTray();
+            }
         }
         private void client_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
             if (!e.Cancelled && e.Error == null && e.Result != null)
             {
                 XDocument doc = XDocument.Parse(e.Result);
-
-                #region current conditions
-                //Current Conditions
-                var currentObservation = doc.Element("response").Element("current_observation");
-                //location name
-                string city = (string)currentObservation.Element("display_location").Element("city");
-                string state = (string)currentObservation.Element("display_location").Element("state_name");
-                this.cityName = city + ", " + state;
-                this.shortCityName = (string)currentObservation.Element("display_location").Element("city");
-
-                if (store["defaultLocation"] == "Current Location")
+                XElement error = doc.Element("response").Element("error");
+                if (error == null)
                 {
-                    store["saveDefaultLocName"] = cityName;
-                    store.Save();
-                }
-                //Current Weather
-                this.weather = (string)currentObservation.Element("weather");
-                //Current wind
 
-                this.windSpeedM = (string)currentObservation.Element("wind_mph") + " mph";
+                    #region current conditions
+                    //Current Conditions
+                    var currentObservation = doc.Element("response").Element("current_observation");
+                    //location name
+                    string city = (string)currentObservation.Element("display_location").Element("city");
+                    string state = (string)currentObservation.Element("display_location").Element("state_name");
+                    this.cityName = city + ", " + state;
+                    this.shortCityName = (string)currentObservation.Element("display_location").Element("city");
 
-                this.windSpeedK = (string)currentObservation.Element("wind_kph") + " kph";
+                    if (store["defaultLocation"] == "Current Location")
+                    {
+                        store["saveDefaultLocName"] = cityName;
+                        store.Save();
+                    }
+                    //Current Weather
+                    this.weather = (string)currentObservation.Element("weather");
+                    //Current wind
 
-                this.windDir = (string)currentObservation.Element("wind_dir");
-                //Current Temp and feels like
+                    this.windSpeedM = (string)currentObservation.Element("wind_mph") + " mph";
 
-                this.tempC = (string)currentObservation.Element("temp_c");
-                this.realFeelC = (string)currentObservation.Element("feelslike_c");
+                    this.windSpeedK = (string)currentObservation.Element("wind_kph") + " kph";
 
-                this.tempF = (string)currentObservation.Element("temp_f");
-                this.realFeelF = (string)currentObservation.Element("feelslike_f");
+                    this.windDir = (string)currentObservation.Element("wind_dir");
+                    //Current Temp and feels like
 
-                //current humidity
-                this.humidityValue = (string)currentObservation.Element("relative_humidity");
-                #endregion
-                #region forecast conditions
-                //Forecast Conditions
-                XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
-                //Today's conditions
-                var today = forecastDays.Element("forecastday");
-                //Today's Forecast
-                this.forecastToday = (string)today.Element("conditions");
-                //Today's High/Low
-                if (tempUnit == "c")
-                {
-                    this.todayLow = (string)today.Element("low").Element("celsius");
-                    this.todayHigh = (string)today.Element("high").Element("celsius");
+                    this.tempC = (string)currentObservation.Element("temp_c");
+                    this.realFeelC = (string)currentObservation.Element("feelslike_c");
+
+                    this.tempF = (string)currentObservation.Element("temp_f");
+                    this.realFeelF = (string)currentObservation.Element("feelslike_f");
+
+                    //current humidity
+                    this.humidityValue = (string)currentObservation.Element("relative_humidity");
+                    #endregion
+                    #region forecast conditions
+                    //Forecast Conditions
+                    XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
+                    //Today's conditions
+                    var today = forecastDays.Element("forecastday");
+                    //Today's Forecast
+                    this.forecastToday = (string)today.Element("conditions");
+                    //Today's High/Low
+                    if (tempUnit == "c")
+                    {
+                        this.todayLow = (string)today.Element("low").Element("celsius");
+                        this.todayHigh = (string)today.Element("high").Element("celsius");
+                    }
+                    else
+                    {
+                        this.todayLow = (string)today.Element("low").Element("fahrenheit");
+                        this.todayHigh = (string)today.Element("high").Element("fahrenheit");
+                    }
+                    //Tomorrow's conditions
+                    var tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
+                    //Tomorrow's Forecast
+                    this.forecastTomorrow = (string)tomorrow.Element("conditions");
+                    //Tomorrow's High/Low
+                    if (tempUnit == "c")
+                    {
+                        this.tomorrowHigh = (string)tomorrow.Element("low").Element("celsius");
+                        this.tomorrowLow = (string)tomorrow.Element("high").Element("celsius");
+                    }
+                    else
+                    {
+                        this.tomorrowHigh = (string)tomorrow.Element("high").Element("fahrenheit");
+                        this.tomorrowLow = (string)tomorrow.Element("low").Element("fahrenheit");
+                    }
+
+                    int todayHighInt = Convert.ToInt32(todayHigh);
+                    int tomorrowHighInt = Convert.ToInt32(tomorrowLow);
+
+                    if (todayHighInt > tomorrowHighInt)
+                    {
+                        tempCompareText = "COOLER THAN";
+                    }
+                    else if (todayHighInt < tomorrowHighInt)
+                    {
+                        tempCompareText = "WARMER THAN";
+                    }
+                    else
+                    {
+                        tempCompareText = "ABOUT THE SAME AS";
+                    }
+
+                    var forecastDaysTxt = doc.Element("response").Element("forecast").Element("txt_forecast").Element("forecastdays");
+                    foreach (XElement elm in forecastDaysTxt.Elements("forecastday"))
+                    {
+                        string title = (string)elm.Element("title");
+                        string fcttext = (string)elm.Element("fcttext");
+                        string fcttextMet = (string)elm.Element("fcttext_metric");
+                        string pop = (string)elm.Element("pop");
+
+                        if (store.Contains("forecastUnit"))
+                            if (store["forecastUnit"] == "m")
+                            {
+                                fcttext = fcttextMet;
+                            }
+
+                        this.foreRes.Add(new ForecastResults() { title = title, fcttext = fcttext, pop = pop });
+                        this.forecastListBox.ItemsSource = foreRes;
+                    }
+                    #endregion
+
+                    //set ui elements
+                    setWeather();
+
+                    //Back it all up
+                    backupWeather();
+                    timesWeatherBroke = 0;
                 }
                 else
                 {
-                    this.todayLow = (string)today.Element("low").Element("fahrenheit");
-                    this.todayHigh = (string)today.Element("high").Element("fahrenheit");
+                    clearWeather();
+
+                    errorSet = true;
+                    string errorDescrip = (string)error.Element("description");
+                    if (errorDescrip.Contains("location"))
+                    {
+                        errorDescrip += Environment.NewLine + "Try checking your location settings.";
+                    }
+                    errorText.Text = errorDescrip;
+
+                    progWeather.IsVisible = false;
+                    HideTray();
                 }
-                //Tomorrow's conditions
-                var tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
-                //Tomorrow's Forecast
-                this.forecastTomorrow = (string)tomorrow.Element("conditions");
-                //Tomorrow's High/Low
-                if (tempUnit == "c")
-                {
-                    this.tomorrowHigh = (string)tomorrow.Element("low").Element("celsius");
-                    this.tomorrowLow = (string)tomorrow.Element("high").Element("celsius");
-                }
-                else
-                {
-                    this.tomorrowHigh = (string)tomorrow.Element("high").Element("fahrenheit");
-                    this.tomorrowLow = (string)tomorrow.Element("low").Element("fahrenheit");
-                }
-
-                int todayHighInt = Convert.ToInt32(todayHigh);
-                int tomorrowHighInt = Convert.ToInt32(tomorrowLow);
-
-                if (todayHighInt > tomorrowHighInt)
-                {
-                    tempCompareText = "COOLER THAN";
-                }
-                else if (todayHighInt < tomorrowHighInt)
-                {
-                    tempCompareText = "WARMER THAN";
-                }
-                else
-                {
-                    tempCompareText = "ABOUT THE SAME AS";
-                }
-
-                var forecastDaysTxt = doc.Element("response").Element("forecast").Element("txt_forecast").Element("forecastdays");
-                foreach (XElement elm in forecastDaysTxt.Elements("forecastday"))
-                {
-                    string title = (string)elm.Element("title");
-                    string fcttext = (string)elm.Element("fcttext");
-                    string fcttextMet = (string)elm.Element("fcttext_metric");
-                    string pop = (string)elm.Element("pop");
-
-                    if (store.Contains("forecastUnit"))
-                        if (store["forecastUnit"] == "m")
-                        {
-                            fcttext = fcttextMet;
-                        }
-
-                    this.foreRes.Add(new ForecastResults() { title = title, fcttext = fcttext, pop = pop });
-                    this.forecastListBox.ItemsSource = foreRes;
-                }
-                #endregion
-
-                //set ui elements
-                setWeather();
-
-                //Back it all up
-                backupWeather();
-                timesWeatherBroke = 0;
-
             }
-            else if(timesWeatherBroke<5)
+            else if (timesWeatherBroke < 5)
             {
                 timesWeatherBroke++;
                 updateWeather();
@@ -759,23 +844,31 @@ namespace WeatherLock
         //Radar
         private void setupRadar()
         {
-            if (latitude != null && longitude != null)
+            if (radTries == 0)
             {
-
+                radarMap.Loaded += addRadar;
+                radarMap.IsEnabled = false;
+            }
+            if (latitude != null && longitude != null && latitude != "" && longitude != "" && radTries < 5)
+            {
                 double lat = Convert.ToDouble(latitude);
                 double lon = Convert.ToDouble(longitude);
                 radarMap.Center = new GeoCoordinate(lat, lon);
                 radarMap.CartographicMode = MapCartographicMode.Road;
                 radarMap.ZoomLevel = 5;
-                radarMap.IsEnabled = false;
 
                 showRadarLocation();
-                radarMap.Loaded += addRadar;
+            }
+            else if (radTries >= 5)
+            {
+                return;
             }
             else
             {
+                radTries++;
                 findLocation();
                 setupRadar();
+
             }
         }
         void addRadar(object sender, RoutedEventArgs e)
@@ -828,20 +921,30 @@ namespace WeatherLock
         //Sat
         private void setupSat()
         {
-            if (latitude != null && longitude != null)
+            if (satTries == 0)
+            {
+                satMap.Loaded += addSat;
+                satMap.IsEnabled = false;
+            }
+            if (latitude != null && longitude != null && latitude != "" && longitude != "" && satTries < 5)
             {
                 double lat = Convert.ToDouble(latitude);
                 double lon = Convert.ToDouble(longitude);
                 satMap.Center = new GeoCoordinate(lat, lon);
                 satMap.CartographicMode = MapCartographicMode.Road;
                 satMap.ZoomLevel = 5;
-                satMap.IsEnabled = false;
+
 
                 showSatLocation();
-                satMap.Loaded += addSat;
+
+            }
+            else if (satTries >= 5)
+            {
+                return;
             }
             else
             {
+                satTries++;
                 findLocation();
                 setupSat();
             }
@@ -971,6 +1074,7 @@ namespace WeatherLock
         {
             if (!e.Cancelled && e.Error == null)
             {
+                photoList.Clear();
                 XDocument doc = XDocument.Parse(e.Result);
                 var stat = doc.Element("rsp").Attribute("stat");
                 if ((string)stat == "fail")
@@ -981,7 +1085,7 @@ namespace WeatherLock
                     HideTray();
                     return;
                 }
-                var photos = doc.Element("rsp").Element("photos");
+                XElement photos = doc.Element("rsp").Element("photos");
 
                 var rand = new Random();
 
@@ -997,7 +1101,7 @@ namespace WeatherLock
                     {
                         this.fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&tags=" + flickrTags + "&per_page=500&tag_mode=any&content_type=1&media=photos&sort=relevance&format=rest";
                     }
-                        WebClient client = new WebClient();
+                    WebClient client = new WebClient();
                     client.Headers[HttpRequestHeader.IfModifiedSince] = DateTime.Now.ToString();
                     client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(getFlickrXml);
                     client.DownloadStringAsync(new Uri(fUrl));
@@ -1006,33 +1110,24 @@ namespace WeatherLock
                 {
                     if (numFlickrAttempts > 5)
                     {
-                        progFlickr.Text = "Could not find any relevant pictures";
-                        System.Threading.Thread.Sleep(500);
                         progFlickr.IsVisible = false;
                         HideTray();
                         return;
                     }
-                    int randValue;
-                    if (numPhotos < 251)
-                    {
-                        randValue = rand.Next(numPhotos + 1);
-                    }
-                    else
-                    {
-                        randValue = rand.Next(251);
-                    }
 
 
-                    var photo = photos.Element("photo");
-                    for (int x = 1; x < randValue - 1; x++)
+
+                    foreach (XElement photo in photos.Elements("photo"))
                     {
-                        photo = photo.ElementsAfterSelf("photo").First();
+                        photoList.Add(new FlickrImage { farm = photo.Attribute("farm").Value, server = photo.Attribute("server").Value, secret = photo.Attribute("secret").Value, id = photo.Attribute("id").Value });
                     }
 
-                    string farm = photo.Attribute("farm").Value;
-                    string server = photo.Attribute("server").Value;
-                    string secret = photo.Attribute("secret").Value;
-                    string id = photo.Attribute("id").Value;
+                    int randValue = rand.Next(photoList.Count);
+
+                    string farm = photoList[randValue].farm;
+                    string server = photoList[randValue].server;
+                    string id = photoList[randValue].id;
+                    string secret = photoList[randValue].secret;
 
                     string photoUrl = "http://farm" + farm + ".staticflickr.com/" + server + "/" + id + "_" + secret + "_b.jpg";
                     Uri photoUri = new Uri(photoUrl);
@@ -1046,6 +1141,13 @@ namespace WeatherLock
                     HideTray();
                 }
             }
+        }
+        public class FlickrImage
+        {
+            public string farm { get; set; }
+            public string server { get; set; }
+            public string secret { get; set; }
+            public string id { get; set; }
         }
 
         //Getting Alerts

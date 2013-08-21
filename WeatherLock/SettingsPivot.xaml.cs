@@ -1,4 +1,4 @@
-﻿//#define DEBUG_AGENT
+﻿#define DEBUG_AGENT
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,9 +42,47 @@ namespace WeatherLock
             InitializeComponent();
         }
 
+        
+
+        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
+        {
+            licInfo = new LicenseInformation();
+            isTrial = licInfo.IsTrial();
+
+
+            setValues();
+
+            ignoreCheckBoxEvents = true;
+
+            periodicTask = ScheduledActionService.Find(periodicTaskName) as PeriodicTask;
+
+            if (periodicTask != null)
+            {
+                PeriodicStackPanel.DataContext = periodicTask;
+            }
+            ignoreCheckBoxEvents = false;
+
+            createDefaultLoc();
+            addLocation();
+        }
         private void setValues()
         {
-
+            if (store.Contains("enableLocation"))
+            {
+                if ((bool)store["enableLocation"])
+                {
+                    enableLocation.IsChecked = true;
+                }
+                else
+                {
+                    enableLocation.IsChecked = false;
+                }
+            }
+            else
+            {
+                store["enableLocation"] = true;
+                enableLocation.IsChecked = true;
+            }
             if (store.Contains("lockUnit"))
             {
                 if (store["lockUnit"] == "c")
@@ -84,16 +122,19 @@ namespace WeatherLock
                 if ((bool)store["useFlickr"])
                 {
                     flickrPics.IsChecked = true;
+                    weatherGroup.IsEnabled = true;
                 }
                 else
                 {
                     flickrPics.IsChecked = false;
+                    weatherGroup.IsEnabled = false;
                 }
             }
             else
             {
                 store["useFlickr"] = true;
                 flickrPics.IsChecked = true;
+                weatherGroup.IsEnabled = true;
             }
 
             if (store.Contains("useWeatherGroup"))
@@ -221,28 +262,6 @@ namespace WeatherLock
             }
         }
 
-        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
-        {
-            licInfo = new LicenseInformation();
-            isTrial = licInfo.IsTrial();
-
-
-            setValues();
-
-            ignoreCheckBoxEvents = true;
-
-            periodicTask = ScheduledActionService.Find(periodicTaskName) as PeriodicTask;
-
-            if (periodicTask != null)
-            {
-                PeriodicStackPanel.DataContext = periodicTask;
-            }
-            ignoreCheckBoxEvents = false;
-
-            createDefaultLoc();
-            addLocation();
-        }
-
         //show/hide add button
         private void Pivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -289,10 +308,12 @@ namespace WeatherLock
         private void flickrPics_Checked(object sender, RoutedEventArgs e)
         {
             store["useFlickr"] = true;
+            weatherGroup.IsEnabled = true;
         }
         private void flickrPics_Unchecked(object sender, RoutedEventArgs e)
         {
             store["useFlickr"] = false;
+            weatherGroup.IsEnabled = false;
         }
         private void weatherGroup_Checked(object sender, RoutedEventArgs e)
         {
@@ -310,6 +331,14 @@ namespace WeatherLock
         ObservableCollection<Locations> locations = new ObservableCollection<Locations>();
         
         #endregion
+        private void enableLocation_Checked(object sender, RoutedEventArgs e)
+        {
+            store["enableLocation"] = true;
+        }
+        private void enableLocation_Unchecked(object sender, RoutedEventArgs e)
+        {
+            store["enableLocation"] = false;
+        }
         private void initializeLocations()
         {
             locations.Add(new Locations() { LocName = "Current Location", CurrentLoc = true, ImageSource = "/Images/favs.png" });
@@ -341,13 +370,29 @@ namespace WeatherLock
             {
                 if ((bool)store["locAdded"])
                 {
+                    String lat;
+                    String lon;
                     store["locAdded"] = false;
                     String locationName = store["newLocation"];
                     String locationUrl = store["newUrl"];
-                    String[] location = store["newLoc"];
-                    String lat = location[0];
-                    String lon = location[1];
+                    if (!locationName.Contains("Current Location"))
+                    {
+                        String[] location = store["newLoc"];
+                        lat = location[0];
+                        lon = location[1];
+                    }
+                    else
+                    {
+                        lat = null;
+                        lon = null;
+                    }
+                    if(!locationName.Contains("Current Location")){
                     locations.Add(new Locations() { LocName = locationName, CurrentLoc = false, LocUrl = locationUrl, Lat = lat, Lon = lon, ImageSource = "/Images/Clear.png" });
+                }
+                    else
+                    {
+                        locations.Add(new Locations() { LocName = locationName, CurrentLoc = true, LocUrl = locationUrl, Lat = lat, Lon = lon, ImageSource = "/Images/Clear.png" });
+                    }
                     LocationListBox.ItemsSource = locations;
                     backupLocations();
                 }
@@ -470,15 +515,18 @@ namespace WeatherLock
         }
         private void LocationListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var resArray = locations.ToArray()[LocationListBox.SelectedIndex];
-            string current = (string)resArray.LocName;
-            store["isCurrent"] = resArray.CurrentLoc;
-            store["locUrl"] = resArray.LocUrl;
-            store["locName"] = resArray.LocName;
-            store["locChanged"] = true;
-            String[] location = { resArray.Lat, resArray.Lon };
-            store["loc"] = location;
-            store.Save();
+            if (LocationListBox.SelectedIndex != -1)
+            {
+                var resArray = locations.ToArray()[LocationListBox.SelectedIndex];
+                string current = (string)resArray.LocName;
+                store["isCurrent"] = resArray.CurrentLoc;
+                store["locUrl"] = resArray.LocUrl;
+                store["locName"] = resArray.LocName;
+                store["locChanged"] = true;
+                String[] location = { resArray.Lat, resArray.Lon };
+                store["loc"] = location;
+                store.Save();
+            }
 
         }
         private void locationName_Tap(object sender, System.Windows.Input.GestureEventArgs e)
@@ -608,7 +656,7 @@ namespace WeatherLock
                 ScheduledActionService.Add(periodicTask);
                 PeriodicStackPanel.DataContext = periodicTask;
 //#if(DEBUG_AGENT)
-  //              ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
+               //ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
 //#endif
 
             }
@@ -705,7 +753,7 @@ namespace WeatherLock
         private void updateData()
         {
             //Testing Key
-            apiKey = "fb1dd3f4321d048d";
+            //apiKey = "fb1dd3f4321d048d";
 
             checkLocation();
             checkUnits();
