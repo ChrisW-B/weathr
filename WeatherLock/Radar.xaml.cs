@@ -58,6 +58,8 @@ namespace WeatherLock
 
         private void setupRadar()
         {
+            MapsSettings.ApplicationContext.ApplicationId = "6613ed8e-4185-4b0d-b0ba-a530ac174ad5";
+            MapsSettings.ApplicationContext.AuthenticationToken = "YWpfouhJ8iOBbeDGnmKULA";
             if (radTries == 0)
             {
                 map.Loaded += addRadar;
@@ -93,8 +95,7 @@ namespace WeatherLock
         }
         void addRadar(object sender, RoutedEventArgs e)
         {
-            MapsSettings.ApplicationContext.ApplicationId = "<applicationid>";
-            MapsSettings.ApplicationContext.AuthenticationToken = "<authenticationtoken>";
+            
 
 
             RadarCache radarCache = new RadarCache();

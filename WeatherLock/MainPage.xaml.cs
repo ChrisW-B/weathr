@@ -844,6 +844,8 @@ namespace WeatherLock
         //Radar
         private void setupRadar()
         {
+            MapsSettings.ApplicationContext.ApplicationId = "6613ed8e-4185-4b0d-b0ba-a530ac174ad5";
+            MapsSettings.ApplicationContext.AuthenticationToken = "YWpfouhJ8iOBbeDGnmKULA";
             if (radTries == 0)
             {
                 radarMap.Loaded += addRadar;
@@ -873,8 +875,6 @@ namespace WeatherLock
         }
         void addRadar(object sender, RoutedEventArgs e)
         {
-            MapsSettings.ApplicationContext.ApplicationId = "<applicationid>";
-            MapsSettings.ApplicationContext.AuthenticationToken = "<authenticationtoken>";
             TileSource radar = new CurrentRadar();
             radarMap.TileSources.Add(radar);
         }
@@ -921,6 +921,8 @@ namespace WeatherLock
         //Sat
         private void setupSat()
         {
+            MapsSettings.ApplicationContext.ApplicationId = "6613ed8e-4185-4b0d-b0ba-a530ac174ad5";
+            MapsSettings.ApplicationContext.AuthenticationToken = "YWpfouhJ8iOBbeDGnmKULA";
             if (satTries == 0)
             {
                 satMap.Loaded += addSat;
@@ -951,8 +953,6 @@ namespace WeatherLock
         }
         private void addSat(object sender, RoutedEventArgs e)
         {
-            MapsSettings.ApplicationContext.ApplicationId = "<applicationid>";
-            MapsSettings.ApplicationContext.AuthenticationToken = "<authenticationtoken>";
             TileSource sat = new CurrentSat();
             satMap.TileSources.Add(sat);
         }

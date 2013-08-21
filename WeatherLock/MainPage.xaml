@@ -132,7 +132,7 @@
 
 
         </phone:Panorama>
-        <my:AdControl x:Name="adControl" IsAutoRefreshEnabled="True" ApplicationId="ff3b5777-e1f7-4e72-8b9e-300f0093c2db" AdUnitId="137381" Margin="0,548,0,27" Width="480" Grid.Row="1" Height="80" />
+        <my:AdControl x:Name="adControl" IsAutoRefreshEnabled="True" ApplicationId="2af06aa6-4d1c-448b-908a-40372c39a9e1" AdUnitId="137381" Margin="0,548,0,27" Width="480" Grid.Row="1" Height="80" />
     </Grid>
 
     <phone:PhoneApplicationPage.ApplicationBar>

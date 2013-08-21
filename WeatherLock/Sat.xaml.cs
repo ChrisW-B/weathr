@@ -54,6 +54,8 @@ namespace WeatherLock
 
         private void setupSat()
         {
+            MapsSettings.ApplicationContext.ApplicationId = "6613ed8e-4185-4b0d-b0ba-a530ac174ad5";
+            MapsSettings.ApplicationContext.AuthenticationToken = "YWpfouhJ8iOBbeDGnmKULA";
             if (satTries == 0)
             {
                 map.Loaded += addSat;
@@ -83,8 +85,6 @@ namespace WeatherLock
         }
         private void addSat(object sender, RoutedEventArgs e)
         {
-            MapsSettings.ApplicationContext.ApplicationId = "<applicationid>";
-            MapsSettings.ApplicationContext.AuthenticationToken = "<authenticationtoken>";
             TileSource sat = new AnimatedSat();
             map.TileSources.Add(sat);
         }
