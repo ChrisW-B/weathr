@@ -521,6 +521,11 @@ namespace WeatherLock
                         MessageBoxResult m = MessageBox.Show("Already Pinned!", "", MessageBoxButton.OK);
                         return;
                     }
+                    else if (tile.NavigationUri.ToString().Contains("isCurrent=True") && resArray[2]=="True")
+                    {
+                        MessageBoxResult m = MessageBox.Show("Already Pinned!", "", MessageBoxButton.OK);
+                        return;
+                    }
                 }
 
                 if (checkPeriodic(sender, e))

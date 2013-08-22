@@ -162,7 +162,7 @@ namespace WeatherLock
                 String[] loc = { latitude, longitude };
                 store["loc"] = loc;
 
-                if (store.Contains("cityName") && !cityNameLoad.Contains("Current Location"))
+                if (store.Contains("cityName") && !isCurrent)
                 {
                     string citySplit = (string)store["cityName"].Split(',')[0];
                     string stateSplit = (string)store["cityName"].Split(',')[1];
@@ -177,9 +177,10 @@ namespace WeatherLock
                         }
                     }
                 }
-                else if (cityNameLoad.Contains("Current Location"))
+                else if (isCurrent)
                 {
                     store["locChanged"] = true;
+                    cityNameLoad = "Current Location";
                 }
                 store.Save();
             }
@@ -200,6 +201,11 @@ namespace WeatherLock
             foreach (ShellTile tile in ShellTile.ActiveTiles)
             {
                 if (tile.NavigationUri.ToString().Contains(cityNameLoad))
+                {
+                    pinButton.IsEnabled = false;
+                    break;
+                }
+                else if (tile.NavigationUri.ToString().Contains("isCurrent=True") && isCurrent)
                 {
                     pinButton.IsEnabled = false;
                     break;
