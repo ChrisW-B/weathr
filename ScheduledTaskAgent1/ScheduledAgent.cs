@@ -198,7 +198,7 @@ namespace ScheduledTaskAgent1
         {
             foreach (Pins pinnedTile in pinnedList)
             {
-                if (!pinnedTile.LocName.Contains("default location"))
+                if (!pinnedTile.LocName.Contains("default location") && !pinnedTile.currentLoc)
                 {
                     String pinnedUrl = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast" + pinnedTile.LocUrl + ".xml";
                     checkUnits();
@@ -206,6 +206,16 @@ namespace ScheduledTaskAgent1
 
                     client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(WeatherStringCallback);
                     client.DownloadStringAsync(new Uri(pinnedUrl));
+                }
+                if (pinnedTile.currentLoc)
+                {
+                    locationSearchTimes = 0;
+                    checkLocation();
+                    checkUnits();
+                    var client = new WebClient();
+
+                    client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(WeatherStringCallback);
+                    client.DownloadStringAsync(new Uri(url));
                 }
             }
         }
