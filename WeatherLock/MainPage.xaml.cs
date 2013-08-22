@@ -28,8 +28,8 @@ namespace WeatherLock
         #region variables
 
         //Set Units
-        String tempUnit = null;
-        String windUnit = null;
+        bool tempUnitIsC;
+        bool windUnitIsM;
 
         //Current Conditions
         private String cityName;
@@ -63,6 +63,7 @@ namespace WeatherLock
         bool mapsSet;
         bool alertSet;
         bool getBackground;
+        bool weatherSet = false;
         bool errorSet = false;
         int radTries;
         int satTries;
@@ -117,7 +118,7 @@ namespace WeatherLock
             apiKey = "fb1dd3f4321d048d";
 
             initializeProgIndicators();
-            noParams();
+            //noParams();
             setUnits();
             restoreWeather();
             this.clock = new Clock(this);
@@ -133,6 +134,7 @@ namespace WeatherLock
             locationSearchTimes = 0;
             mapsSet = false;
             getBackground = false;
+            weatherSet = false;
 
             checkUseWeatherGroup();
 
@@ -160,9 +162,12 @@ namespace WeatherLock
                     string cityLoadSplit = cityNameLoad.Split(',')[0];
                     string stateLoadSplit = cityNameLoad.Split(',')[1];
 
-                    if (!(cityLoadSplit.Contains(citySplit) && stateLoadSplit.Contains(stateSplit)))
+                    if (!cityLoadSplit.Contains(citySplit))
                     {
-                        store["locChanged"] = true;
+                        if (!stateLoadSplit.Contains(stateSplit))
+                        {
+                            store["locChanged"] = true;
+                        }
                     }
                 }
                 else if (cityNameLoad.Contains("Current Location"))
@@ -210,7 +215,10 @@ namespace WeatherLock
                 {
                     if (store["cityName"] != cityNameLoad)
                     {
-                        store["locChanged"] = true;
+                        if (store["cityName"] != store["defaultLocation"])
+                        {
+                            store["locChanged"] = true;
+                        }
                     }
                 }
                 else
@@ -243,32 +251,32 @@ namespace WeatherLock
             {
                 if ((bool)store["tempIsC"])
                 {
-                    this.tempUnit = "c";
+                    this.tempUnitIsC = true;
                 }
                 else
                 {
-                    this.tempUnit = "f";
+                    this.tempUnitIsC = false;
                 }
             }
             else
             {
-                this.tempUnit = "c";
+                this.tempUnitIsC = true;
             }
 
-            if (store.Contains("windUnit"))
+            if (store.Contains("windUnitIsM"))
             {
-                if ((string)store["windUnit"] == "m")
+                if ((bool)store["windUnitIsM"])
                 {
-                    this.windUnit = "m";
+                    this.windUnitIsM = true;
                 }
                 else
                 {
-                    this.windUnit = "k";
+                    this.windUnitIsM = false;
                 }
             }
             else
             {
-                this.windUnit = "k";
+                this.windUnitIsM = false;
             }
         }
 
@@ -417,22 +425,24 @@ namespace WeatherLock
                 if ((int)timeDiff.TotalMinutes > 15)
                 {
                     getBackground = true;
+                    //clearWeather();
                     updateWeather();
                     store["lastUpdated"] = DateTime.Now;
                 }
                 if (store.Contains("locChanged"))
                 {
-                    if ((bool)store["locChanged"] == true)
+                    if ((bool)store["locChanged"])
                     {
+                        //clearWeather();
                         store["locChanged"] = false;
                         getBackground = true;
                         updateWeather();
                         store["lastUpdated"] = DateTime.Now;
                     }
                 }
-                if (store.Contains("unitChanged") == true)
+                if (store.Contains("unitChanged"))
                 {
-                    if ((bool)store["unitChanged"] == true)
+                    if ((bool)store["unitChanged"])
                     {
                         store["unitChanged"] = false;
                         restoreWeather();
@@ -524,9 +534,14 @@ namespace WeatherLock
         {
             //Convert weather text to caps
             weather = weather.ToUpper();
+
             //Restore all the data
-            title.Title = cityName;
-            if (tempUnit == "c")
+            if (weatherSet)
+            {
+                title.Title = cityName;
+                weatherSet = false;
+            }
+            if (tempUnitIsC)
             {
                 temp.Text = tempC + "°";
                 feelsLike.Text = "Feels like: " + realFeelC + "°";
@@ -536,7 +551,7 @@ namespace WeatherLock
                 temp.Text = tempF + "°";
                 feelsLike.Text = "Feels like: " + realFeelF + "°";
             }
-            if (windUnit == "m")
+            if (windUnitIsM)
             {
                 wind.Text = "Wind: " + windSpeedM + " " + windDir;
             }
@@ -713,7 +728,7 @@ namespace WeatherLock
                     //Today's Forecast
                     this.forecastToday = (string)today.Element("conditions");
                     //Today's High/Low
-                    if (tempUnit == "c")
+                    if (tempUnitIsC)
                     {
                         this.todayLow = (string)today.Element("low").Element("celsius");
                         this.todayHigh = (string)today.Element("high").Element("celsius");
@@ -728,7 +743,7 @@ namespace WeatherLock
                     //Tomorrow's Forecast
                     this.forecastTomorrow = (string)tomorrow.Element("conditions");
                     //Tomorrow's High/Low
-                    if (tempUnit == "c")
+                    if (tempUnitIsC)
                     {
                         this.tomorrowHigh = (string)tomorrow.Element("low").Element("celsius");
                         this.tomorrowLow = (string)tomorrow.Element("high").Element("celsius");
@@ -763,8 +778,8 @@ namespace WeatherLock
                         string fcttextMet = (string)elm.Element("fcttext_metric");
                         string pop = (string)elm.Element("pop");
 
-                        if (store.Contains("forecastUnit"))
-                            if (store["forecastUnit"] == "m")
+                        if (store.Contains("forecastUnitisI"))
+                            if (!(bool)store["forecastUnitisI"])
                             {
                                 fcttext = fcttextMet;
                             }
@@ -775,6 +790,7 @@ namespace WeatherLock
                     #endregion
 
                     //set ui elements
+                    weatherSet = true;
                     setWeather();
 
                     //Back it all up

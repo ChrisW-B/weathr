@@ -445,6 +445,8 @@ namespace ScheduledTaskAgent1
                                 Title = "Error",
                                 Count = 0,
                                 WideContent1 = errorText,
+                                WideContent2 = null,
+                                WideContent3 = null,
                             };
                             tile.Update(TileData);
 

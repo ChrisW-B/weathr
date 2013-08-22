@@ -42,15 +42,13 @@ namespace WeatherLock
             InitializeComponent();
         }
 
-        
-
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
             licInfo = new LicenseInformation();
             isTrial = licInfo.IsTrial();
 
 
-            setValues();
+            
 
             ignoreCheckBoxEvents = true;
 
@@ -60,6 +58,8 @@ namespace WeatherLock
             {
                 PeriodicStackPanel.DataContext = periodicTask;
             }
+
+            setValues();
             ignoreCheckBoxEvents = false;
 
             createDefaultLoc();
@@ -83,9 +83,9 @@ namespace WeatherLock
                 store["enableLocation"] = true;
                 enableLocation.IsChecked = true;
             }
-            if (store.Contains("lockUnit"))
+            if (store.Contains("lockUnitIsC"))
             {
-                if (store["lockUnit"] == "c")
+                if ((bool)store["lockUnitIsC"])
                 {
                     lockCelsius.IsChecked = true;
                 }
@@ -96,13 +96,13 @@ namespace WeatherLock
             }
             else
             {
-                store["lockUnit"] = "c";
+                store["lockUnitIsC"] = true;
                 lockCelsius.IsChecked = true;
             }
 
-            if (store.Contains("forecastUnit"))
+            if (store.Contains("forecastUnitisI"))
             {
-                if (store["forecastUnit"] == "i")
+                if ((bool)store["forecastUnitisI"])
                 {
                     imperial.IsChecked = true;
                 }
@@ -113,7 +113,7 @@ namespace WeatherLock
             }
             else
             {
-                store["forecastUnit"] = "m";
+                store["forecastUnitisI"] = false;
                 metric.IsChecked = true;
             }
 
@@ -167,13 +167,13 @@ namespace WeatherLock
             }
             else
             {
-                store["tempIsC"] = "true";
+                store["tempIsC"] = true;
                 celsius.IsChecked = true;
             }
 
-            if (store.Contains("windUnit"))
+            if (store.Contains("windUnitIsM"))
             {
-                if ((string)store["windUnit"] == "m")
+                if ((bool)store["windUnitIsM"])
                 {
                     unitMiles.IsChecked = true;
                 }
@@ -184,7 +184,7 @@ namespace WeatherLock
             }
             else
             {
-                store["windUnit"] = "k";
+                store["windUnitIsM"] = false;
                 unitKms.IsChecked = true;
             }
             if (store.Contains("tempAlert"))
@@ -287,43 +287,99 @@ namespace WeatherLock
         //Now Pivot
         private void celsius_Checked(object sender, RoutedEventArgs e)
         {
-            store["tempIsC"] = true;
-            store["unitChanged"] = true;
+            if (!ignoreCheckBoxEvents)
+            {
+                store["tempIsC"] = true;
+                store["unitChanged"] = true;
+            }
+            else
+            {
+                return;
+            }
         }
         private void fahrenheit_Checked(object sender, RoutedEventArgs e)
         {
-            store["tempIsC"] = false;
-            store["unitChanged"] = true;
+            if (!ignoreCheckBoxEvents)
+            {
+                store["tempIsC"] = false;
+                store["unitChanged"] = true;
+            }
+            else
+            {
+                return;
+            }
         }
         private void unitKms_Checked(object sender, RoutedEventArgs e)
         {
-            store["windUnit"] = "k";
-            store["unitChanged"] = true;
+            if (ignoreCheckBoxEvents)
+            {
+                return;
+            }
+            else
+            {
+                store["windUnitIsM"] = false;
+                store["unitChanged"] = true;
+            }
         }
         private void unitMiles_Checked(object sender, RoutedEventArgs e)
         {
-            store["windUnit"] = "m";
-            store["unitChanged"] = true;
+            if (ignoreCheckBoxEvents)
+            {
+                return;
+            }
+            else
+            {
+                store["windUnitIsM"] = true;
+                store["unitChanged"] = true;
+            }
         }
         private void flickrPics_Checked(object sender, RoutedEventArgs e)
         {
-            store["useFlickr"] = true;
-            weatherGroup.IsEnabled = true;
+            if (ignoreCheckBoxEvents)
+            {
+                return;
+            }
+            else
+            {
+                store["useFlickr"] = true;
+                weatherGroup.IsEnabled = true;
+            }
         }
         private void flickrPics_Unchecked(object sender, RoutedEventArgs e)
         {
-            store["useFlickr"] = false;
-            weatherGroup.IsEnabled = false;
+            if (ignoreCheckBoxEvents)
+            {
+                return;
+            }
+            else
+            {
+                store["useFlickr"] = false;
+                weatherGroup.IsEnabled = false;
+            }
         }
         private void weatherGroup_Checked(object sender, RoutedEventArgs e)
         {
-            store["useWeatherGroup"] = true;
-            store["groupChanged"] = true;
+            if (ignoreCheckBoxEvents)
+            {
+                return;
+            }
+            else
+            {
+                store["useWeatherGroup"] = true;
+                store["groupChanged"] = true;
+            }
         }
         private void weatherGroup_Unchecked(object sender, RoutedEventArgs e)
         {
-            store["useWeatherGroup"] = false;
-            store["groupChanged"] = true;
+            if (ignoreCheckBoxEvents)
+            {
+                return;
+            }
+            else
+            {
+                store["useWeatherGroup"] = false;
+                store["groupChanged"] = true;
+            }
         }
 
         //Location Pivot
@@ -333,11 +389,25 @@ namespace WeatherLock
         #endregion
         private void enableLocation_Checked(object sender, RoutedEventArgs e)
         {
-            store["enableLocation"] = true;
+            if (ignoreCheckBoxEvents)
+            {
+                return;
+            }
+            else
+            {
+                store["enableLocation"] = true;
+            }
         }
         private void enableLocation_Unchecked(object sender, RoutedEventArgs e)
         {
-            store["enableLocation"] = false;
+            if (ignoreCheckBoxEvents)
+            {
+                return;
+            }
+            else
+            {
+                store["enableLocation"] = false;
+            }
         }
         private void initializeLocations()
         {
@@ -515,17 +585,24 @@ namespace WeatherLock
         }
         private void LocationListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (LocationListBox.SelectedIndex != -1)
+            if (ignoreCheckBoxEvents)
             {
-                var resArray = locations.ToArray()[LocationListBox.SelectedIndex];
-                string current = (string)resArray.LocName;
-                store["isCurrent"] = resArray.CurrentLoc;
-                store["locUrl"] = resArray.LocUrl;
-                store["locName"] = resArray.LocName;
-                store["locChanged"] = true;
-                String[] location = { resArray.Lat, resArray.Lon };
-                store["loc"] = location;
-                store.Save();
+                return;
+            }
+            else
+            {
+                if (LocationListBox.SelectedIndex != -1)
+                {
+                    var resArray = locations.ToArray()[LocationListBox.SelectedIndex];
+                    string current = (string)resArray.LocName;
+                    store["isCurrent"] = resArray.CurrentLoc;
+                    store["locUrl"] = resArray.LocUrl;
+                    store["locName"] = resArray.LocName;
+                    store["locChanged"] = true;
+                    String[] location = { resArray.Lat, resArray.Lon };
+                    store["loc"] = location;
+                    store.Save();
+                }
             }
 
         }
@@ -542,15 +619,29 @@ namespace WeatherLock
         //Forecast Pivot
         private void metric_Checked(object sender, RoutedEventArgs e)
         {
-            store["forecastUnit"] = "m";
-            store["unitChanged"] = true;
-            metric.IsChecked = true;
+            if (ignoreCheckBoxEvents)
+            {
+                return;
+            }
+            else
+            {
+                store["forecastUnitisI"] = false;
+                store["unitChanged"] = true;
+                metric.IsChecked = true;
+            }
         }
         private void imperial_Checked(object sender, RoutedEventArgs e)
         {
-            store["forecastUnit"] = "i";
-            store["unitChanged"] = true;
-            imperial.IsChecked = true;
+            if (ignoreCheckBoxEvents)
+            {
+                return;
+            }
+            else
+            {
+                store["forecastUnitisI"] = true;
+                store["unitChanged"] = true;
+                imperial.IsChecked = true;
+            }
         }
 
         //Tile and Lock pivot
@@ -571,14 +662,27 @@ namespace WeatherLock
         }
         private void notifyMe_Checked(object sender, RoutedEventArgs e)
         {
-            store["notifyMe"] = true;
-            notifyMe.IsChecked = true;
+            if (ignoreCheckBoxEvents)
+            {
+                return;
+            }
+            else
+            {
+                store["notifyMe"] = true;
+                notifyMe.IsChecked = true;
+            }
         }
         private void notifyMe_Unchecked(object sender, RoutedEventArgs e)
         {
-            store["notifyMe"] = false;
-            notifyMe.IsChecked = false;
-
+            if (ignoreCheckBoxEvents)
+            {
+                return;
+            }
+            else
+            {
+                store["notifyMe"] = false;
+                notifyMe.IsChecked = false;
+            }
         }
         private async void btnGoToLockSettings_Click(object sender, RoutedEventArgs e)
         {
@@ -591,42 +695,63 @@ namespace WeatherLock
         }
         private void UpdateBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!isTrial)
+            if (ignoreCheckBoxEvents)
             {
-                int y = UpdateBox.SelectedIndex;
-                switch (y)
-                {
-                    case 0:
-                        store["updateRate"] = "720";
-                        break;
-                    case 1:
-                        store["updateRate"] = "360";
-                        break;
-                    case 2:
-                        store["updateRate"] = "180";
-                        break;
-                    case 3:
-                        store["updateRate"] = "60";
-                        break;
-                    case 4:
-                        store["updateRate"] = "0";
-                        break;
-                }
+                return;
             }
             else
             {
-                store["updateRate"] = "720";
-                UpdateBox.SelectedIndex = 0;
+                if (!isTrial)
+                {
+                    int y = UpdateBox.SelectedIndex;
+                    switch (y)
+                    {
+                        case 0:
+                            store["updateRate"] = "720";
+                            break;
+                        case 1:
+                            store["updateRate"] = "360";
+                            break;
+                        case 2:
+                            store["updateRate"] = "180";
+                            break;
+                        case 3:
+                            store["updateRate"] = "60";
+                            break;
+                        case 4:
+                            store["updateRate"] = "0";
+                            break;
+                    }
+                }
+                else
+                {
+                    store["updateRate"] = "720";
+                    UpdateBox.SelectedIndex = 0;
+                }
+                store.Save();
             }
-            store.Save();
         }
         private void HiLo_Checked(object sender, RoutedEventArgs e)
         {
-            store["tempAlert"] = true;
+            if (ignoreCheckBoxEvents)
+            {
+                return;
+            }
+            else
+            {
+                store["tempAlert"] = true;
+            }
         }
         private void HiLo_Unchecked(object sender, RoutedEventArgs e)
         {
-            store["tempAlert"] = false;
+            if (ignoreCheckBoxEvents)
+            {
+                return;
+            }
+            else
+            {
+                store["tempAlert"] = false;
+            }
         }
         private void StartPeriodicAgent()
         {
@@ -705,13 +830,27 @@ namespace WeatherLock
         }
         private void lockCelsius_Checked(object sender, RoutedEventArgs e)
         {
-            store["lockUnit"] = "c";
-            lockCelsius.IsChecked = true;
+            if (ignoreCheckBoxEvents)
+            {
+                return;
+            }
+            else
+            {
+                store["lockUnitIsC"] = true;
+                lockCelsius.IsChecked = true;
+            }
         }
         private void lockFahrenheit_Checked(object sender, RoutedEventArgs e)
         {
-            store["lockUnit"] = "f";
-            lockFahrenheit.IsChecked = true;
+            if (ignoreCheckBoxEvents)
+            {
+                return;
+            }
+            else
+            {
+                store["lockUnitIsC"] = false;
+                lockFahrenheit.IsChecked = true;
+            }
         }
         private void startTileProg()
         {
@@ -739,7 +878,7 @@ namespace WeatherLock
         private String tomorrowHigh;
         private String tomorrowLow;
 
-        private String tempUnit;
+        private bool tempUnitIsC;
         private String url;
 
         //Release Key
@@ -787,7 +926,7 @@ namespace WeatherLock
 
                 this.forecastToday = (string)today.Element("conditions");
                 this.forecastTomorrow = (string)tomorrow.Element("conditions");
-                if (tempUnit == "c")
+                if (tempUnitIsC)
                 {
                     tempStr = (string)currentObservation.Element("temp_c");
                     this.todayLow = (string)today.Element("low").Element("celsius");
@@ -822,21 +961,21 @@ namespace WeatherLock
         private void checkUnits()
         {
             //check what the temp units should be
-            if (store.Contains("lockUnit"))
+            if (store.Contains("lockUnitIsC"))
             {
-                if (store["lockUnit"] == "c")
+                if ((bool)store["lockUnitIsC"])
                 {
-                    tempUnit = "c";
+                    tempUnitIsC = true;
                 }
                 else
                 {
-                    tempUnit = "f";
+                    tempUnitIsC = false;
                 }
             }
             else
             {
-                store["lockUnit"] = "c";
-                tempUnit = "c";
+                store["lockUnitIsC"] = true;
+                tempUnitIsC = true;
             }
         }
         private void checkLocation()
