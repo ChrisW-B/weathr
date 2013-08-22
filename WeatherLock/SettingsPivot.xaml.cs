@@ -48,7 +48,7 @@ namespace WeatherLock
             isTrial = licInfo.IsTrial();
 
 
-            
+
 
             ignoreCheckBoxEvents = true;
 
@@ -385,7 +385,7 @@ namespace WeatherLock
         //Location Pivot
         #region variables
         ObservableCollection<Locations> locations = new ObservableCollection<Locations>();
-        
+
         #endregion
         private void enableLocation_Checked(object sender, RoutedEventArgs e)
         {
@@ -421,7 +421,7 @@ namespace WeatherLock
             {
                 locations = (ObservableCollection<Locations>)store["locations"];
                 LocationListBox.ItemsSource = locations;
-                
+
                 backupLocations();
             }
         }
@@ -440,6 +440,13 @@ namespace WeatherLock
             {
                 if ((bool)store["locAdded"])
                 {
+                    foreach (Locations loc in locations)
+                    {
+                        if (store["newLocation"].Contains(loc.LocName))
+                        {
+                            return;
+                        }
+                    }
                     String lat;
                     String lon;
                     store["locAdded"] = false;
@@ -456,9 +463,10 @@ namespace WeatherLock
                         lat = null;
                         lon = null;
                     }
-                    if(!locationName.Contains("Current Location")){
-                    locations.Add(new Locations() { LocName = locationName, CurrentLoc = false, LocUrl = locationUrl, Lat = lat, Lon = lon, ImageSource = "/Images/Clear.png" });
-                }
+                    if (!locationName.Contains("Current Location"))
+                    {
+                        locations.Add(new Locations() { LocName = locationName, CurrentLoc = false, LocUrl = locationUrl, Lat = lat, Lon = lon, ImageSource = "/Images/Clear.png" });
+                    }
                     else
                     {
                         locations.Add(new Locations() { LocName = locationName, CurrentLoc = true, LocUrl = locationUrl, Lat = lat, Lon = lon, ImageSource = "/Images/Clear.png" });
@@ -501,28 +509,68 @@ namespace WeatherLock
         {
             if (!isTrial)
             {
+
                 MenuItem menuItem = (MenuItem)sender;
 
                 String[] resArray = getArray(menuItem.Tag.ToString());
 
-                IconicTileData locTile = new IconicTileData
+                foreach (ShellTile tile in ShellTile.ActiveTiles)
                 {
-                    IconImage = new Uri("SunCloud202.png", UriKind.Relative),
-                    SmallIconImage = new Uri("SunCloud110.png", UriKind.Relative),
-                    Title = resArray[0]
-                };
+                    if (tile.NavigationUri.ToString().Contains(resArray[0]))
+                    {
+                        MessageBoxResult m = MessageBox.Show("Already Pinned!", "", MessageBoxButton.OK);
+                        return;
+                    }
+                }
 
-                ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + resArray[0] + "&url=" + resArray[1] + "&isCurrent=" + resArray[2] + "&lat=" + resArray[3] + "&lon=" + resArray[4], UriKind.Relative), locTile, true);
+                if (checkPeriodic(sender, e))
+                {
+                    IconicTileData locTile = new IconicTileData
+                    {
+                        IconImage = new Uri("SunCloud202.png", UriKind.Relative),
+                        SmallIconImage = new Uri("SunCloud110.png", UriKind.Relative),
+                        Title = resArray[0]
+                    };
+
+                    ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + resArray[0] + "&url=" + resArray[1] + "&isCurrent=" + resArray[2] + "&lat=" + resArray[3] + "&lon=" + resArray[4], UriKind.Relative), locTile, true);
+
+                }
+                else
+                {
+                    MessageBoxResult m = MessageBox.Show("Multiple location Pinning is only supported in the full version. Buy now?", "Trial Mode", MessageBoxButton.OKCancel);
+                    if (m == MessageBoxResult.OK)
+                    {
+                        MarketplaceDetailTask task = new MarketplaceDetailTask();
+                        task.Show();
+                    }
+                }
+            }
+        }
+        private bool checkPeriodic(object sender, RoutedEventArgs e)
+        {
+            if (store.Contains("periodicStarted"))
+            {
+                if (!(bool)store["periodicStarted"])
+                {
+                    if (!store.Contains("manPerOff"))
+                    {
+                        StartPeriodicAgent();
+                        return true;
+                    }
+                    else if (!(bool)(store["manPerOff"]))
+                    {
+                        StartPeriodicAgent();
+                        return true;
+                    }
+                }
             }
             else
             {
-                MessageBoxResult m = MessageBox.Show("Multiple location Pinning is only supported in the full version. Buy now?", "Trial Mode", MessageBoxButton.OKCancel);
-                if (m == MessageBoxResult.OK)
-                {
-                    MarketplaceDetailTask task = new MarketplaceDetailTask();
-                    task.Show();
-                }
+                store["periodicStarted"] = false;
+                pin_Click(sender, e);
+                return false;
             }
+            return true;
         }
         private void default_Click(object sender, RoutedEventArgs e)
         {
@@ -550,7 +598,7 @@ namespace WeatherLock
             LocationListBox.ItemsSource = null;
             LocationListBox.ItemsSource = locations;
             backupLocations();
-            
+
         }
         private String[] getArray(string loc)
         {
@@ -649,6 +697,7 @@ namespace WeatherLock
         {
             try
             {
+                store["periodicStarted"] = false;
                 ScheduledActionService.Remove(name);
             }
             catch (Exception)
@@ -755,6 +804,8 @@ namespace WeatherLock
         }
         private void StartPeriodicAgent()
         {
+            store["periodicStarted"] = true;
+
             // Variable for tracking enabled status of background agents for this app.
             agentsAreEnabled = true;
 
@@ -780,22 +831,22 @@ namespace WeatherLock
             {
                 ScheduledActionService.Add(periodicTask);
                 PeriodicStackPanel.DataContext = periodicTask;
-//#if(DEBUG_AGENT)
-               //ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
-//#endif
+                //#if(DEBUG_AGENT)
+                //ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
+                //#endif
 
             }
             catch (InvalidOperationException exception)
             {
                 if (exception.Message.Contains("BNS Error: The action is disabled"))
                 {
-                    MessageBox.Show("Background agents for this application have been disabled by the user.");
+                    MessageBox.Show("Background tasks have been disabled for Weathr. Tile and Lockscreen will not update");
                     agentsAreEnabled = false;
                     PeriodicCheckBox.IsChecked = false;
                     UpdateBox.IsEnabled = false;
                 }
 
-                if (exception.Message.Contains("BNS Error: The maximum number of ScheduledActions of this type have already been added."))
+                if (exception.Message.Contains("You have too many background tasks. Remove some and try again"))
                 {
                     // No user action required. The system prompts the user when the hard limit of periodic tasks has been reached.
 
@@ -815,18 +866,23 @@ namespace WeatherLock
         {
             if (ignoreCheckBoxEvents)
                 return;
-            StartPeriodicAgent();
             if (!isTrial)
             {
                 UpdateBox.IsEnabled = true;
             }
+            store["manPerOff"] = false;
+            StartPeriodicAgent();
+
         }
         private void PeriodicCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
                 return;
-            RemoveAgent(periodicTaskName);
+
             UpdateBox.IsEnabled = false;
+            store["manPerOff"] = true;
+            RemoveAgent(periodicTaskName);
+
         }
         private void lockCelsius_Checked(object sender, RoutedEventArgs e)
         {

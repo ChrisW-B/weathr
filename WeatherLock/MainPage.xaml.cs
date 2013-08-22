@@ -19,6 +19,7 @@ using Microsoft.Phone.Maps.Controls;
 using System.Device.Location;
 using System.Windows.Shapes;
 using Microsoft.Phone.Maps;
+using Microsoft.Phone.Scheduler;
 
 
 namespace WeatherLock
@@ -107,6 +108,12 @@ namespace WeatherLock
         //Check to see if app is running as trial
         LicenseInformation licInfo;
         public bool isTrial;
+
+        //background stuff
+        PeriodicTask periodicTask;
+
+        string periodicTaskName = "PeriodicAgent";
+        public bool agentsAreEnabled = true;
         #endregion
 
         //Initialize the main page
@@ -181,8 +188,28 @@ namespace WeatherLock
                 noParams();
             }
             title.Title = cityNameLoad;
+
+            checkPinned();
             checkUpdated();
             showAd();
+        }
+
+        private void checkPinned()
+        {
+            ApplicationBarIconButton pinButton = (ApplicationBarIconButton)ApplicationBar.Buttons[2];
+            foreach (ShellTile tile in ShellTile.ActiveTiles)
+            {
+                if (tile.NavigationUri.ToString().Contains(cityNameLoad))
+                {
+                    pinButton.IsEnabled = false;
+                    break;
+                }
+                else
+                {
+                    pinButton.IsEnabled = true;
+                }
+
+            }
         }
 
         private void checkUseWeatherGroup()
@@ -478,6 +505,67 @@ namespace WeatherLock
                 adControl.Visibility = System.Windows.Visibility.Collapsed;
             }
 
+        }
+
+        //enable periodic task
+        private void StartPeriodicAgent()
+        {
+            store["periodicStarted"] = true;
+
+            // Variable for tracking enabled status of background agents for this app.
+            agentsAreEnabled = true;
+
+            // Obtain a reference to the period task, if one exists
+            periodicTask = ScheduledActionService.Find(periodicTaskName) as PeriodicTask;
+
+            // If the task already exists and background agents are enabled for the
+            // application, you must remove the task and then add it again to update 
+            // the schedule
+            if (periodicTask != null)
+            {
+                RemoveAgent(periodicTaskName);
+            }
+
+            periodicTask = new PeriodicTask(periodicTaskName);
+
+            // The description is required for periodic agents. This is the string that the user
+            // will see in the background services Settings page on the device.
+            periodicTask.Description = "Updates tile and Lockscreen with weather conditions and forecast";
+
+            // Place the call to Add in a try block in case the user has disabled agents.
+            try
+            {
+                ScheduledActionService.Add(periodicTask);
+
+            }
+            catch (InvalidOperationException exception)
+            {
+                if (exception.Message.Contains("BNS Error: The action is disabled"))
+                {
+                    MessageBox.Show("Background tasks have been disabled for Weathr. Tile and Lockscreen will not update");
+                    agentsAreEnabled = false;
+                }
+
+                if (exception.Message.Contains("You have too many background tasks. Remove some and try again"))
+                {
+                    // No user action required. The system prompts the user when the hard limit of periodic tasks has been reached.
+
+                }
+            }
+            catch (SchedulerServiceException)
+            {
+            }
+        }
+        private void RemoveAgent(string name)
+        {
+            try
+            {
+                store["periodicStarted"] = false;
+                ScheduledActionService.Remove(name);
+            }
+            catch (Exception)
+            {
+            }
         }
 
         //Progress Bars
@@ -1286,26 +1374,53 @@ namespace WeatherLock
         {
             if (!isTrial)
             {
-
-
-                IconicTileData locTile = new IconicTileData
+                if (checkPeriodic(sender, e))
                 {
-                    IconImage = new Uri("SunCloud202.png", UriKind.Relative),
-                    SmallIconImage = new Uri("SunCloud110.png", UriKind.Relative),
-                    Title = cityName
-                };
+                    IconicTileData locTile = new IconicTileData
+                    {
+                        IconImage = new Uri("SunCloud202.png", UriKind.Relative),
+                        SmallIconImage = new Uri("SunCloud110.png", UriKind.Relative),
+                        Title = cityNameLoad
+                    };
 
-                ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + cityName + "&url=" + urlKey + "&isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative), locTile, true);
+                    ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + cityName + "&url=" + urlKey + "&isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative), locTile, true);
+                }
+                else
+                {
+                    MessageBoxResult m = MessageBox.Show("Multiple location Pinning is only supported in the full version. Buy now?", "Trial Mode", MessageBoxButton.OKCancel);
+                    if (m == MessageBoxResult.OK)
+                    {
+                        MarketplaceDetailTask task = new MarketplaceDetailTask();
+                        task.Show();
+                    }
+                }
+            }
+        }
+        private bool checkPeriodic(object sender, EventArgs e)
+        {
+            if (store.Contains("periodicStarted"))
+            {
+                if (!(bool)store["periodicStarted"])
+                {
+                    if (!store.Contains("manPerOff"))
+                    {
+                        StartPeriodicAgent();
+                        return true;
+                    }
+                    else if (!(bool)(store["manPerOff"]))
+                    {
+                        StartPeriodicAgent();
+                        return true;
+                    }
+                }
             }
             else
             {
-                MessageBoxResult m = MessageBox.Show("Multiple location Pinning is only supported in the full version. Buy now?", "Trial Mode", MessageBoxButton.OKCancel);
-                if (m == MessageBoxResult.OK)
-                {
-                    MarketplaceDetailTask task = new MarketplaceDetailTask();
-                    task.Show();
-                }
+                store["periodicStarted"] = false;
+                pin_Click(sender, e);
+                return false;
             }
+            return true;
         }
         private void ApplicationBarMenuItem_Click(object sender, EventArgs e)
         {
