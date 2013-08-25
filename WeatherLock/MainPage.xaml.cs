@@ -1388,7 +1388,7 @@ namespace WeatherLock
                         SmallIconImage = new Uri("SunCloud110.png", UriKind.Relative),
                         Title = cityNameLoad
                     };
-
+   
                     ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + cityName + "&url=" + urlKey + "&isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative), locTile, true);
                 }
                 else

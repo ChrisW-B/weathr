@@ -17,7 +17,6 @@ using System.Collections;
 using System.IO;
 using Windows.Devices.Geolocation;
 using System.Collections.ObjectModel;
-using Pinned;
 
 
 
@@ -81,16 +80,16 @@ namespace ScheduledTaskAgent1
         {
             error = false;
             checkUnits();
-
             foreach (ShellTile tile in ShellTile.ActiveTiles)
             {
                 if (tile.NavigationUri.OriginalString != "/")
                 {
                     String[] uriSplit = tile.NavigationUri.ToString().Split('&');
 
-                    string locationName = uriSplit[0].Split('=')[1];
-                    string locationUrl = uriSplit[1].Split('=')[1];
                     bool isCurrentLoc = Convert.ToBoolean(uriSplit[2].Split('=')[1]);
+                    string locationUrl = uriSplit[1].Split('=')[1];
+                    string locationName = uriSplit[0].Split('=')[1];
+
                     pinnedList.Add(new Pins { LocName = locationName, LocUrl = locationUrl, currentLoc = isCurrentLoc, updated = false });
                 }
                 else if (tile.NavigationUri.OriginalString == "/")
@@ -99,9 +98,9 @@ namespace ScheduledTaskAgent1
                     pinnedList.Add(new Pins { LocName = locationName, updated = false });
                 }
             }
+
+            //prevent enumeration errors
             pinnedListCopy = pinnedList;
-
-
 
             //updates the app after a selected time
             if (store.Contains("lastRun") && store.Contains("updateRate"))
@@ -204,125 +203,24 @@ namespace ScheduledTaskAgent1
                     checkUnits();
                     var client = new WebClient();
 
-                    client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(WeatherStringCallback);
+                    client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(updateOtherTiles);
                     client.DownloadStringAsync(new Uri(pinnedUrl));
                 }
                 if (pinnedTile.currentLoc)
                 {
                     locationSearchTimes = 0;
                     checkLocation();
+                    string pinnedUrl = url;
                     checkUnits();
                     var client = new WebClient();
 
-                    client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(WeatherStringCallback);
-                    client.DownloadStringAsync(new Uri(url));
+                    client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(updateLocAwareTile);
+                    client.DownloadStringAsync(new Uri(pinnedUrl));
                 }
             }
         }
 
         //Async Calls to get weather data for each tile type
-        private void WeatherStringCallback(object sender, DownloadStringCompletedEventArgs e)
-        {
-
-            if (!e.Cancelled && e.Error == null)
-            {
-                XDocument doc = XDocument.Parse(e.Result);
-
-                string tempStr = "0";
-                string todayHigh = "0";
-                string todayLow = "0";
-                string tomorrowHigh = "0";
-                string tomorrowLow = "0";
-                Uri normalIcon = new Uri("/SunCloud202.png", UriKind.Relative);
-                Uri smallIcon = new Uri("/SunCloud110.png", UriKind.Relative);
-
-                //Current Conditions
-                var currentObservation = doc.Element("response").Element("current_observation");
-                string city = (string)currentObservation.Element("display_location").Element("city");
-                string state = (string)currentObservation.Element("display_location").Element("state_name");
-                string cityName = city + ", " + state;
-                string weather = (string)currentObservation.Element("weather");
-
-                XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
-
-                var today = forecastDays.Element("forecastday");
-                var tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
-
-                string forecastToday = (string)today.Element("conditions");
-                string forecastTomorrow = (string)tomorrow.Element("conditions");
-                if (tempUnit == "c")
-                {
-                    tempStr = (string)currentObservation.Element("temp_c");
-                    todayLow = (string)today.Element("low").Element("celsius");
-                    todayHigh = (string)today.Element("high").Element("celsius");
-                    tomorrowLow = (string)tomorrow.Element("low").Element("celsius");
-                    tomorrowHigh = (string)tomorrow.Element("high").Element("celsius");
-                }
-                else
-                {
-                    tempStr = (string)currentObservation.Element("temp_f");
-                    todayLow = (string)today.Element("low").Element("fahrenheit");
-                    todayHigh = (string)today.Element("high").Element("fahrenheit");
-                    tomorrowHigh = (string)tomorrow.Element("high").Element("fahrenheit");
-                    tomorrowLow = (string)tomorrow.Element("low").Element("fahrenheit");
-                }
-
-                //convert temps to ints
-                var getTemp = new convertTemp(tempStr);
-                int temp = getTemp.temp;
-
-                //get weather icons
-                Uri[] weatherIcons = getWeatherIcons(weather);
-                normalIcon = weatherIcons[0];
-                smallIcon = weatherIcons[1];
-
-                foreach (ShellTile tile in ShellTile.ActiveTiles)
-                {
-                    if (tile.NavigationUri.ToString() != "/")
-                    {
-                        foreach (Pins pin in pinnedList)
-                        {
-                            //get name and location from tile url
-                            string tileLoc = tile.NavigationUri.ToString().Split('&')[0].Split('=')[1];
-
-                            if ((tileLoc == cityName && pin.LocName == cityName) || (pin.LocName.Split(',')[0].Contains(city) && tileLoc.Split(',')[0].Contains(city) && pin.LocName.Split(',')[1].Contains(state) && tileLoc.Split(',')[1].Contains(state)))
-                            {
-                                //Update Tile
-                                IconicTileData TileData = new IconicTileData
-                                {
-                                    IconImage = normalIcon,
-                                    SmallIconImage = smallIcon,
-                                    Title = cityName,
-                                    Count = temp,
-                                    WideContent1 = string.Format("Currently: " + weather + ", " + temp + " degrees"),
-                                    WideContent2 = string.Format("Today: " + forecastToday + " " + todayHigh + "/" + todayLow),
-                                    WideContent3 = string.Format("Tomorrow: " + forecastTomorrow + " " + tomorrowHigh + "/" + tomorrowLow)
-
-                                };
-                                tile.Update(TileData);
-
-                                //mark the tile as finished updating
-                                markUpdated(cityName, city, state);
-
-                                //send toast if enabled
-                                sendToast(cityName);
-
-                                //stop looping
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (finished())
-                {
-                    NotifyComplete();
-                }
-            }
-            else
-            {
-                NotifyComplete();
-            }
-        }
         private void updateMainTile(object sender, DownloadStringCompletedEventArgs e)
         {
             if (!e.Cancelled && e.Error == null)
@@ -509,6 +407,210 @@ namespace ScheduledTaskAgent1
             {
                 NotifyComplete();
             }
+        }
+        private void updateOtherTiles(object sender, DownloadStringCompletedEventArgs e)
+        {
+            if (!e.Cancelled && e.Error == null)
+            {
+                string tempStr = "0";
+                string todayHigh = "0";
+                string todayLow = "0";
+                string tomorrowHigh = "0";
+                string tomorrowLow = "0";
+                Uri normalIcon = new Uri("/SunCloud202.png", UriKind.Relative);
+                Uri smallIcon = new Uri("/SunCloud110.png", UriKind.Relative);
+
+                XDocument doc = XDocument.Parse(e.Result);
+                XElement weatherError = doc.Element("response").Element("error");
+                if (weatherError == null && !error)
+                {
+                    //Current Conditions
+                    var currentObservation = doc.Element("response").Element("current_observation");
+                    string city = (string)currentObservation.Element("display_location").Element("city");
+                    string state = (string)currentObservation.Element("display_location").Element("state_name");
+                    string cityName = city + ", " + state;
+                    string weather = (string)currentObservation.Element("weather");
+
+                    XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
+
+                    var today = forecastDays.Element("forecastday");
+                    var tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
+
+                    string forecastToday = (string)today.Element("conditions");
+                    string forecastTomorrow = (string)tomorrow.Element("conditions");
+                    if (tempUnit == "c")
+                    {
+                        tempStr = (string)currentObservation.Element("temp_c");
+                        todayLow = (string)today.Element("low").Element("celsius");
+                        todayHigh = (string)today.Element("high").Element("celsius");
+                        tomorrowLow = (string)tomorrow.Element("low").Element("celsius");
+                        tomorrowHigh = (string)tomorrow.Element("high").Element("celsius");
+                    }
+                    else
+                    {
+                        tempStr = (string)currentObservation.Element("temp_f");
+                        todayLow = (string)today.Element("low").Element("fahrenheit");
+                        todayHigh = (string)today.Element("high").Element("fahrenheit");
+                        tomorrowHigh = (string)tomorrow.Element("high").Element("fahrenheit");
+                        tomorrowLow = (string)tomorrow.Element("low").Element("fahrenheit");
+                    }
+
+                    //get weather icons
+                    Uri[] weatherIcons = getWeatherIcons(weather);
+                    normalIcon = weatherIcons[0];
+                    smallIcon = weatherIcons[1];
+
+                    //convert temps to ints
+                    var getTemp = new convertTemp(tempStr);
+                    int temp = getTemp.temp;
+
+                    foreach (ShellTile tile in ShellTile.ActiveTiles)
+                    {
+                        if (tile.NavigationUri.ToString() != "/")
+                        {
+                            foreach (Pins pin in pinnedList)
+                            {
+                                //get name and location from tile url
+                                string tileLoc = tile.NavigationUri.ToString().Split('&')[0].Split('=')[1];
+                                bool tileIsCurrent  =Convert.ToBoolean(tile.NavigationUri.ToString().Split('&')[2].Split('=')[1]);
+
+                               if (((tileLoc == cityName && pin.LocName == cityName) || (pin.LocName.Split(',')[0].Contains(city) && tileLoc.Split(',')[0].Contains(city) && pin.LocName.Split(',')[1].Contains(state) && tileLoc.Split(',')[1].Contains(state))) && !pin.updated)
+                                {
+                                    //Update Tile
+                                    IconicTileData TileData = new IconicTileData
+                                    {
+                                        IconImage = normalIcon,
+                                        SmallIconImage = smallIcon,
+                                        Title = cityName,
+                                        Count = temp,
+                                        WideContent1 = string.Format("Currently: " + weather + ", " + temp + " degrees"),
+                                        WideContent2 = string.Format("Today: " + forecastToday + " " + todayHigh + "/" + todayLow),
+                                        WideContent3 = string.Format("Tomorrow: " + forecastTomorrow + " " + tomorrowHigh + "/" + tomorrowLow)
+
+                                    };
+                                    tile.Update(TileData);
+
+                                    //mark the tile as finished updating
+                                    markUpdated(cityName, city, state);
+
+                                    //send toast if enabled
+                                    sendToast(cityName);
+
+                                    //stop looping
+                                    break;
+                                }
+                            }
+                        }
+
+                    }
+                    if (finished())
+                    {
+                        NotifyComplete();
+                    }
+                }
+                else
+                {
+                    NotifyComplete();
+                }
+            }
+        }
+        private void updateLocAwareTile(object sender, DownloadStringCompletedEventArgs e)
+        {
+            if (!e.Cancelled && e.Error == null)
+            {
+                string tempStr = "0";
+                string todayHigh = "0";
+                string todayLow = "0";
+                string tomorrowHigh = "0";
+                string tomorrowLow = "0";
+                Uri normalIcon = new Uri("/SunCloud202.png", UriKind.Relative);
+                Uri smallIcon = new Uri("/SunCloud110.png", UriKind.Relative);
+
+                XDocument doc = XDocument.Parse(e.Result);
+                XElement weatherError = doc.Element("response").Element("error");
+                if (weatherError == null && !error)
+                {
+                    //Current Conditions
+                    var currentObservation = doc.Element("response").Element("current_observation");
+                    string city = (string)currentObservation.Element("display_location").Element("city");
+                    string state = (string)currentObservation.Element("display_location").Element("state_name");
+                    string cityName = city + ", " + state;
+                    string weather = (string)currentObservation.Element("weather");
+
+                    XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
+
+                    var today = forecastDays.Element("forecastday");
+                    var tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
+
+                    string forecastToday = (string)today.Element("conditions");
+                    string forecastTomorrow = (string)tomorrow.Element("conditions");
+                    if (tempUnit == "c")
+                    {
+                        tempStr = (string)currentObservation.Element("temp_c");
+                        todayLow = (string)today.Element("low").Element("celsius");
+                        todayHigh = (string)today.Element("high").Element("celsius");
+                        tomorrowLow = (string)tomorrow.Element("low").Element("celsius");
+                        tomorrowHigh = (string)tomorrow.Element("high").Element("celsius");
+                    }
+                    else
+                    {
+                        tempStr = (string)currentObservation.Element("temp_f");
+                        todayLow = (string)today.Element("low").Element("fahrenheit");
+                        todayHigh = (string)today.Element("high").Element("fahrenheit");
+                        tomorrowHigh = (string)tomorrow.Element("high").Element("fahrenheit");
+                        tomorrowLow = (string)tomorrow.Element("low").Element("fahrenheit");
+                    }
+
+                    //get weather icons
+                    Uri[] weatherIcons = getWeatherIcons(weather);
+                    normalIcon = weatherIcons[0];
+                    smallIcon = weatherIcons[1];
+
+                    //convert temps to ints
+                    var getTemp = new convertTemp(tempStr);
+                    int temp = getTemp.temp;
+
+                    foreach (ShellTile tile in ShellTile.ActiveTiles)
+                    {
+                        if (tile.NavigationUri.ToString() != "/")
+                        {
+                            //get name and location from tile url
+                            string tileLoc = tile.NavigationUri.ToString().Split('&')[0].Split('=')[1];
+                            bool tileIsCurrent = Convert.ToBoolean(tile.NavigationUri.ToString().Split('&')[2].Split('=')[1]);
+
+                            foreach (Pins pin in pinnedList)
+                            {
+                                if (tileIsCurrent && pin.currentLoc && !pin.LocName.Contains("default location") && pin.LocUrl == "null")
+                                {
+                                    //Update Tile
+                                    IconicTileData TileData = new IconicTileData
+                                    {
+                                        IconImage = normalIcon,
+                                        SmallIconImage = smallIcon,
+                                        Title = cityName,
+                                        Count = temp,
+                                        WideContent1 = string.Format("Currently: " + weather + ", " + temp + " degrees"),
+                                        WideContent2 = string.Format("Today: " + forecastToday + " " + todayHigh + "/" + todayLow),
+                                        WideContent3 = string.Format("Tomorrow: " + forecastTomorrow + " " + tomorrowHigh + "/" + tomorrowLow)
+
+                                    };
+                                    tile.Update(TileData);
+
+                                    //mark the tile as finished updating
+                                    markUpdated(cityName, city, state);
+
+                                    //send toast if enabled
+                                    sendToast(cityName);
+
+                                    //stop looping
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
         }
 
         private void sendToast(string cityName)

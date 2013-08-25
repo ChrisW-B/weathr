@@ -1,4 +1,4 @@
-﻿//#define DEBUG_AGENT
+﻿#define DEBUG_AGENT
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -537,6 +537,9 @@ namespace WeatherLock
                         Title = resArray[0]
                     };
 
+                   
+
+
                     ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + resArray[0] + "&url=" + resArray[1] + "&isCurrent=" + resArray[2] + "&lat=" + resArray[3] + "&lon=" + resArray[4], UriKind.Relative), locTile, true);
 
                 }
@@ -836,9 +839,9 @@ namespace WeatherLock
             {
                 ScheduledActionService.Add(periodicTask);
                 PeriodicStackPanel.DataContext = periodicTask;
-               // #if(DEBUG_AGENT)
-               // ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
-               // #endif
+                #if(DEBUG_AGENT)
+                ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
+                #endif
 
             }
             catch (InvalidOperationException exception)
