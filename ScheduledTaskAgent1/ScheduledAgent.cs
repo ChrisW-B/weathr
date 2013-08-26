@@ -142,14 +142,12 @@ namespace ScheduledTaskAgent1
                     }
 
                 }
-
                 else
                 {
                     //if time period is too short, don't update
                     NotifyComplete();
                 }
             }
-
             //runs the app for the first time (when the background agent has never been launched)
             else if (!store.Contains("lastRun"))
             {
@@ -177,6 +175,10 @@ namespace ScheduledTaskAgent1
                     }
                 }
             }
+            else
+            {
+                NotifyComplete();
+            }
             //save the time of the last time the app was run
             store["lastRun"] = DateTime.Now.ToString();
             store.Save();
@@ -185,14 +187,21 @@ namespace ScheduledTaskAgent1
         //Update each type of tile
         private void updateDefault()
         {
+
             locationSearchTimes = 0;
             checkLocation();
+            bool mainCurrent = isCurrent;
+            url = getUrl(mainCurrent);
             checkUnits();
             var client = new WebClient();
 
             client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(updateMainTile);
             client.DownloadStringAsync(new Uri(url));
         }
+
+
+
+
         private void updateOthers()
         {
             foreach (Pins pinnedTile in pinnedList)
@@ -206,11 +215,11 @@ namespace ScheduledTaskAgent1
                     client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(updateOtherTiles);
                     client.DownloadStringAsync(new Uri(pinnedUrl));
                 }
-                if (pinnedTile.currentLoc)
+                if (pinnedTile.currentLoc && !pinnedTile.LocName.Contains("default location"))
                 {
                     locationSearchTimes = 0;
                     checkLocation();
-                    string pinnedUrl = url;
+                    string pinnedUrl = getUrl(pinnedTile.currentLoc);
                     checkUnits();
                     var client = new WebClient();
 
@@ -298,7 +307,7 @@ namespace ScheduledTaskAgent1
                                 tile.Update(TileData);
 
                                 //mark tile as updated
-                                markUpdated("default location", city, state);
+                                markUpdated("default location", city, state, false);
 
                                 //send a toast to tell that it has updated
                                 sendToast(cityName);
@@ -324,7 +333,7 @@ namespace ScheduledTaskAgent1
                                     tile.Update(TileData);
 
                                     //mark tile as updated
-                                    markUpdated("default location", city, state);
+                                    markUpdated("default location", city, state, false);
 
                                     //send a toast to tell that it has updated
                                     sendToast(cityName);
@@ -359,7 +368,7 @@ namespace ScheduledTaskAgent1
                             tile.Update(TileData);
 
                             //mark tile as updated
-                            markUpdated("default location", "null", "null");
+                            markUpdated("default location", "null", "null", false);
 
                             //send a toast to tell that it has updated
                             sendToast("Error");
@@ -388,7 +397,7 @@ namespace ScheduledTaskAgent1
                             tile.Update(TileData);
 
                             //mark tile as updated
-                            markUpdated("default location", "null", "null");
+                            markUpdated("default location", "null", "null", false);
 
                             //send a toast to tell that it has updated
                             sendToast("Error");
@@ -472,9 +481,13 @@ namespace ScheduledTaskAgent1
                             {
                                 //get name and location from tile url
                                 string tileLoc = tile.NavigationUri.ToString().Split('&')[0].Split('=')[1];
-                                bool tileIsCurrent  =Convert.ToBoolean(tile.NavigationUri.ToString().Split('&')[2].Split('=')[1]);
+                                bool tileIsCurrent = Convert.ToBoolean(tile.NavigationUri.ToString().Split('&')[2].Split('=')[1]);
 
-                               if (((tileLoc == cityName && pin.LocName == cityName) || (pin.LocName.Split(',')[0].Contains(city) && tileLoc.Split(',')[0].Contains(city) && pin.LocName.Split(',')[1].Contains(state) && tileLoc.Split(',')[1].Contains(state))) && !pin.updated)
+                                if (tileIsCurrent)
+                                {
+                                    break;
+                                }
+                                else if (((tileLoc == cityName && pin.LocName == cityName) || (pin.LocName.Split(',')[0].Contains(city) && tileLoc.Split(',')[0].Contains(city) && pin.LocName.Split(',')[1].Contains(state) && tileLoc.Split(',')[1].Contains(state))) && !pin.updated)
                                 {
                                     //Update Tile
                                     IconicTileData TileData = new IconicTileData
@@ -491,7 +504,7 @@ namespace ScheduledTaskAgent1
                                     tile.Update(TileData);
 
                                     //mark the tile as finished updating
-                                    markUpdated(cityName, city, state);
+                                    markUpdated(cityName, city, state, false);
 
                                     //send toast if enabled
                                     sendToast(cityName);
@@ -501,7 +514,6 @@ namespace ScheduledTaskAgent1
                                 }
                             }
                         }
-
                     }
                     if (finished())
                     {
@@ -580,7 +592,7 @@ namespace ScheduledTaskAgent1
 
                             foreach (Pins pin in pinnedList)
                             {
-                                if (tileIsCurrent && pin.currentLoc && !pin.LocName.Contains("default location") && pin.LocUrl == "null")
+                                if (tileIsCurrent && pin.currentLoc && !pin.LocName.Contains("default location"))
                                 {
                                     //Update Tile
                                     IconicTileData TileData = new IconicTileData
@@ -597,7 +609,7 @@ namespace ScheduledTaskAgent1
                                     tile.Update(TileData);
 
                                     //mark the tile as finished updating
-                                    markUpdated(cityName, city, state);
+                                    markUpdated("current location", city, state, true);
 
                                     //send toast if enabled
                                     sendToast(cityName);
@@ -608,9 +620,16 @@ namespace ScheduledTaskAgent1
                             }
                         }
                     }
+                    if (finished())
+                    {
+                        NotifyComplete();
+                    }
+                }
+                else
+                {
+                    NotifyComplete();
                 }
             }
-
         }
 
         private void sendToast(string cityName)
@@ -729,69 +748,73 @@ namespace ScheduledTaskAgent1
         private void checkLocation()
         {
             //Check to see if allowed to get location
-
-            if (isCurrent)
+            if (store.Contains("enableLocation"))
             {
-                if (store.Contains("enableLocation"))
+                if ((bool)store["enableLocation"])
                 {
-                    if ((bool)store["enableLocation"])
+                    if (locationSearchTimes <= 5)
                     {
-                        if (locationSearchTimes <= 5)
+                        //get location
+                        var getLocation = new getLocation();
+                        if (getLocation.getLat() != null && getLocation.getLat() != "NA")
                         {
-                            //get location
-                            var getLocation = new getLocation();
-                            if (getLocation.getLat() != null && getLocation.getLat() != "NA")
-                            {
-                                latitude = getLocation.getLat();
-                                longitude = getLocation.getLong();
-                                String[] loc = { latitude, longitude };
-                                store["loc"] = loc;
-                            }
-                            else
-                            {
-                                locationSearchTimes++;
-                                checkLocation();
-                            }
+                            latitude = getLocation.getLat();
+                            longitude = getLocation.getLong();
+                            String[] loc = { latitude, longitude };
+                            store["loc"] = loc;
                         }
-                        if (locationSearchTimes > 5)
+                        else
                         {
-                            if (store.Contains("loc"))
-                            {
-                                String[] latlng = new String[2];
-                                latlng = (String[])store["loc"];
-                                latitude = latlng[0];
-                                longitude = latlng[1];
-
-                                //stop reuse of the location too many times
-                                store.Remove("loc");
-                            }
-                            else
-                            {
-                                error = true;
-                                errorText = "Cannot get location";
-                            }
+                            locationSearchTimes++;
+                            checkLocation();
                         }
                     }
-                    else
+                    if (locationSearchTimes > 5)
                     {
-                        error = true;
-                        errorText = "Cannot get location";
+                        if (store.Contains("loc"))
+                        {
+                            String[] latlng = new String[2];
+                            latlng = (String[])store["loc"];
+                            latitude = latlng[0];
+                            longitude = latlng[1];
+
+                            //stop reuse of the location too many times
+                            store.Remove("loc");
+                        }
+                        else
+                        {
+                            error = true;
+                            errorText = "Cannot get location";
+                        }
                     }
                 }
-                url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast/q/" + latitude + "," + longitude + ".xml";
+                else
+                {
+                    error = true;
+                    errorText = "Cannot get location";
+                }
+            }
+        }
+
+        //return a url for weather data depending on whether the tile is location aware or not
+        private string getUrl(bool isCurrent)
+        {
+            if (isCurrent)
+            {
+                return "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast/q/" + latitude + "," + longitude + ".xml";
             }
             else
             {
-                url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast" + locUrl + ".xml";
+                return "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast" + locUrl + ".xml";
             }
         }
 
         //mark a tile as updated
-        private void markUpdated(string cityName, string city, string state)
+        private void markUpdated(string cityName, string city, string state, bool isCurrent)
         {
             foreach (Pins pin in pinnedListCopy)
             {
-                if ((pin.LocName == cityName) || (pin.LocName.Split(',')[0].Contains(city) && pin.LocName.Split(',')[1].Contains(state)))
+                if ((pin.LocName == cityName) || (pin.LocName.Split(',')[0].Contains(city) && pin.LocName.Split(',')[1].Contains(state)) || (pin.currentLoc == isCurrent))
                 {
                     pin.updated = true;
                     break;
