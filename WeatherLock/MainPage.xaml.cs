@@ -200,7 +200,7 @@ namespace WeatherLock
             ApplicationBarIconButton pinButton = (ApplicationBarIconButton)ApplicationBar.Buttons[2];
             foreach (ShellTile tile in ShellTile.ActiveTiles)
             {
-                if (tile.NavigationUri.ToString().Contains(cityNameLoad))
+                if (tile.NavigationUri.ToString().Contains(cityNameLoad) && !tile.NavigationUri.ToString().Contains("isCurrent=True"))
                 {
                     pinButton.IsEnabled = false;
                     break;

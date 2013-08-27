@@ -516,7 +516,7 @@ namespace WeatherLock
 
                 foreach (ShellTile tile in ShellTile.ActiveTiles)
                 {
-                    if (tile.NavigationUri.ToString().Contains(resArray[0]))
+                    if (tile.NavigationUri.ToString().Contains(resArray[0]) && !tile.NavigationUri.ToString().Contains("isCurrent=True"))
                     {
                         MessageBoxResult m = MessageBox.Show("Already Pinned!", "", MessageBoxButton.OK);
                         return;
