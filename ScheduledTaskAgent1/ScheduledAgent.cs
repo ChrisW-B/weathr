@@ -133,14 +133,8 @@ namespace ScheduledTaskAgent1
                                 toast.sendToast("Weathr", "Please run the app first");
                                 NotifyComplete();
                             }
-                            updateDefault();
-                        }
-                        else
-                        {
-                            updateOthers();
                         }
                     }
-
                 }
                 else
                 {
@@ -167,11 +161,6 @@ namespace ScheduledTaskAgent1
                             toast.sendToast("Weathr", "Please run the app first");
                             NotifyComplete();
                         }
-                        updateDefault();
-                    }
-                    else
-                    {
-                        updateOthers();
                     }
                 }
             }
@@ -179,6 +168,9 @@ namespace ScheduledTaskAgent1
             {
                 NotifyComplete();
             }
+
+            updateDefault();
+            updateOthers();
             //save the time of the last time the app was run
             store["lastRun"] = DateTime.Now.ToString();
             store.Save();
@@ -187,14 +179,19 @@ namespace ScheduledTaskAgent1
         //Update each type of tile
         private void updateDefault()
         {
-
+            //set location
             locationSearchTimes = 0;
             checkLocation();
+
+            //check get url
             bool mainCurrent = isCurrent;
             url = getUrl(mainCurrent);
-            checkUnits();
-            var client = new WebClient();
 
+            //check units
+            checkUnits();
+
+            //get weather data
+            var client = new WebClient();
             client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(updateMainTile);
             client.DownloadStringAsync(new Uri(url));
         }
