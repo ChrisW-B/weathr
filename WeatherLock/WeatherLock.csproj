@@ -105,7 +105,7 @@
     <Compile Include="Clock.cs" />
     <Compile Include="CurrentSat.cs" />
     <Compile Include="getDataMain.cs" />
-    <Compile Include="getLocationMain.cs" />
+    <Compile Include="Images\getLocationMain.cs" />
     <Compile Include="convertTempMain.cs" />
     <Compile Include="LocalizedStrings.cs" />
     <Compile Include="MainPage.xaml.cs">

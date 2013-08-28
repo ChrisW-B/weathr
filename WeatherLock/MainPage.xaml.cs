@@ -122,7 +122,7 @@ namespace WeatherLock
             InitializeComponent();
 
             //Testing Key
-            //apiKey = "fb1dd3f4321d048d";
+            apiKey = "fb1dd3f4321d048d";
 
             initializeProgIndicators();
             //noParams();
@@ -659,6 +659,7 @@ namespace WeatherLock
 
             humidity.Text = "Humidity: " + humidityValue;
             tempCompare.Text = "TOMORROW WILL BE " + tempCompareText + " TODAY";
+            foreRes.Clear();
             forecastListBox.ItemsSource = foreRes;
             alertListBox.ItemsSource = results;
 
@@ -851,11 +852,11 @@ namespace WeatherLock
                     int todayHighInt = Convert.ToInt32(todayHigh);
                     int tomorrowHighInt = Convert.ToInt32(tomorrowLow);
 
-                    if (todayHighInt > tomorrowHighInt)
+                    if (todayHighInt > tomorrowHighInt + 3)
                     {
                         tempCompareText = "COOLER THAN";
                     }
-                    else if (todayHighInt < tomorrowHighInt)
+                    else if (todayHighInt < tomorrowHighInt - 3)
                     {
                         tempCompareText = "WARMER THAN";
                     }
@@ -950,8 +951,7 @@ namespace WeatherLock
             public string pop { get; set; }
         }
 
-        //Maps Pane
-        //Radar
+        //Radar Map
         private void setupRadar()
         {
             MapsSettings.ApplicationContext.ApplicationId = "6613ed8e-4185-4b0d-b0ba-a530ac174ad5";
@@ -1028,7 +1028,7 @@ namespace WeatherLock
         {
             NavigationService.Navigate(new Uri("/Radar.xaml?isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative));
         }
-        //Sat
+        //Sat Map
         private void setupSat()
         {
             MapsSettings.ApplicationContext.ApplicationId = "6613ed8e-4185-4b0d-b0ba-a530ac174ad5";
@@ -1388,7 +1388,7 @@ namespace WeatherLock
                         SmallIconImage = new Uri("SunCloud110.png", UriKind.Relative),
                         Title = cityNameLoad
                     };
-   
+
                     ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + cityName + "&url=" + urlKey + "&isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative), locTile, true);
                 }
                 else
