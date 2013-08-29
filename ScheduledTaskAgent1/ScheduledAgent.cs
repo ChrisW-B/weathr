@@ -17,6 +17,7 @@ using System.Collections;
 using System.IO;
 using Windows.Devices.Geolocation;
 using System.Collections.ObjectModel;
+using Helpers;
 
 
 
@@ -196,9 +197,6 @@ namespace ScheduledTaskAgent1
             client.DownloadStringAsync(new Uri(url));
         }
 
-
-
-
         private void updateOthers()
         {
             foreach (Pins pinnedTile in pinnedList)
@@ -282,6 +280,17 @@ namespace ScheduledTaskAgent1
                     //convert temps to ints
                     var getTemp = new convertTemp(tempStr);
                     int temp = getTemp.temp;
+                    if (checkRange(cityName, temp))
+                    {
+                        if (temp > 99)
+                        {
+                            temp = 99;
+                        }
+                        else if (temp<1)
+                        {
+                            temp = 1;
+                        }
+                    }
 
 
                     foreach (ShellTile tile in ShellTile.ActiveTiles)
@@ -469,6 +478,17 @@ namespace ScheduledTaskAgent1
                     //convert temps to ints
                     var getTemp = new convertTemp(tempStr);
                     int temp = getTemp.temp;
+                    if (checkRange(cityName, temp))
+                    {
+                        if (temp > 99)
+                        {
+                            temp = 99;
+                        }
+                        else if (temp < 1)
+                        {
+                            temp = 1;
+                        }
+                    }
 
                     foreach (ShellTile tile in ShellTile.ActiveTiles)
                     {
@@ -578,6 +598,17 @@ namespace ScheduledTaskAgent1
                     //convert temps to ints
                     var getTemp = new convertTemp(tempStr);
                     int temp = getTemp.temp;
+                    if (checkRange(cityName, temp))
+                    {
+                        if (temp > 99)
+                        {
+                            temp = 99;
+                        }
+                        else if (temp < 1)
+                        {
+                            temp = 1;
+                        }
+                    }
 
                     foreach (ShellTile tile in ShellTile.ActiveTiles)
                     {
@@ -830,6 +861,36 @@ namespace ScheduledTaskAgent1
                 }
             }
             return true;
+        }
+
+        private bool checkRange(string loc, int temp){
+            if ((temp > 99))
+            {
+                if (store.Contains("tempAlert"))
+                {
+                    if ((bool)store["tempAlert"])
+                    {
+                        var toastMessage = new Toast();
+                        toastMessage.sendToast(loc, "Temp over 99");
+                    }
+                }
+                temp = 99;
+                return true;
+            }
+            else if (temp < 1)
+            {
+                if (store.Contains("tempAlert"))
+                {
+                    if ((bool)store["tempAlert"])
+                    {
+                        var toastMessage = new Toast();
+                        toastMessage.sendToast(loc, "Temp below 1");
+                    }
+                }
+                temp = 1;
+                return true;
+            }
+            return false;
         }
     }
 }

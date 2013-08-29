@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Xml;
 using System.Xml.Linq;
+using Helpers;
 
 namespace WeatherLock
 {
@@ -236,10 +237,10 @@ namespace WeatherLock
                     tempStr = tempF;
                 }
 
-                var getTemp = new convertTempMain(tempStr);
+                var getTemp = new convertTemp(tempStr);
                 this.tempInt = getTemp.temp;
 
-                var updateTile = new updateTileMain(cityName, tempInt, weather, todayHigh, todayLow, forecastToday, forecastTomorrow, tomorrowHigh, tomorrowLow);
+                var updateTile = new updateTile(cityName, tempInt, weather, todayHigh, todayLow, forecastToday, forecastTomorrow, tomorrowHigh, tomorrowLow);
                 store["locName"] = cityName;
             }
         }

@@ -13,6 +13,7 @@ using Microsoft.Phone.Maps.Controls;
 using System.Windows.Shapes;
 using System.Windows.Media;
 using System.Device.Location;
+using Helpers;
 
 namespace WeatherLock
 {
@@ -85,7 +86,7 @@ namespace WeatherLock
         }
         private void addSat(object sender, RoutedEventArgs e)
         {
-            TileSource sat = new AnimatedSat();
+            TileSource sat = new CurrentSat();
             map.TileSources.Add(sat);
         }
         private void showSatLocation()
@@ -137,7 +138,7 @@ namespace WeatherLock
                     if (isCurrent && locationSearchTimes <= 5)
                     {
                         //get location
-                        var getLocation = new getLocationMain();
+                        var getLocation = new getLocation();
                         if (getLocation.getLat() != null && getLocation.getLat() != "NA")
                         {
                             //Set long and lat

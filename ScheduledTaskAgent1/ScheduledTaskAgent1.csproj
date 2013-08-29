@@ -85,10 +85,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="getLocation.cs" />
-    <Compile Include="convertTemp.cs" />
     <Compile Include="Toast.cs" />
-    <Compile Include="updateTile.cs" />
     <Compile Include="ScheduledAgent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -96,8 +93,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Pinned">
-      <HintPath>..\..\Pinned\Pinned\Bin\Release\Pinned.dll</HintPath>
+    <Reference Include="Helpers">
+      <HintPath>..\..\Helpers\Helpers\Bin\Release\Helpers.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).$(TargetFrameworkVersion).Overrides.targets" />

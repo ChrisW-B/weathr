@@ -20,6 +20,8 @@ using System.Device.Location;
 using System.Windows.Shapes;
 using Microsoft.Phone.Maps;
 using Microsoft.Phone.Scheduler;
+using Helpers;
+
 
 
 namespace WeatherLock
@@ -387,7 +389,7 @@ namespace WeatherLock
                     if (isCurrent && locationSearchTimes <= 5)
                     {
                         //get location
-                        var getLocation = new getLocationMain();
+                        var getLocation = new getLocation();
                         if (getLocation.getLat() != null && getLocation.getLat() != "NA")
                         {
                             errorSet = false;
@@ -659,7 +661,6 @@ namespace WeatherLock
 
             humidity.Text = "Humidity: " + humidityValue;
             tempCompare.Text = "TOMORROW WILL BE " + tempCompareText + " TODAY";
-            foreRes.Clear();
             forecastListBox.ItemsSource = foreRes;
             alertListBox.ItemsSource = results;
 
@@ -866,6 +867,10 @@ namespace WeatherLock
                     }
 
                     var forecastDaysTxt = doc.Element("response").Element("forecast").Element("txt_forecast").Element("forecastdays");
+
+                    //clear out forecast list first
+                    foreRes.Clear();
+
                     foreach (XElement elm in forecastDaysTxt.Elements("forecastday"))
                     {
                         string title = (string)elm.Element("title");
@@ -878,7 +883,7 @@ namespace WeatherLock
                             {
                                 fcttext = fcttextMet;
                             }
-
+                        
                         this.foreRes.Add(new ForecastResults() { title = title, fcttext = fcttext, pop = pop });
                         this.forecastListBox.ItemsSource = foreRes;
                     }

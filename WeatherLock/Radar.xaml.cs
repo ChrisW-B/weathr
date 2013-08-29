@@ -14,6 +14,7 @@ using Microsoft.Phone.Maps.Controls;
 using System.Device.Location;
 using System.IO.IsolatedStorage;
 using System.Threading;
+using Helpers;
 
 namespace WeatherLock
 {
@@ -101,7 +102,7 @@ namespace WeatherLock
             RadarCache radarCache = new RadarCache();
             for (int i = 0; i < 51; i = i + 5)
             {
-                TileSource radar = new AnimatedRadar();
+                TileSource radar = new CurrentRadar();
                 string radarAge;
                 if (i == 0)
                 {
@@ -165,7 +166,7 @@ namespace WeatherLock
                 
                // map.TileSources.Remove(map.TileSources.Last());
 
-                TileSource radar = new AnimatedRadar();
+                TileSource radar = new CurrentRadar();
                 switch (age)
                 {
                     case 0:
@@ -278,7 +279,7 @@ namespace WeatherLock
                     if (isCurrent && locationSearchTimes <= 5)
                     {
                         //get location
-                        var getLocation = new getLocationMain();
+                        var getLocation = new getLocation();
                         if (getLocation.getLat() != null && getLocation.getLat() != "NA")
                         {
                             //Set long and lat

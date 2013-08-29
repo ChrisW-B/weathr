@@ -1,4 +1,4 @@
-﻿#define DEBUG_AGENT
+﻿//#define DEBUG_AGENT
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +15,7 @@ using System.Xml.Linq;
 using Microsoft.Phone.Marketplace;
 using Microsoft.Phone.Tasks;
 using System.Windows.Media;
+using Helpers;
 
 namespace WeatherLock
 {
@@ -839,9 +840,9 @@ namespace WeatherLock
             {
                 ScheduledActionService.Add(periodicTask);
                 PeriodicStackPanel.DataContext = periodicTask;
-                #if(DEBUG_AGENT)
-                ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
-                #endif
+               // #if(DEBUG_AGENT)
+                //ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
+               // #endif
 
             }
             catch (InvalidOperationException exception)
@@ -1008,11 +1009,11 @@ namespace WeatherLock
                 }
 
                 //convert temps to ints
-                var getTemp = new convertTempMain(tempStr);
+                var getTemp = new Helpers.convertTemp(tempStr);
                 int temp = getTemp.temp;
 
                 //update the tile and lockscreen
-                var updateTile = new updateTileMain(cityName, temp, weather, todayHigh, todayLow, forecastToday, forecastTomorrow, tomorrowHigh, tomorrowLow);
+                var updateTile = new Helpers.updateTile(cityName, temp, weather, todayHigh, todayLow, forecastToday, forecastTomorrow, tomorrowHigh, tomorrowLow);
 
                 backupWeather();
                 //save the time of the last time the app was run
@@ -1050,7 +1051,7 @@ namespace WeatherLock
                 if (Convert.ToBoolean(store["defaultCurrent"]))
                 {
                     //get location
-                    var getLocation = new getLocationMain();
+                    var getLocation = new Helpers.getLocation();
                     if (getLocation.getLat() != null)
                     {
                         latitude = getLocation.getLat();
