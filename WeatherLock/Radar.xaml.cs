@@ -8,6 +8,7 @@ using System.IO.IsolatedStorage;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Helpers;
 
 namespace WeatherLock
 {

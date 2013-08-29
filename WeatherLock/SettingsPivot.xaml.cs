@@ -12,6 +12,7 @@ using System.Windows.Controls;
 using System.Linq;
 using System.Net;
 using System.Xml.Linq;
+using Helpers;
 
 namespace WeatherLock
 {

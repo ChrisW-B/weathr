@@ -8,6 +8,7 @@ using System.Net;
 using System.Windows;
 using System.Xml.Linq;
 using System.Linq;
+using Helpers;
 
 namespace ScheduledTaskAgent1
 {

@@ -3,6 +3,7 @@ using System.IO.IsolatedStorage;
 using System.Net;
 using System.Xml.Linq;
 using System.Linq;
+using Helpers;
 
 namespace WeatherLock
 {
