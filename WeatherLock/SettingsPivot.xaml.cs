@@ -1,21 +1,17 @@
 ﻿//#define DEBUG_AGENT
+using Microsoft.Phone.Controls;
+using Microsoft.Phone.Marketplace;
+using Microsoft.Phone.Scheduler;
+using Microsoft.Phone.Shell;
+using Microsoft.Phone.Tasks;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+using System.Collections.ObjectModel;
+using System.IO.IsolatedStorage;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Navigation;
-using Microsoft.Phone.Controls;
-using Microsoft.Phone.Shell;
-using Microsoft.Phone.Scheduler;
-using System.IO.IsolatedStorage;
-using System.Collections.ObjectModel;
+using System.Linq;
+using System.Net;
 using System.Xml.Linq;
-using Microsoft.Phone.Marketplace;
-using Microsoft.Phone.Tasks;
-using System.Windows.Media;
-using Helpers;
 
 namespace WeatherLock
 {
@@ -47,9 +43,6 @@ namespace WeatherLock
         {
             licInfo = new LicenseInformation();
             isTrial = licInfo.IsTrial();
-
-
-
 
             ignoreCheckBoxEvents = true;
 
@@ -1009,11 +1002,11 @@ namespace WeatherLock
                 }
 
                 //convert temps to ints
-                var getTemp = new Helpers.convertTemp(tempStr);
+                var getTemp = new convertTemp(tempStr);
                 int temp = getTemp.temp;
 
                 //update the tile and lockscreen
-                var updateTile = new Helpers.updateTile(cityName, temp, weather, todayHigh, todayLow, forecastToday, forecastTomorrow, tomorrowHigh, tomorrowLow);
+                var updateTile = new updateTile(cityName, temp, weather, todayHigh, todayLow, forecastToday, forecastTomorrow, tomorrowHigh, tomorrowLow);
 
                 backupWeather();
                 //save the time of the last time the app was run
@@ -1051,7 +1044,7 @@ namespace WeatherLock
                 if (Convert.ToBoolean(store["defaultCurrent"]))
                 {
                     //get location
-                    var getLocation = new Helpers.getLocation();
+                    var getLocation = new getLocation();
                     if (getLocation.getLat() != null)
                     {
                         latitude = getLocation.getLat();

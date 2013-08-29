@@ -1,28 +1,23 @@
-﻿using System;
+﻿using Microsoft.Phone.Controls;
+using Microsoft.Phone.Marketplace;
+using Microsoft.Phone.Scheduler;
+using Microsoft.Phone.Shell;
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Collections.ObjectModel;
+using System.IO.IsolatedStorage;
 using System.Net;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Navigation;
-using Microsoft.Phone.Controls;
-using Microsoft.Phone.Shell;
-using System.IO.IsolatedStorage;
 using System.Xml.Linq;
-using System.Windows.Media.Imaging;
-using System.Windows.Media;
-using System.Collections.ObjectModel;
-using Microsoft.Phone.Tasks;
-using Microsoft.Phone.Marketplace;
-using Microsoft.Advertising.Mobile.UI;
-using Microsoft.Phone.Maps.Controls;
-using System.Device.Location;
-using System.Windows.Shapes;
+using System.Linq;
 using Microsoft.Phone.Maps;
-using Microsoft.Phone.Scheduler;
-using Helpers;
-
-
+using System.Device.Location;
+using Microsoft.Phone.Maps.Controls;
+using System.Windows.Shapes;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Controls;
+using Microsoft.Phone.Tasks;
 
 namespace WeatherLock
 {

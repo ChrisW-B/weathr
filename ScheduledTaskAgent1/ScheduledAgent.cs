@@ -1,25 +1,13 @@
-﻿using System.Diagnostics;
-using System.Windows;
-using Microsoft.Phone.Scheduler;
+﻿using Microsoft.Phone.Scheduler;
+using Microsoft.Phone.Shell;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Windows.Controls;
-using System.Windows.Navigation;
-using Microsoft.Phone.Controls;
-using Microsoft.Phone.Shell;
-using System.Windows.Threading;
+using System.Diagnostics;
 using System.IO.IsolatedStorage;
+using System.Net;
+using System.Windows;
 using System.Xml.Linq;
-using System.Xml;
-using System.Collections;
-using System.IO;
-using Windows.Devices.Geolocation;
-using System.Collections.ObjectModel;
-using Helpers;
-
-
+using System.Linq;
 
 namespace ScheduledTaskAgent1
 {

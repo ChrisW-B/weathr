@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Navigation;
-using Microsoft.Phone.Controls;
-using Microsoft.Phone.Shell;
-using System.IO.IsolatedStorage;
+﻿using Microsoft.Phone.Controls;
 using Microsoft.Phone.Maps;
 using Microsoft.Phone.Maps.Controls;
-using System.Windows.Shapes;
-using System.Windows.Media;
+using System;
 using System.Device.Location;
-using Helpers;
+using System.IO.IsolatedStorage;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace WeatherLock
 {
