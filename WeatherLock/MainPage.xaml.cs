@@ -19,40 +19,22 @@ using System.Windows.Media.Imaging;
 using System.Windows.Controls;
 using Microsoft.Phone.Tasks;
 using Helpers;
+using WeatherData;
 
 namespace WeatherLock
 {
     public partial class MainPage : PhoneApplicationPage
     {
         #region variables
+        //Collection of weather data
+        private WeatherInfo weather;
+        private String updateTime;
+        private String cityName;
 
         //Set Units
         bool tempUnitIsC;
         bool windUnitIsM;
-
-        //Current Conditions
-        private String cityName;
-        private String weather;
-        private String shortCityName;
-        private String realFeel;
-        private String windSpeedM;
-        private String windSpeedK;
-        private String windDir;
-        private String humidityValue;
-        private String updateTime;
-        private String tempCompareText;
-        private String tempC;
-        private String tempF;
-        private String realFeelC;
-        private String realFeelF;
-
-        //Forecast Conditions
-        private String todayHigh;
-        private String todayLow;
-        private String forecastToday;
-        private String forecastTomorrow;
-        private String tomorrowHigh;
-        private String tomorrowLow;
+        bool forecastUnitIsM;
 
         //location data
         String latitude = null;
@@ -84,9 +66,8 @@ namespace WeatherLock
         String weatherGroup = "1463451@N25";
         String fUrl = null;
 
-        //collections of alerts and forecast
+        //collections of alerts
         ObservableCollection<HazardResults> results = new ObservableCollection<HazardResults>();
-        ObservableCollection<ForecastResults> foreRes = new ObservableCollection<ForecastResults>();
 
         //List of photo data
         List<FlickrImage> photoList = new List<FlickrImage>();
@@ -128,6 +109,7 @@ namespace WeatherLock
             restoreWeather();
             this.clock = new Clock(this);
         }
+        
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
 
@@ -308,6 +290,22 @@ namespace WeatherLock
             else
             {
                 this.windUnitIsM = false;
+            }
+
+            if (store.Contains("forecastUnitIsM"))
+            {
+                if ((bool)store["forecastUnitIsM"])
+                {
+                    this.forecastUnitIsM = true;
+                }
+                else
+                {
+                    this.forecastUnitIsM = false;
+                }
+            }
+            else
+            {
+                forecastUnitIsM = true;
             }
         }
 
@@ -611,7 +609,6 @@ namespace WeatherLock
             SystemTray.SetOpacity(this, 0);
             progAlerts.IsVisible = true;
             SystemTray.SetProgressIndicator(this, progAlerts);
-
         }
         private void HideTray()
         {
@@ -624,52 +621,87 @@ namespace WeatherLock
         //Getting and Setting Weather data
         private void setWeather()
         {
-            //Convert weather text to caps
-            weather = weather.ToUpper();
+            #region variables
+            string windCon;
+            #endregion
 
-            //Restore all the data
+            //Convert weather text to caps
+            weather.currentConditions = weather.currentConditions.ToUpper();
+
+            //set name
             if (weatherSet)
             {
                 title.Title = cityName;
                 weatherSet = false;
             }
+
+            //set temp
             if (tempUnitIsC)
             {
-                temp.Text = tempC + "°";
-                feelsLike.Text = "Feels like: " + realFeelC + "°";
+                temp.Text = weather.tempC + "°";
+                feelsLike.Text = "Feels like: " + weather.feelsLikeC + "°";
             }
             else
             {
-                temp.Text = tempF + "°";
-                feelsLike.Text = "Feels like: " + realFeelF + "°";
+                temp.Text = weather.tempF + "°";
+                feelsLike.Text = "Feels like: " + weather.feelsLikeF + "°";
             }
+
+            //set wind
             if (windUnitIsM)
             {
-                wind.Text = "Wind: " + windSpeedM + " " + windDir;
+                windCon = "Wind: " + weather.windSpeedM;
             }
             else
             {
-                wind.Text = "Wind: " + windSpeedK + " " + windDir;
+                windCon = "Wind: " + weather.windSpeedK;
+            }
+            windCon += " " + weather.windDir;
+            wind.Text = windCon;
+
+            //Set current conditons
+            conditions.Text = weather.currentConditions;
+
+            //Set humidity
+            humidity.Text = "Humidity: " + weather.humidity;
+
+            //Set compare text
+            if (tempUnitIsC)
+            {
+                tempCompare.Text = "TOMORROW WILL BE " + weather.tempCompareC + " TODAY";
+            }
+            else
+            {
+                tempCompare.Text = "TOMORROW WILL BE " + weather.tempCompareF + " TODAY";
             }
 
-            conditions.Text = weather;
+            //set forecasts
+            forecastListBox.ItemsSource = null;
+            if (forecastUnitIsM)
+            {
+                forecastListBox.ItemsSource = weather.forecastC;
+            }
+            else
+            {
+                forecastListBox.ItemsSource = weather.forecastF;
+            }
 
-
-            humidity.Text = "Humidity: " + humidityValue;
-            tempCompare.Text = "TOMORROW WILL BE " + tempCompareText + " TODAY";
-            forecastListBox.ItemsSource = foreRes;
+            //set alerts box
             alertListBox.ItemsSource = results;
 
             store["cityName"] = cityName;
-
+            //Set errors (if there are any)
             if (!errorSet)
             {
                 errorText.Text = null;
             }
 
+            //backup weather
             backupWeather();
             progWeather.IsVisible = false;
             HideTray();
+
+            //set background if necessary
             if (getBackground)
             {
                 getBackground = false;
@@ -690,14 +722,6 @@ namespace WeatherLock
         }
         private void restoreWeather()
         {
-            if ((bool)store.Contains("backupForecast"))
-            {
-                forecastListBox.ItemsSource = null;
-                foreRes.Clear();
-                foreRes = (ObservableCollection<ForecastResults>)store["backupForecast"];
-            }
-
-
             if (store.Contains("backupAlerts"))
             {
                 results = (ObservableCollection<HazardResults>)store["backupAlerts"];
@@ -711,31 +735,10 @@ namespace WeatherLock
                 this.longitude = latlng[1];
             }
 
-            String[] savedData = new String[15];
             if ((bool)store.Contains("backupApp"))
             {
-                savedData = (string[])store["backupApp"];
-
-                this.cityName = savedData[0];
-                this.shortCityName = savedData[1];
-                this.realFeelF = savedData[2];
-                this.weather = savedData[3];
-                this.todayHigh = savedData[4];
-                this.todayLow = savedData[5];
-                this.forecastToday = savedData[6];
-                this.forecastTomorrow = savedData[7];
-                this.tomorrowHigh = savedData[8];
-                this.tomorrowLow = savedData[9];
-                this.windSpeedM = savedData[10];
-                this.realFeel = savedData[11];
-                this.humidityValue = savedData[12];
-                this.windDir = savedData[13];
-                this.updateTime = savedData[14];
-                this.tempCompareText = savedData[15];
-                this.tempC = savedData[16];
-                this.tempF = savedData[17];
-                this.realFeelC = savedData[18];
-                this.windSpeedK = savedData[19];
+                weather = store["backupApp"];
+                cityName = weather.city + ", " + weather.state;
 
                 if (this.weather == null)
                 {
@@ -753,8 +756,6 @@ namespace WeatherLock
             startWeatherProg();
             setURL();
 
-            forecastListBox.ItemsSource = null;
-            foreRes.Clear();
             if (!errorSet)
             {
                 clearWeather();
@@ -773,115 +774,133 @@ namespace WeatherLock
         {
             if (!e.Cancelled && e.Error == null && e.Result != null)
             {
+                weather = new WeatherInfo();
                 XDocument doc = XDocument.Parse(e.Result);
-                XElement error = doc.Element("response").Element("error");
-                if (error == null)
+                weather.error = (string)doc.Element("response").Element("error");
+                if (weather.error == null)
                 {
 
                     #region current conditions
                     //Current Conditions
                     var currentObservation = doc.Element("response").Element("current_observation");
+
                     //location name
-                    string city = (string)currentObservation.Element("display_location").Element("city");
-                    string state = (string)currentObservation.Element("display_location").Element("state_name");
-                    this.cityName = city + ", " + state;
-                    this.shortCityName = (string)currentObservation.Element("display_location").Element("city");
+                    weather.city = (string)currentObservation.Element("display_location").Element("city");
+                    weather.state = (string)currentObservation.Element("display_location").Element("state_name");
+                    weather.shortCityName = (string)currentObservation.Element("display_location").Element("city");
+
+                    cityName = weather.city + ", " + weather.state;
 
                     if (store["defaultLocation"] == "Current Location")
                     {
                         store["saveDefaultLocName"] = cityName;
                         store.Save();
                     }
+
                     //Current Weather
-                    this.weather = (string)currentObservation.Element("weather");
+                    weather.currentConditions = (string)currentObservation.Element("weather");
+
                     //Current wind
-
-                    this.windSpeedM = (string)currentObservation.Element("wind_mph") + " mph";
-
-                    this.windSpeedK = (string)currentObservation.Element("wind_kph") + " kph";
-
-                    this.windDir = (string)currentObservation.Element("wind_dir");
+                    weather.windSpeedM = (string)currentObservation.Element("wind_mph") + " mph";
+                    weather.windSpeedK = (string)currentObservation.Element("wind_kph") + " kph";
+                    weather.windDir = (string)currentObservation.Element("wind_dir");
                     //Current Temp and feels like
-
-                    this.tempC = (string)currentObservation.Element("temp_c");
-                    this.realFeelC = (string)currentObservation.Element("feelslike_c");
-
-                    this.tempF = (string)currentObservation.Element("temp_f");
-                    this.realFeelF = (string)currentObservation.Element("feelslike_f");
+                    weather.tempC = (string)currentObservation.Element("temp_c");
+                    weather.feelsLikeC = (string)currentObservation.Element("feelslike_c");
+                    weather.tempF = (string)currentObservation.Element("temp_f");
+                    weather.feelsLikeF = (string)currentObservation.Element("feelslike_f");
 
                     //current humidity
-                    this.humidityValue = (string)currentObservation.Element("relative_humidity");
+                    weather.humidity = (string)currentObservation.Element("relative_humidity");
                     #endregion
+
                     #region forecast conditions
                     //Forecast Conditions
                     XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
+
                     //Today's conditions
-                    var today = forecastDays.Element("forecastday");
-                    //Today's Forecast
-                    this.forecastToday = (string)today.Element("conditions");
+                    XElement today = forecastDays.Element("forecastday");
+
                     //Today's High/Low
-                    if (tempUnitIsC)
-                    {
-                        this.todayLow = (string)today.Element("low").Element("celsius");
-                        this.todayHigh = (string)today.Element("high").Element("celsius");
-                    }
-                    else
-                    {
-                        this.todayLow = (string)today.Element("low").Element("fahrenheit");
-                        this.todayHigh = (string)today.Element("high").Element("fahrenheit");
-                    }
+                    weather.todayLowC = (string)today.Element("low").Element("celsius");
+                    weather.todayHighC = (string)today.Element("high").Element("celsius");
+                    weather.todayLowF = (string)today.Element("low").Element("fahrenheit");
+                    weather.todayHighF = (string)today.Element("high").Element("fahrenheit");
+
                     //Tomorrow's conditions
-                    var tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
-                    //Tomorrow's Forecast
-                    this.forecastTomorrow = (string)tomorrow.Element("conditions");
+                    XElement tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
+
                     //Tomorrow's High/Low
-                    if (tempUnitIsC)
+                    weather.tomorrowHighC = (string)tomorrow.Element("low").Element("celsius");
+                    weather.tomorrowLowC = (string)tomorrow.Element("high").Element("celsius");
+                    weather.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
+                    weather.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
+
+                    //convert to ints
+                    weather.todayHighIntC = Convert.ToInt32(weather.todayHighC);
+                    weather.tomorrowHighIntC = Convert.ToInt32(weather.tomorrowLowC);
+                    weather.todayHighIntF = Convert.ToInt32(weather.todayHighF);
+                    weather.tomorrowHighIntF = Convert.ToInt32(weather.tomorrowLowF);
+
+                    if (weather.todayHighIntC > weather.tomorrowHighIntC + 3)
                     {
-                        this.tomorrowHigh = (string)tomorrow.Element("low").Element("celsius");
-                        this.tomorrowLow = (string)tomorrow.Element("high").Element("celsius");
+                        weather.tempCompareC = "COOLER THAN";
+                    }
+                    else if (weather.todayHighIntC < weather.tomorrowHighIntC - 3)
+                    {
+                        weather.tempCompareC = "WARMER THAN";
                     }
                     else
                     {
-                        this.tomorrowHigh = (string)tomorrow.Element("high").Element("fahrenheit");
-                        this.tomorrowLow = (string)tomorrow.Element("low").Element("fahrenheit");
+                        weather.tempCompareC = "ABOUT THE SAME AS";
                     }
 
-                    int todayHighInt = Convert.ToInt32(todayHigh);
-                    int tomorrowHighInt = Convert.ToInt32(tomorrowLow);
-
-                    if (todayHighInt > tomorrowHighInt + 3)
+                    if (weather.todayHighIntF > weather.tomorrowHighIntF + 3)
                     {
-                        tempCompareText = "COOLER THAN";
+                        weather.tempCompareF = "COOLER THAN";
                     }
-                    else if (todayHighInt < tomorrowHighInt - 3)
+                    else if (weather.todayHighIntF < weather.tomorrowHighIntF - 3)
                     {
-                        tempCompareText = "WARMER THAN";
+                        weather.tempCompareF = "WARMER THAN";
                     }
                     else
                     {
-                        tempCompareText = "ABOUT THE SAME AS";
+                        weather.tempCompareF = "ABOUT THE SAME AS";
                     }
 
                     var forecastDaysTxt = doc.Element("response").Element("forecast").Element("txt_forecast").Element("forecastdays");
 
                     //clear out forecast list first
-                    foreRes.Clear();
+                    
+                    weather.forecastC = new ObservableCollection<ForecastC>();
+                    weather.forecastF = new ObservableCollection<ForecastF>();
+
+                    weather.forecastC.Clear();
+                    weather.forecastF.Clear();
 
                     foreach (XElement elm in forecastDaysTxt.Elements("forecastday"))
                     {
-                        string title = (string)elm.Element("title");
-                        string fcttext = (string)elm.Element("fcttext");
-                        string fcttextMet = (string)elm.Element("fcttext_metric");
-                        string pop = (string)elm.Element("pop");
-
-                        if (store.Contains("forecastUnitisI"))
-                            if (!(bool)store["forecastUnitisI"])
-                            {
-                                fcttext = fcttextMet;
-                            }
+                        ForecastC forecastC = new WeatherData.ForecastC();
+                        ForecastF forecastF = new WeatherData.ForecastF();
                         
-                        this.foreRes.Add(new ForecastResults() { title = title, fcttext = fcttext, pop = pop });
-                        this.forecastListBox.ItemsSource = foreRes;
+                        
+
+                        forecastC.title = forecastF.title = (string)elm.Element("title");
+                        forecastC.text = (string)elm.Element("fcttext_metric");
+                        forecastF.text = (string)elm.Element("fcttext");
+                        forecastC.pop = forecastF.pop = (string)elm.Element("pop");
+
+
+                        weather.forecastF.Add(forecastF);
+                        weather.forecastC.Add(forecastC);
+                        if (forecastUnitIsM)
+                        {
+                            forecastListBox.ItemsSource = weather.forecastC;
+                        }
+                        else
+                        {
+                            forecastListBox.ItemsSource = weather.forecastF;
+                        }
                     }
                     #endregion
 
@@ -898,7 +917,7 @@ namespace WeatherLock
                     clearWeather();
 
                     errorSet = true;
-                    string errorDescrip = (string)error.Element("description");
+                    string errorDescrip = (string)weather.error;
                     if (errorDescrip.Contains("location"))
                     {
                         errorDescrip += Environment.NewLine + "Try checking your location settings.";
@@ -918,38 +937,10 @@ namespace WeatherLock
         }
         private void backupWeather()
         {
-            String[] backup = { cityName,
-                                  shortCityName,
-                                  realFeelF,
-                                  weather,
-                                  todayHigh,
-                                  todayLow,
-                                  forecastToday,
-                                  forecastTomorrow,
-                                  tomorrowHigh,
-                                  tomorrowLow,
-                                  windSpeedM,
-                                  realFeel,
-                                  humidityValue,
-                                  windDir,
-                                  updateTime,
-                                  tempCompareText,
-                                  tempC,
-                                  tempF,
-                                  realFeelC,
-                                  windSpeedK
-                              };
+            //Backup location, weather data, and alerts
             store["locationName"] = cityName;
-            store["backupApp"] = backup;
-
-            store["backupForecast"] = foreRes;
+            store["backupApp"] = weather;
             store["backupAlerts"] = results;
-        }
-        public class ForecastResults
-        {
-            public string title { get; set; }
-            public string fcttext { get; set; }
-            public string pop { get; set; }
         }
 
         //Radar Map
@@ -1124,7 +1115,7 @@ namespace WeatherLock
                     else
                     {
                         editFlickrTags();
-                        fUrl = fUrl.Replace(weather, flickrTags);
+                        fUrl = fUrl.Replace(weather.currentConditions, flickrTags);
                     }
 
                     startFlickrProg();
@@ -1148,37 +1139,37 @@ namespace WeatherLock
         }
         private void editFlickrTags()
         {
-            if (weather.Contains("THUNDER"))
+            if (weather.currentConditions.Contains("THUNDER"))
             {
                 flickrTags = "thunder, thunderstorm, lightning, storm";
             }
-            else if (weather.Contains("RAIN"))
+            else if (weather.currentConditions.Contains("RAIN"))
             {
                 flickrTags = "rain, drizzle";
             }
-            else if (weather.Contains("SNOW") || weather.Contains("FLURRY"))
+            else if (weather.currentConditions.Contains("SNOW") || weather.currentConditions.Contains("FLURRY"))
             {
                 flickrTags = "snow, flurry, snowing";
             }
-            else if (weather.Contains("FOG") || weather.Contains("MIST"))
+            else if (weather.currentConditions.Contains("FOG") || weather.currentConditions.Contains("MIST"))
             {
                 flickrTags = "fog, foggy, mist";
             }
-            else if (weather.Contains("CLEAR"))
+            else if (weather.currentConditions.Contains("CLEAR"))
             {
                 flickrTags = "clear, sun, sunny, blue sky";
             }
-            else if (weather.Contains("OVERCAST"))
+            else if (weather.currentConditions.Contains("OVERCAST"))
             {
                 flickrTags = "overcast, cloudy";
             }
-            else if (weather.Contains("CLOUDS") || weather.Contains("CLOUDY"))
+            else if (weather.currentConditions.Contains("CLOUDS") || weather.currentConditions.Contains("CLOUDY"))
             {
                 flickrTags = "cloudy, clouds, fluffy cloud";
             }
             else
             {
-                flickrTags = weather;
+                flickrTags = weather.currentConditions;
             }
         }
         private void getFlickrXml(object sender, DownloadStringCompletedEventArgs e)

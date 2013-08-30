@@ -97,7 +97,7 @@
                                                Text="{Binding title}" Foreground="White" FontFamily="Segoe WP SemiLight" FontSize="30"
                                                />
                                     <TextBlock x:Name="forecast"
-                                    Text="{Binding fcttext}" 
+                                    Text="{Binding text}" 
                                            FontSize="20"
                                            Margin="15,0,0,15"
                                            Foreground="White" FontFamily="Segoe UI" TextWrapping="Wrap" TextOptions.TextHintingMode="Animated" HorizontalAlignment="Left" VerticalAlignment="Top"                                          

@@ -95,20 +95,20 @@ namespace WeatherLock
                 lockCelsius.IsChecked = true;
             }
 
-            if (store.Contains("forecastUnitisI"))
+            if (store.Contains("forecastUnitIsM"))
             {
-                if ((bool)store["forecastUnitisI"])
+                if ((bool)store["forecastUnitIsM"])
                 {
-                    imperial.IsChecked = true;
+                    metric.IsChecked = true;
                 }
                 else
                 {
-                    metric.IsChecked = true;
+                    imperial.IsChecked = true;
                 }
             }
             else
             {
-                store["forecastUnitisI"] = false;
+                store["forecastUnitIsM"] = true;
                 metric.IsChecked = true;
             }
 
@@ -676,7 +676,7 @@ namespace WeatherLock
             }
             else
             {
-                store["forecastUnitisI"] = false;
+                store["forecastUnitIsM"] = true;
                 store["unitChanged"] = true;
                 metric.IsChecked = true;
             }
@@ -689,7 +689,7 @@ namespace WeatherLock
             }
             else
             {
-                store["forecastUnitisI"] = true;
+                store["forecastUnitIsM"] = false;
                 store["unitChanged"] = true;
                 imperial.IsChecked = true;
             }
