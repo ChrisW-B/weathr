@@ -96,6 +96,9 @@
     <Reference Include="Helpers">
       <HintPath>..\..\Helpers\Helpers\Bin\Release\Helpers.dll</HintPath>
     </Reference>
+    <Reference Include="WeatherData">
+      <HintPath>..\..\WeatherData\WeatherData\Bin\Release\WeatherData.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).$(TargetFrameworkVersion).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).CSharp.targets" />

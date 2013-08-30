@@ -707,11 +707,6 @@ namespace WeatherLock
             {
             }
         }
-        private void UpdateButton_Click(object sender, RoutedEventArgs e)
-        {
-            startTileProg();
-            updateData();
-        }
         private void notifyMe_Checked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -895,6 +890,7 @@ namespace WeatherLock
             }
             else
             {
+                UpdateTileFromApp update = new UpdateTileFromApp();
                 store["lockUnitIsC"] = true;
                 lockCelsius.IsChecked = true;
             }
@@ -907,6 +903,7 @@ namespace WeatherLock
             }
             else
             {
+                UpdateTileFromApp update = new UpdateTileFromApp();
                 store["lockUnitIsC"] = false;
                 lockFahrenheit.IsChecked = true;
             }
