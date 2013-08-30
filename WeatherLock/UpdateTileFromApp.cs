@@ -683,9 +683,9 @@ namespace WeatherLock
         private void checkUnits()
         {
             //check what the temp units should be
-            if (store.Contains("lockUnit"))
+            if (store.Contains("lockUnitIsC"))
             {
-                if ((string)store["lockUnit"] == "c")
+                if ((bool)store["lockUnitIsC"])
                 {
                     tempUnitIsC = true;
                 }
@@ -696,8 +696,8 @@ namespace WeatherLock
             }
             else
             {
-                store["lockUnit"] = "c";
-                tempUnitIsC = false;
+                store["lockUnitIsC"] = true;
+                tempUnitIsC = true;
             }
         }
 
