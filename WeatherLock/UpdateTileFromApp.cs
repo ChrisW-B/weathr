@@ -159,7 +159,7 @@ namespace WeatherLock
                 Uri smallIcon = new Uri("/SunCloud110.png", UriKind.Relative);
 
                 XDocument doc = XDocument.Parse(e.Result);
-                //weather.error = doc.Element("response").Element("error").ToString();
+                weather.error = doc.Element("response").Element("error").Element("description").Value;
                 if (weather.error == null && !error)
                 {
                     //Current Conditions
@@ -356,7 +356,7 @@ namespace WeatherLock
                 Uri smallIcon = new Uri("/SunCloud110.png", UriKind.Relative);
 
                 XDocument doc = XDocument.Parse(e.Result);
-                //weather.error = doc.Element("response").Element("error").ToString();
+                weather.error = doc.Element("response").Element("error").Element("description").Value;
                 if (weather.error == null && !error)
                 {
                     //Current Conditions
@@ -486,7 +486,7 @@ namespace WeatherLock
                 Uri smallIcon = new Uri("/SunCloud110.png", UriKind.Relative);
 
                 XDocument doc = XDocument.Parse(e.Result);
-                //weather.error = doc.Element("response").Element("error").ToString();
+                weather.error = doc.Element("response").Element("error").Element("description").Value;
                 if (weather.error == null && !error)
                 {
                     //Current Conditions

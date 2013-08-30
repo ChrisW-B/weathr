@@ -776,7 +776,7 @@ namespace WeatherLock
             {
                 weather = new WeatherInfo();
                 XDocument doc = XDocument.Parse(e.Result);
-                weather.error = (string)doc.Element("response").Element("error");
+                weather.error = doc.Element("response").Element("error").Element("description").Value;
                 if (weather.error == null)
                 {
 
@@ -917,7 +917,7 @@ namespace WeatherLock
                     clearWeather();
 
                     errorSet = true;
-                    string errorDescrip = (string)weather.error;
+                    string errorDescrip = weather.error;
                     if (errorDescrip.Contains("location"))
                     {
                         errorDescrip += Environment.NewLine + "Try checking your location settings.";
