@@ -776,8 +776,8 @@ namespace WeatherLock
             {
                 weather = new WeatherInfo();
                 XDocument doc = XDocument.Parse(e.Result);
-                weather.error = doc.Element("response").Element("error").Element("description").Value;
-                if (weather.error == null)
+                XElement error = doc.Element("response").Element("error");
+                if (error == null)
                 {
 
                     #region current conditions
@@ -914,6 +914,7 @@ namespace WeatherLock
                 }
                 else
                 {
+                    weather.error = doc.Element("response").Element("error").Element("description").Value;
                     clearWeather();
 
                     errorSet = true;

@@ -159,8 +159,8 @@ namespace WeatherLock
                 Uri smallIcon = new Uri("/SunCloud110.png", UriKind.Relative);
 
                 XDocument doc = XDocument.Parse(e.Result);
-                weather.error = doc.Element("response").Element("error").Element("description").Value;
-                if (weather.error == null && !error)
+                XElement weatherError = doc.Element("response").Element("error");
+                if (weatherError == null && !error)
                 {
                     //Current Conditions
                     XElement currentObservation = doc.Element("response").Element("current_observation");
@@ -283,6 +283,7 @@ namespace WeatherLock
                 }
                 else if (!error)
                 {
+                    weather.error = doc.Element("response").Element("error").Element("description").Value;
                     errorText = weather.error;
                     error = true;
 
@@ -356,8 +357,8 @@ namespace WeatherLock
                 Uri smallIcon = new Uri("/SunCloud110.png", UriKind.Relative);
 
                 XDocument doc = XDocument.Parse(e.Result);
-                weather.error = doc.Element("response").Element("error").Element("description").Value;
-                if (weather.error == null && !error)
+                XElement weatherError = doc.Element("response").Element("error");
+                if (weatherError == null && !error)
                 {
                     //Current Conditions
                     XElement currentObservation = doc.Element("response").Element("current_observation");
@@ -486,8 +487,8 @@ namespace WeatherLock
                 Uri smallIcon = new Uri("/SunCloud110.png", UriKind.Relative);
 
                 XDocument doc = XDocument.Parse(e.Result);
-                weather.error = doc.Element("response").Element("error").Element("description").Value;
-                if (weather.error == null && !error)
+                XElement weatherError = doc.Element("response").Element("error");
+                if (weatherError == null && !error)
                 {
                     //Current Conditions
                     XElement currentObservation = doc.Element("response").Element("current_observation");
@@ -590,15 +591,70 @@ namespace WeatherLock
                             }
                         }
                     }
-                    if (finished())
+                }
+                else if (!error)
+                {
+                    errorText = weather.error;
+                    error = true;
+
+                    foreach (ShellTile tile in ShellTile.ActiveTiles)
                     {
-                        return;
+                        if (tile.NavigationUri.OriginalString == "/")
+                        {
+                            IconicTileData TileData = new IconicTileData
+                            {
+                                IconImage = normalIcon,
+                                SmallIconImage = smallIcon,
+                                Title = "Error",
+                                Count = 0,
+                                WideContent1 = errorText,
+                                WideContent2 = null,
+                                WideContent3 = null,
+                            };
+                            tile.Update(TileData);
+
+                            //mark tile as updated
+                            markUpdated("default location", "null", "null", false);
+
+                            //stop looping
+                            break;
+                        }
                     }
                 }
-                else
+                else if (error)
+                {
+                    foreach (ShellTile tile in ShellTile.ActiveTiles)
+                    {
+                        if (tile.NavigationUri.OriginalString == "/")
+                        {
+                            IconicTileData TileData = new IconicTileData
+                            {
+                                IconImage = normalIcon,
+                                SmallIconImage = smallIcon,
+                                Title = "Error",
+                                Count = 0,
+                                WideContent1 = errorText,
+                                WideContent2 = null,
+                                WideContent3 = null
+                            };
+                            tile.Update(TileData);
+
+                            //mark tile as updated
+                            markUpdated("default location", "null", "null", false);
+
+                            //stop looping
+                            break;
+                        }
+                    }
+                }
+                if (finished())
                 {
                     return;
                 }
+            }
+            else
+            {
+                return;
             }
         }
 

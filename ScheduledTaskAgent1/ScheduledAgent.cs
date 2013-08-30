@@ -227,8 +227,9 @@ namespace ScheduledTaskAgent1
                 Uri smallIcon = new Uri("/SunCloud110.png", UriKind.Relative);
 
                 XDocument doc = XDocument.Parse(e.Result);
-                weather.error = doc.Element("response").Element("error").Element("description").Value;
-                if (weather.error == null && !error)
+                XElement weatherError = doc.Element("response").Element("error");
+
+                if (weatherError == null && !error)
                 {
                     //Current Conditions
                     XElement currentObservation = doc.Element("response").Element("current_observation");
@@ -239,24 +240,24 @@ namespace ScheduledTaskAgent1
 
                     XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
 
-                   XElement today = forecastDays.Element("forecastday");
+                    XElement today = forecastDays.Element("forecastday");
                     XElement tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
 
                     weather.todayShort = (string)today.Element("conditions");
                     weather.tomorrowShort = (string)tomorrow.Element("conditions");
-                   
-                        weather.tempC = (string)currentObservation.Element("temp_c");
-                        weather.todayLowC = (string)today.Element("low").Element("celsius");
-                        weather.todayHighC = (string)today.Element("high").Element("celsius");
-                        weather.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
-                        weather.tomorrowHighC = (string)tomorrow.Element("high").Element("celsius");
-                    
-                        weather.tempF = (string)currentObservation.Element("temp_f");
-                        weather.todayLowF = (string)today.Element("low").Element("fahrenheit");
-                        weather.todayHighF = (string)today.Element("high").Element("fahrenheit");
-                        weather.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
-                        weather.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
-                    
+
+                    weather.tempC = (string)currentObservation.Element("temp_c");
+                    weather.todayLowC = (string)today.Element("low").Element("celsius");
+                    weather.todayHighC = (string)today.Element("high").Element("celsius");
+                    weather.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
+                    weather.tomorrowHighC = (string)tomorrow.Element("high").Element("celsius");
+
+                    weather.tempF = (string)currentObservation.Element("temp_f");
+                    weather.todayLowF = (string)today.Element("low").Element("fahrenheit");
+                    weather.todayHighF = (string)today.Element("high").Element("fahrenheit");
+                    weather.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
+                    weather.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
+
                     //get weather icons
                     Uri[] weatherIcons = getWeatherIcons(weather.currentConditions);
                     normalIcon = weatherIcons[0];
@@ -292,13 +293,13 @@ namespace ScheduledTaskAgent1
                         {
                             temp = 99;
                         }
-                        else if (temp<1)
+                        else if (temp < 1)
                         {
                             temp = 1;
                         }
                     }
 
-                    
+
 
 
                     foreach (ShellTile tile in ShellTile.ActiveTiles)
@@ -362,6 +363,7 @@ namespace ScheduledTaskAgent1
                 }
                 else if (!error)
                 {
+                    weather.error = doc.Element("response").Element("error").Element("description").Value;
                     errorText = weather.error;
                     error = true;
 
@@ -441,8 +443,8 @@ namespace ScheduledTaskAgent1
                 Uri smallIcon = new Uri("/SunCloud110.png", UriKind.Relative);
 
                 XDocument doc = XDocument.Parse(e.Result);
-                weather.error = doc.Element("response").Element("error").Element("description").Value;
-                if (weather.error == null && !error)
+                XElement weatherError = doc.Element("response").Element("error");
+                if (weatherError == null && !error)
                 {
                     //Current Conditions
                     XElement currentObservation = doc.Element("response").Element("current_observation");
@@ -554,17 +556,18 @@ namespace ScheduledTaskAgent1
                             }
                         }
                     }
-                    if (finished())
-                    {
-                        NotifyComplete();
-                    }
                 }
-                else
+                if (finished())
                 {
                     NotifyComplete();
                 }
             }
+            else
+            {
+                NotifyComplete();
+            }
         }
+
         private void updateLocAwareTile(object sender, DownloadStringCompletedEventArgs e)
         {
             weather = new WeatherInfo();
@@ -575,8 +578,8 @@ namespace ScheduledTaskAgent1
                 Uri smallIcon = new Uri("/SunCloud110.png", UriKind.Relative);
 
                 XDocument doc = XDocument.Parse(e.Result);
-                weather.error = doc.Element("response").Element("error").Element("description").Value;
-                if (weather.error == null && !error)
+                XElement weatherError = doc.Element("response").Element("error");
+                if (weatherError == null && !error)
                 {
                     //Current Conditions
                     XElement currentObservation = doc.Element("response").Element("current_observation");
@@ -683,15 +686,96 @@ namespace ScheduledTaskAgent1
                             }
                         }
                     }
-                    if (finished())
+
+                }
+                else if (!error)
+                {
+                    weather.error = doc.Element("response").Element("error").Element("description").Value;
+                    errorText = weather.error;
+                    error = true;
+
+                    foreach (ShellTile tile in ShellTile.ActiveTiles)
                     {
-                        NotifyComplete();
+                        if (tile.NavigationUri.ToString() != "/")
+                        {
+                            //get name and location from tile url
+                            string tileLoc = tile.NavigationUri.ToString().Split('&')[0].Split('=')[1];
+                            bool tileIsCurrent = Convert.ToBoolean(tile.NavigationUri.ToString().Split('&')[2].Split('=')[1]);
+                            foreach (Pins pin in pinnedList)
+                            {
+                                if (tileIsCurrent && pin.currentLoc && !pin.LocName.Contains("default location"))
+                                {
+                                    IconicTileData TileData = new IconicTileData
+                                    {
+                                        IconImage = normalIcon,
+                                        SmallIconImage = smallIcon,
+                                        Title = "Error",
+                                        Count = 0,
+                                        WideContent1 = errorText,
+                                        WideContent2 = null,
+                                        WideContent3 = null,
+                                    };
+                                    tile.Update(TileData);
+
+                                    //mark tile as updated
+                                    markUpdated("default location", "null", "null", false);
+
+                                    //send a toast to tell that it has updated
+                                    sendToast("Error");
+
+                                    //stop looping
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
-                else
+                else if (error)
+                {
+                    foreach (ShellTile tile in ShellTile.ActiveTiles)
+                    {
+                        if (tile.NavigationUri.ToString() != "/")
+                        {
+                            //get name and location from tile url
+                            string tileLoc = tile.NavigationUri.ToString().Split('&')[0].Split('=')[1];
+                            bool tileIsCurrent = Convert.ToBoolean(tile.NavigationUri.ToString().Split('&')[2].Split('=')[1]);
+                            foreach (Pins pin in pinnedList)
+                            {
+                                if (tileIsCurrent && pin.currentLoc && !pin.LocName.Contains("default location"))
+                                {
+                                    IconicTileData TileData = new IconicTileData
+                                    {
+                                        IconImage = normalIcon,
+                                        SmallIconImage = smallIcon,
+                                        Title = "Error",
+                                        Count = 0,
+                                        WideContent1 = errorText,
+                                        WideContent2 = null,
+                                        WideContent3 = null
+                                    };
+                                    tile.Update(TileData);
+
+                                    //mark tile as updated
+                                    markUpdated("default location", "null", "null", false);
+
+                                    //send a toast to tell that it has updated
+                                    sendToast("Error");
+
+                                    //stop looping
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (finished())
                 {
                     NotifyComplete();
                 }
+            }
+            else
+            {
+                NotifyComplete();
             }
         }
 
@@ -898,7 +982,8 @@ namespace ScheduledTaskAgent1
             return true;
         }
 
-        private bool checkRange(string loc, int temp){
+        private bool checkRange(string loc, int temp)
+        {
             if ((temp > 99))
             {
                 if (store.Contains("tempAlert"))
