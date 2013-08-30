@@ -33,77 +33,188 @@
             </toolkit:NavigationOutTransition.Forward>
         </toolkit:NavigationOutTransition>
     </toolkit:TransitionService.NavigationOutTransition>
-
-    <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <phone:Pivot Title="ABOUT">
+            <phone:PivotItem Header="app">
+                <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
+                    <ScrollViewer>
+                        <RichTextBox HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{x:Null}">
+                            <Paragraph>
+                                <Run Text="Weathr was developed by Chris Barry "/>
+                            </Paragraph>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="mailto:ChrisApps@outlook.com" TargetName="mailTo">
+                                    <Run Text="Email"/>
+                                </Hyperlink>
+                            </Paragraph>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://twitter.com/CB_27" TargetName="twitter">
+                                    <Run Text="Twitter"/>
+                                </Hyperlink>
+                            </Paragraph>
+                            <Paragraph/>
+                            <Paragraph>
+                                <Run FontSize="26" Text="Privacy:"/>
+                            </Paragraph>
+                            <Paragraph>
+                                <Run Text="When Use Current Location is enabled, rough GPS coordinates are saved for use in finding your location. These coordinates are sent to "/>
+                                <Hyperlink NavigateUri="http://www.flickr.com/services/developer/" TargetName="flickrApi">
+                                    <Run Text="Flickr"/>
+                                </Hyperlink>
+                                <Run Text=", to get a local picture, "/>
+                                <Hyperlink NavigateUri="http://www.wunderground.com/?apiref=cdd8be6583b62f40" TargetName="wunderApi">
+                                    <Run Text="Weather Underground"/>
+                                </Hyperlink>
+                                <Run Text=" for current weather data, as well as forecasts, and the "/>
+                                <Hyperlink NavigateUri="http://graphical.weather.gov/xml/" TargetName="NWSapi">
+                                    <Run Text="National Weather Service"/>
+                                </Hyperlink>
+                                <Run Text=" to get weather alerts."/>
+                            </Paragraph>
+                            <Paragraph/>
+                            <Paragraph>
+                                <Run Text="Additionally, when a location is added manually, rough coordinates are obtained for the town/city via the "/>
+                                <Hyperlink NavigateUri="https://developers.google.com/maps/documentation/geocoding/?hl=en" TargetName="googleApi">
+                                    <Run Text="Google Maps API"/>
+                                </Hyperlink>
+                                <Run Text=" and then used to find local photos through Flickr. "/>
+                            </Paragraph>
+                            <Paragraph/>
+                            <Paragraph>
+                                <Run Text="Coordinates are also stored on your phone in case the GPS service is inaccessible, and in that case, the last known location can be used. None of this data is saved off your phone, and I (the developer) do not have access to any of it"/>
+                            </Paragraph>
+                            <Paragraph>
+                                <Run/>
+                            </Paragraph>
+                            <Paragraph>
+                                <Run Text="Radar is provided through the Iowa State University Department of Agronomy's Iowa Environmental Mesonet project, and comes from the National Weather Service"/>
+                            </Paragraph>
+                        </RichTextBox>
+                    </ScrollViewer>
+                </Grid>
+            </phone:PivotItem>
 
-        <!--TitlePanel contains the name of the application and page title-->
-        <StackPanel Grid.Row="0" Margin="12,17,0,28">
-            <TextBlock Text="WEATHR" Style="{StaticResource PhoneTextNormalStyle}"/>
-            <TextBlock Text="about" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
-        </StackPanel>
 
-        <!--ContentPanel - place additional content here-->
-        <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
-            <ScrollViewer>
-                <RichTextBox HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{x:Null}">
-                    <Paragraph>
-                        <Run Text="Weathr was developed by Chris Barry "/>
-                    </Paragraph>
-                    <Paragraph>
-                        <Hyperlink NavigateUri="mailto:ChrisApps@outlook.com" TargetName="mailTo">
-                            <Run Text="Email"/>
-                        </Hyperlink>
-                    </Paragraph>
-                    <Paragraph>
-                        <Hyperlink NavigateUri="http://twitter.com/CB_27" TargetName="twitter">
-                            <Run Text="Twitter"/>
-                        </Hyperlink>
-                    </Paragraph>
-                    <Paragraph/>
-                    <Paragraph>
-                        <Run FontSize="26" Text="Privacy:"/>
-                    </Paragraph>
-                    <Paragraph>
-                        <Run Text="When Use Current Location is enabled, rough GPS coordinates are saved for use in finding your location. These coordinates are sent to "/>
-                        <Hyperlink NavigateUri="http://www.flickr.com/services/developer/" TargetName="flickrApi">
-                            <Run Text="Flickr"/>
-                        </Hyperlink>
-                        <Run Text=", to get a local picture, "/>
-                        <Hyperlink NavigateUri="http://www.wunderground.com/?apiref=cdd8be6583b62f40" TargetName="wunderApi">
-                            <Run Text="Weather Underground"/>
-                        </Hyperlink>
-                        <Run Text=" for current weather data, as well as forecasts, and the "/>
-                        <Hyperlink NavigateUri="http://graphical.weather.gov/xml/" TargetName="NWSapi">
-                            <Run Text="National Weather Service"/>
-                        </Hyperlink>
-                        <Run Text=" to get weather alerts."/>
-                    </Paragraph>
-                    <Paragraph/>
-                    <Paragraph>
-                        <Run Text="Additionally, when a location is added manually, rough coordinates are obtained for the town/city via the "/>
-                        <Hyperlink NavigateUri="https://developers.google.com/maps/documentation/geocoding/?hl=en" TargetName="googleApi">
-                            <Run Text="Google Maps API"/>
-                        </Hyperlink>
-                        <Run Text=" and then used to find local photos through Flickr. "/>
-                    </Paragraph>
-                    <Paragraph/>
-                    <Paragraph>
-                        <Run Text="Coordinates are also stored on your phone in case the GPS service is inaccessible, and in that case, the last known location can be used. None of this data is saved off your phone, and I (the developer) do not have access to any of it"/>
-                    </Paragraph>
-                    <Paragraph>
-                        <Run/>
-                    </Paragraph>
-                    <Paragraph>
-                        <Run Text="Radar is provided through the Iowa State University Department of Agronomy's Iowa Environmental Mesonet project, and comes from the National Weather Service"/>
-                    </Paragraph>
-                </RichTextBox>
-            </ScrollViewer>
-        </Grid>
+            <phone:PivotItem Header="updates">
+                <ScrollViewer>
+                    <RichTextBox>
+                        <Paragraph>
+                            <Run Text="Version 1.2.3"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Updates tiles when units are changed"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Tile unit bug fixed"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Redo of data handling in app"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-More stuff coming as well"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="Version 1.2.2"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-General visual tweaks for ease of use"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Knows when you've already pinned a location"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Fixed problems when pinning current location as a separate tile"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Auto start background task when a location is pinned"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Bigger radar/satellite maps"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="1.2.1"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Fixed many bugs in location services that prevented 1.1 from approval"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="1.2"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Radar Support!(US only, and no animations currently)"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Only load info as needed, app launches faster"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Improved reliability"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Removed some restrictions on trial mode"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="1.1.0-4:"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-New icon"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Multiple location support!"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Multiple live tile support!"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Update weather units without refreshing"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Unified default units"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-General appearance clean up"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-More reliable background task"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="1.0.1:"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Better readability on light backgrounds"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Fixed restoring forecasts"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Less calls to API"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="COMING SOON:"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Lockscreen Images"/>
+                        </Paragraph>
+                    </RichTextBox>
+                </ScrollViewer>
+            </phone:PivotItem>
+        </phone:Pivot>
     </Grid>
-
 </phone:PhoneApplicationPage>

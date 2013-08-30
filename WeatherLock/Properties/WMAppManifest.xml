@@ -6,7 +6,7 @@
     <Language code="en-US" />
     <Language code="en-GB" />
   </Languages>
-  <App xmlns="" ProductID="{3bacf703-65e0-4919-89a3-ac901decf82a}" Title="WeathrDEV" RuntimeType="Silverlight" Version="1.1.3.0" Genre="apps.normal" Author="Chris Barry" Description="A new weather app for Windows Phone with not only live tile support, but also the ability to have a detailed forecast on your lockscreen, without changing your current wallpaper. Combine with other apps that can set the lockscreen to have even more glance " Publisher="WeatherLock" PublisherID="{6b72e231-93c0-4e18-b20d-449acf2b5d53}">
+  <App xmlns="" ProductID="{3bacf703-65e0-4919-89a3-ac901decf82a}" Title="WeathrDEV" RuntimeType="Silverlight" Version="1.1.3.0" Genre="apps.normal" Author="Chris Barry" Description="A new weather app for Windows Phone with not only live tile support, but also the ability to have a detailed forecast on your lockscreen, without changing your current wallpaper. Combine with other apps that can set the lockscreen to have even more glance " Publisher="CB_27" PublisherID="{6b72e231-93c0-4e18-b20d-449acf2b5d53}">
     <IconPath IsRelative="true" IsResource="false">SunCloud300Trans.png</IconPath>
     <Capabilities>
       <Capability Name="ID_CAP_NETWORKING" />
