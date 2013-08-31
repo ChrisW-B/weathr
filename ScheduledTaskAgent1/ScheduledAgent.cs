@@ -228,7 +228,6 @@ namespace ScheduledTaskAgent1
 
                 XDocument doc = XDocument.Parse(e.Result);
                 XElement weatherError = doc.Element("response").Element("error");
-
                 if (weatherError == null && !error)
                 {
                     //Current Conditions
@@ -287,20 +286,15 @@ namespace ScheduledTaskAgent1
                         tomorrowLow = weather.todayLowF;
                     }
                     int temp = getTemp.temp;
-                    if (checkRange(cityName, temp))
+
+                    if (temp > 99)
                     {
-                        if (temp > 99)
-                        {
-                            temp = 99;
-                        }
-                        else if (temp < 1)
-                        {
-                            temp = 1;
-                        }
+                        temp = 99;
                     }
-
-
-
+                    else if (temp < 1)
+                    {
+                        temp = 1;
+                    }
 
                     foreach (ShellTile tile in ShellTile.ActiveTiles)
                     {
@@ -324,9 +318,6 @@ namespace ScheduledTaskAgent1
                                 //mark tile as updated
                                 markUpdated("default location", weather.city, weather.state, false);
 
-                                //send a toast to tell that it has updated
-                                sendToast(cityName);
-
                                 //stop looping
                                 break;
                             }
@@ -349,9 +340,6 @@ namespace ScheduledTaskAgent1
 
                                     //mark tile as updated
                                     markUpdated("default location", weather.city, weather.state, false);
-
-                                    //send a toast to tell that it has updated
-                                    sendToast(cityName);
 
                                     //stop looping
                                     break;
@@ -386,9 +374,6 @@ namespace ScheduledTaskAgent1
                             //mark tile as updated
                             markUpdated("default location", "null", "null", false);
 
-                            //send a toast to tell that it has updated
-                            sendToast("Error");
-
                             //stop looping
                             break;
                         }
@@ -414,9 +399,6 @@ namespace ScheduledTaskAgent1
 
                             //mark tile as updated
                             markUpdated("default location", "null", "null", false);
-
-                            //send a toast to tell that it has updated
-                            sendToast("Error");
 
                             //stop looping
                             break;
@@ -502,17 +484,16 @@ namespace ScheduledTaskAgent1
                         tomorrowLow = weather.todayLowF;
                     }
                     int temp = getTemp.temp;
-                    if (checkRange(cityName, temp))
+
+                    if (temp > 99)
                     {
-                        if (temp > 99)
-                        {
-                            temp = 99;
-                        }
-                        else if (temp < 1)
-                        {
-                            temp = 1;
-                        }
+                        temp = 99;
                     }
+                    else if (temp < 1)
+                    {
+                        temp = 1;
+                    }
+
 
                     foreach (ShellTile tile in ShellTile.ActiveTiles)
                     {
@@ -547,9 +528,6 @@ namespace ScheduledTaskAgent1
                                     //mark the tile as finished updating
                                     markUpdated(cityName, weather.city, weather.state, false);
 
-                                    //send toast if enabled
-                                    sendToast(cityName);
-
                                     //stop looping
                                     break;
                                 }
@@ -567,7 +545,6 @@ namespace ScheduledTaskAgent1
                 NotifyComplete();
             }
         }
-
         private void updateLocAwareTile(object sender, DownloadStringCompletedEventArgs e)
         {
             weather = new WeatherInfo();
@@ -637,17 +614,16 @@ namespace ScheduledTaskAgent1
                         tomorrowLow = weather.todayLowF;
                     }
                     int temp = getTemp.temp;
-                    if (checkRange(cityName, temp))
+
+                    if (temp > 99)
                     {
-                        if (temp > 99)
-                        {
-                            temp = 99;
-                        }
-                        else if (temp < 1)
-                        {
-                            temp = 1;
-                        }
+                        temp = 99;
                     }
+                    else if (temp < 1)
+                    {
+                        temp = 1;
+                    }
+
                     foreach (ShellTile tile in ShellTile.ActiveTiles)
                     {
                         if (tile.NavigationUri.ToString() != "/")
@@ -677,56 +653,39 @@ namespace ScheduledTaskAgent1
                                     //mark the tile as finished updating
                                     markUpdated("current location", weather.city, weather.state, true);
 
-                                    //send toast if enabled
-                                    sendToast(cityName);
-
                                     //stop looping
                                     break;
                                 }
                             }
                         }
                     }
-
                 }
                 else if (!error)
                 {
-                    weather.error = doc.Element("response").Element("error").Element("description").Value;
                     errorText = weather.error;
                     error = true;
 
                     foreach (ShellTile tile in ShellTile.ActiveTiles)
                     {
-                        if (tile.NavigationUri.ToString() != "/")
+                        if (tile.NavigationUri.OriginalString == "/")
                         {
-                            //get name and location from tile url
-                            string tileLoc = tile.NavigationUri.ToString().Split('&')[0].Split('=')[1];
-                            bool tileIsCurrent = Convert.ToBoolean(tile.NavigationUri.ToString().Split('&')[2].Split('=')[1]);
-                            foreach (Pins pin in pinnedList)
+                            IconicTileData TileData = new IconicTileData
                             {
-                                if (tileIsCurrent && pin.currentLoc && !pin.LocName.Contains("default location"))
-                                {
-                                    IconicTileData TileData = new IconicTileData
-                                    {
-                                        IconImage = normalIcon,
-                                        SmallIconImage = smallIcon,
-                                        Title = "Error",
-                                        Count = 0,
-                                        WideContent1 = errorText,
-                                        WideContent2 = null,
-                                        WideContent3 = null,
-                                    };
-                                    tile.Update(TileData);
+                                IconImage = normalIcon,
+                                SmallIconImage = smallIcon,
+                                Title = "Error",
+                                Count = 0,
+                                WideContent1 = errorText,
+                                WideContent2 = null,
+                                WideContent3 = null,
+                            };
+                            tile.Update(TileData);
 
-                                    //mark tile as updated
-                                    markUpdated("default location", "null", "null", false);
+                            //mark tile as updated
+                            markUpdated("default location", "null", "null", false);
 
-                                    //send a toast to tell that it has updated
-                                    sendToast("Error");
-
-                                    //stop looping
-                                    break;
-                                }
-                            }
+                            //stop looping
+                            break;
                         }
                     }
                 }
@@ -734,37 +693,25 @@ namespace ScheduledTaskAgent1
                 {
                     foreach (ShellTile tile in ShellTile.ActiveTiles)
                     {
-                        if (tile.NavigationUri.ToString() != "/")
+                        if (tile.NavigationUri.OriginalString == "/")
                         {
-                            //get name and location from tile url
-                            string tileLoc = tile.NavigationUri.ToString().Split('&')[0].Split('=')[1];
-                            bool tileIsCurrent = Convert.ToBoolean(tile.NavigationUri.ToString().Split('&')[2].Split('=')[1]);
-                            foreach (Pins pin in pinnedList)
+                            IconicTileData TileData = new IconicTileData
                             {
-                                if (tileIsCurrent && pin.currentLoc && !pin.LocName.Contains("default location"))
-                                {
-                                    IconicTileData TileData = new IconicTileData
-                                    {
-                                        IconImage = normalIcon,
-                                        SmallIconImage = smallIcon,
-                                        Title = "Error",
-                                        Count = 0,
-                                        WideContent1 = errorText,
-                                        WideContent2 = null,
-                                        WideContent3 = null
-                                    };
-                                    tile.Update(TileData);
+                                IconImage = normalIcon,
+                                SmallIconImage = smallIcon,
+                                Title = "Error",
+                                Count = 0,
+                                WideContent1 = errorText,
+                                WideContent2 = null,
+                                WideContent3 = null
+                            };
+                            tile.Update(TileData);
 
-                                    //mark tile as updated
-                                    markUpdated("default location", "null", "null", false);
+                            //mark tile as updated
+                            markUpdated("default location", "null", "null", false);
 
-                                    //send a toast to tell that it has updated
-                                    sendToast("Error");
-
-                                    //stop looping
-                                    break;
-                                }
-                            }
+                            //stop looping
+                            break;
                         }
                     }
                 }
@@ -793,11 +740,11 @@ namespace ScheduledTaskAgent1
         }
 
         //get weather icon Uri for tiles
-        private Uri[] getWeatherIcons(string weather)
+        private Uri[] getWeatherIcons(string weatherConditions)
         {
             Uri normalIcon;
             Uri smallIcon;
-            string weatherLower = weather.ToLower();
+            string weatherLower = weatherConditions.ToLower();
 
             if (weatherLower.Contains("thunder") || weatherLower.Contains("storm"))
             {
