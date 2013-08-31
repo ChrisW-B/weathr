@@ -28,7 +28,7 @@ namespace WeatherLock
         #region variables
         //Collection of weather data
         private WeatherInfo weather;
-        private String updateTime;
+        private String weatherConditions;
         private String cityName;
 
         //Set Units
@@ -326,12 +326,12 @@ namespace WeatherLock
                     url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast/q/" + latitude + "," + longitude + ".xml";
                     if (useWeatherGroup)
                     {
-                        fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&group_id=" + weatherGroup + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weather.currentConditions + "&per_page=500&tag_mode=any&content_type=1&media=photos&radius=32&format=rest";
+                        fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&group_id=" + weatherGroup + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weatherConditions + "&per_page=500&tag_mode=any&content_type=1&media=photos&radius=32&format=rest";
 
                     }
                     else
                     {
-                        fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weather.currentConditions + "&per_page=500&tag_mode=any&content_type=1&media=photos&radius=32&format=rest";
+                        fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weatherConditions + "&per_page=500&tag_mode=any&content_type=1&media=photos&radius=32&format=rest";
                     }
                 }
                 else
@@ -695,6 +695,8 @@ namespace WeatherLock
             {
                 errorText.Text = null;
             }
+
+            weatherConditions = weather.currentConditions;
 
             //backup weather
             backupWeather();

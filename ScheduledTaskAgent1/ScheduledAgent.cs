@@ -961,7 +961,7 @@ namespace ScheduledTaskAgent1
         {
             foreach (Pins pin in pinnedListCopy)
             {
-                if ((pin.LocName == cityName) || (pin.LocName.Split(',')[0].Contains(city) && pin.LocName.Split(',')[1].Contains(state)) || (pin.currentLoc == isCurrent))
+                if ((pin.LocName == cityName) || (pin.LocName.Split(',')[0].Contains(city) && pin.LocName.Split(',')[1].Contains(state)) || (pin.currentLoc == isCurrent && isCurrent))
                 {
                     pin.updated = true;
                     break;

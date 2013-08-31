@@ -124,7 +124,6 @@
       <DependentUpon>SettingsPivot.xaml</DependentUpon>
     </Compile>
     <Compile Include="CurrentRadar.cs" />
-    <Compile Include="UpdateTileFromApp.cs" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
