@@ -28,7 +28,7 @@ namespace WeatherLock
         #region variables
         //Collection of weather data
         private WeatherInfo weather;
-        private String weatherConditions;
+        private string weatherConditions;
         private String cityName;
 
         //Set Units
@@ -626,7 +626,8 @@ namespace WeatherLock
             #endregion
 
             //Convert weather text to caps
-            weather.currentConditions = weather.currentConditions.ToUpper();
+            string weatherUpper = weather.currentConditions.ToUpper();
+            weatherConditions = weather.currentConditions;
 
             //set name
             if (weatherSet)
@@ -660,7 +661,7 @@ namespace WeatherLock
             wind.Text = windCon;
 
             //Set current conditons
-            conditions.Text = weather.currentConditions;
+            conditions.Text = weatherUpper;
 
             //Set humidity
             humidity.Text = "Humidity: " + weather.humidity;
@@ -695,8 +696,6 @@ namespace WeatherLock
             {
                 errorText.Text = null;
             }
-
-            weatherConditions = weather.currentConditions;
 
             //backup weather
             backupWeather();
@@ -905,6 +904,22 @@ namespace WeatherLock
                         }
                     }
                     #endregion
+
+                    #region tile stuff
+                    weather.todayShort = (string)today.Element("conditions");
+                    weather.tomorrowShort = (string)tomorrow.Element("conditions");
+ 
+                    weather.todayLowC = (string)today.Element("low").Element("celsius");
+                    weather.todayHighC = (string)today.Element("high").Element("celsius");
+                    weather.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
+                    weather.tomorrowHighC = (string)tomorrow.Element("high").Element("celsius");
+
+                    weather.todayLowF = (string)today.Element("low").Element("fahrenheit");
+                    weather.todayHighF = (string)today.Element("high").Element("fahrenheit");
+                    weather.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
+                    weather.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
+                    #endregion
+
 
                     //set ui elements
                     weatherSet = true;
@@ -1142,7 +1157,9 @@ namespace WeatherLock
         }
         private void editFlickrTags()
         {
-            if (weather.currentConditions.Contains("THUNDER"))
+            string weatherUpper = weather.currentConditions.ToUpper();
+
+            if (weatherUpper.Contains("THUNDER"))
             {
                 flickrTags = "thunder, thunderstorm, lightning, storm";
             }
@@ -1150,29 +1167,29 @@ namespace WeatherLock
             {
                 flickrTags = "rain, drizzle";
             }
-            else if (weather.currentConditions.Contains("SNOW") || weather.currentConditions.Contains("FLURRY"))
+            else if (weatherUpper.Contains("SNOW") || weatherUpper.Contains("FLURRY"))
             {
                 flickrTags = "snow, flurry, snowing";
             }
-            else if (weather.currentConditions.Contains("FOG") || weather.currentConditions.Contains("MIST"))
+            else if (weatherUpper.Contains("FOG") || weatherUpper.Contains("MIST"))
             {
                 flickrTags = "fog, foggy, mist";
             }
-            else if (weather.currentConditions.Contains("CLEAR"))
+            else if (weatherUpper.Contains("CLEAR"))
             {
                 flickrTags = "clear, sun, sunny, blue sky";
             }
-            else if (weather.currentConditions.Contains("OVERCAST"))
+            else if (weatherUpper.Contains("OVERCAST"))
             {
                 flickrTags = "overcast, cloudy";
             }
-            else if (weather.currentConditions.Contains("CLOUDS") || weather.currentConditions.Contains("CLOUDY"))
+            else if (weatherUpper.Contains("CLOUDS") || weatherUpper.Contains("CLOUDY"))
             {
                 flickrTags = "cloudy, clouds, fluffy cloud";
             }
             else
             {
-                flickrTags = weather.currentConditions;
+                flickrTags = weatherUpper;
             }
         }
         private void getFlickrXml(object sender, DownloadStringCompletedEventArgs e)
@@ -1377,26 +1394,55 @@ namespace WeatherLock
             {
                 if (checkPeriodic(sender, e))
                 {
-                    convertTemp getTemp;
-                    IconicTileData locTile = new IconicTileData();
-
-                    locTile.IconImage = new Uri("SunCloud202.png", UriKind.Relative);
-                    locTile.SmallIconImage = new Uri("SunCloud110.png", UriKind.Relative);
-                    locTile.Title = cityNameLoad;
                     if (store.Contains("lockUnitIsC"))
                     {
+                        #region variables
+                        convertTemp getTemp;
+                        string todayHigh;
+                        string todayLow;
+                        string tomorrowHigh;
+                        string tomorrowLow;
+                        Uri normalIcon;
+                        Uri smallIcon;
+                        #endregion
+
+                        IconicTileData locTile = new IconicTileData();
+                        Uri[] weatherIcons = getWeatherIcons(weather.currentConditions);
+                        normalIcon = weatherIcons[0];
+                        smallIcon = weatherIcons[1];
+
+                        locTile.IconImage = normalIcon;
+                        locTile.SmallIconImage = smallIcon;
+                        locTile.Title = cityNameLoad;
+
                         if ((bool)store["lockUnitIsC"])
                         {
                             getTemp = new convertTemp(weather.tempC);
+                            todayHigh = weather.todayHighC;
+                            todayLow = weather.todayLowC;
+                            tomorrowHigh = weather.tomorrowHighC;
+                            tomorrowLow = weather.tomorrowLowC;
                         }
                         else
                         {
                             getTemp = new convertTemp(weather.tempF);
+                            todayHigh = weather.todayHighF;
+                            todayLow = weather.todayLowF;
+                            tomorrowHigh = weather.tomorrowHighF;
+                            tomorrowLow = weather.tomorrowLowF;
                         }
                         locTile.Count = getTemp.temp;
-                        locTile.WideContent1 = "Currently: " + weather.currentConditions.ToLower() + ", " + getTemp.temp;
+                        locTile.WideContent1 = string.Format("Currently: " + weather.currentConditions + ", " + getTemp.temp + " degrees");
+                        locTile.WideContent2 = string.Format("Today: " + weather.todayShort + " " + todayHigh + "/" + todayLow);
+                        locTile.WideContent3 = string.Format("Tomorrow: " + weather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow);
+
+                        ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + cityName + "&url=" + urlKey + "&isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative), locTile, true);
                     }
-                    ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + cityName + "&url=" + urlKey + "&isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative), locTile, true);
+                    else
+                    {
+                        store["lockUnitIsC"] = true;
+                        pin_Click(sender, e);
+                    }
                 }
                 else
                 {
@@ -1409,6 +1455,84 @@ namespace WeatherLock
                 }
             }
         }
+
+        //get icons
+        private Uri[] getWeatherIcons(string weatherConditions)
+        {
+            Uri normalIcon;
+            Uri smallIcon;
+            string weatherLower = weatherConditions.ToLower();
+
+            if (weatherLower.Contains("thunder") || weatherLower.Contains("storm"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Thunder202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Thunder110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("overcast"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Cloudy202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Cloudy110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("shower") || weatherLower.Contains("drizzle") || weatherLower.Contains("light rain"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Drizzle202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Drizzle110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("flurry") || weatherLower.Contains("snow shower"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Flurry202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Flurry110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("fog") || weatherLower.Contains("mist") || weatherLower.Contains("haz"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Fog202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Fog110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("freezing"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/FreezingRain202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/FreezingRain110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("cloudy") || weatherLower.Contains("partly") || weatherLower.Contains("mostly") || weatherLower.Contains("clouds"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/PartlyCloudy202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/PartlyCloudy110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("rain"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Rain202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Rain110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("sleet") || weatherLower.Contains("pellet"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Sleet202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Sleet110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("snow") || weatherLower.Contains("blizzard"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Snow202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Snow110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("sun") || weatherLower.Contains("sunny") || weatherLower.Contains("clear"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Sun202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Sun110.png", UriKind.Relative);
+            }
+            else if (weatherLower.Contains("wind"))
+            {
+                normalIcon = new Uri("/TileImages/Medium/Wind202.png", UriKind.Relative);
+                smallIcon = new Uri("/TileImages/Small/Wind110.png", UriKind.Relative);
+            }
+            else
+            {
+                normalIcon = new Uri("SunCloud202.png", UriKind.Relative);
+                smallIcon = new Uri("SunCloud110.png", UriKind.Relative);
+            }
+
+            Uri[] icons = { normalIcon, smallIcon };
+            return icons;
+        }
+
         private bool checkPeriodic(object sender, EventArgs e)
         {
             if (store.Contains("periodicStarted"))
