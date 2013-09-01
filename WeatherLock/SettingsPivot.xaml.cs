@@ -1,4 +1,4 @@
-﻿#define DEBUG_AGENT
+﻿//#define DEBUG_AGENT
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Marketplace;
 using Microsoft.Phone.Scheduler;
@@ -859,9 +859,9 @@ namespace WeatherLock
             {
                 ScheduledActionService.Add(periodicTask);
                 PeriodicStackPanel.DataContext = periodicTask;
-                 #if(DEBUG_AGENT)
-                ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
-                 #endif
+               // #if(DEBUG_AGENT)
+              // ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
+              //  #endif
 
             }
             catch (InvalidOperationException exception)
@@ -945,7 +945,7 @@ namespace WeatherLock
             SystemTray.SetIsVisible(this, true);
             SystemTray.SetOpacity(this, 0);
             progTile = new ProgressIndicator();
-            progTile.Text = "Updating Tile...";
+            progTile.Text = "Updating Tiles...";
             progTile.IsIndeterminate = true;
             progTile.IsVisible = true;
             SystemTray.SetProgressIndicator(this, progTile);

@@ -109,7 +109,7 @@ namespace WeatherLock
             restoreWeather();
             this.clock = new Clock(this);
         }
-        
+
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
 
@@ -873,7 +873,7 @@ namespace WeatherLock
                     var forecastDaysTxt = doc.Element("response").Element("forecast").Element("txt_forecast").Element("forecastdays");
 
                     //clear out forecast list first
-                    
+
                     weather.forecastC = new ObservableCollection<ForecastC>();
                     weather.forecastF = new ObservableCollection<ForecastF>();
 
@@ -884,8 +884,8 @@ namespace WeatherLock
                     {
                         ForecastC forecastC = new WeatherData.ForecastC();
                         ForecastF forecastF = new WeatherData.ForecastF();
-                        
-                        
+
+
 
                         forecastC.title = forecastF.title = (string)elm.Element("title");
                         forecastC.text = (string)elm.Element("fcttext_metric");
@@ -1377,13 +1377,25 @@ namespace WeatherLock
             {
                 if (checkPeriodic(sender, e))
                 {
-                    IconicTileData locTile = new IconicTileData
-                    {
-                        IconImage = new Uri("SunCloud202.png", UriKind.Relative),
-                        SmallIconImage = new Uri("SunCloud110.png", UriKind.Relative),
-                        Title = cityNameLoad
-                    };
+                    convertTemp getTemp;
+                    IconicTileData locTile = new IconicTileData();
 
+                    locTile.IconImage = new Uri("SunCloud202.png", UriKind.Relative);
+                    locTile.SmallIconImage = new Uri("SunCloud110.png", UriKind.Relative);
+                    locTile.Title = cityNameLoad;
+                    if (store.Contains("lockUnitIsC"))
+                    {
+                        if ((bool)store["lockUnitIsC"])
+                        {
+                            getTemp = new convertTemp(weather.tempC);
+                        }
+                        else
+                        {
+                            getTemp = new convertTemp(weather.tempF);
+                        }
+                        locTile.Count = getTemp.temp;
+                        locTile.WideContent1 = "Currently: " + weather.currentConditions.ToLower() + ", " + getTemp.temp;
+                    }
                     ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + cityName + "&url=" + urlKey + "&isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative), locTile, true);
                 }
                 else
