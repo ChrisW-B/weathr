@@ -517,7 +517,7 @@ namespace ScheduledTaskAgent1
                                         SmallIconImage = smallIcon,
                                         Title = cityName,
                                         Count = temp,
-                                        WideContent1 = string.Format("Currently: " + weather + ", " + temp + " degrees"),
+                                        WideContent1 = string.Format("Currently: " + weather.currentConditions + ", " + temp + " degrees"),
                                         WideContent2 = string.Format("Today: " + weather.todayShort + " " + todayHigh + "/" + todayLow),
                                         WideContent3 = string.Format("Tomorrow: " + weather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
 
