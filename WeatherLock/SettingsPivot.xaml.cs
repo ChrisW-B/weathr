@@ -1,4 +1,4 @@
-﻿//#define DEBUG_AGENT
+﻿#define DEBUG_AGENT
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Marketplace;
 using Microsoft.Phone.Scheduler;
@@ -859,9 +859,9 @@ namespace WeatherLock
             {
                 ScheduledActionService.Add(periodicTask);
                 PeriodicStackPanel.DataContext = periodicTask;
-               // #if(DEBUG_AGENT)
-              // ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
-              //  #endif
+              #if(DEBUG_AGENT)
+              ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
+              #endif
 
             }
             catch (InvalidOperationException exception)
@@ -1223,8 +1223,8 @@ namespace WeatherLock
                                 Title = "Error",
                                 Count = 0,
                                 WideContent1 = errorText,
-                                WideContent2 = null,
-                                WideContent3 = null,
+                                WideContent2 = "Try checking location services",
+                                WideContent3 = ""
                             };
                             tile.Update(TileData);
 
@@ -1249,8 +1249,8 @@ namespace WeatherLock
                                 Title = "Error",
                                 Count = 0,
                                 WideContent1 = errorText,
-                                WideContent2 = null,
-                                WideContent3 = null
+                                WideContent2 = "Try checking location services",
+                                WideContent3 = ""
                             };
                             tile.Update(TileData);
 
@@ -1265,11 +1265,13 @@ namespace WeatherLock
                 if (finished())
                 {
                     progTile.IsVisible = false;
+                    return;
                 }
             }
             else
             {
                 progTile.IsVisible = false;
+                return;
             }
         }
         private void updateOtherTiles(object sender, DownloadStringCompletedEventArgs e)
@@ -1395,16 +1397,18 @@ namespace WeatherLock
                 if (finished())
                 {
                     progTile.IsVisible = false;
+                    return;
                 }
             }
             else
             {
                 progTile.IsVisible = false;
+                return;
             }
         }
         private void updateLocAwareTile(object sender, DownloadStringCompletedEventArgs e)
         {
-            weather = new WeatherInfo();
+            WeatherInfo weatherCurrent = new WeatherInfo();
 
             if (!e.Cancelled && e.Error == null)
             {
@@ -1417,33 +1421,33 @@ namespace WeatherLock
                 {
                     //Current Conditions
                     XElement currentObservation = doc.Element("response").Element("current_observation");
-                    weather.city = (string)currentObservation.Element("display_location").Element("city");
-                    weather.state = (string)currentObservation.Element("display_location").Element("state_name");
-                    string cityName = weather.city + ", " + weather.state;
-                    weather.currentConditions = (string)currentObservation.Element("weather");
+                    weatherCurrent.city = (string)currentObservation.Element("display_location").Element("city");
+                    weatherCurrent.state = (string)currentObservation.Element("display_location").Element("state_name");
+                    string cityName = weatherCurrent.city + ", " + weatherCurrent.state;
+                    weatherCurrent.currentConditions = (string)currentObservation.Element("weather");
 
                     XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
 
                     XElement today = forecastDays.Element("forecastday");
                     XElement tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
 
-                    weather.todayShort = (string)today.Element("conditions");
-                    weather.tomorrowShort = (string)tomorrow.Element("conditions");
+                    weatherCurrent.todayShort = (string)today.Element("conditions");
+                    weatherCurrent.tomorrowShort = (string)tomorrow.Element("conditions");
 
-                    weather.tempC = (string)currentObservation.Element("temp_c");
-                    weather.todayLowC = (string)today.Element("low").Element("celsius");
-                    weather.todayHighC = (string)today.Element("high").Element("celsius");
-                    weather.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
-                    weather.tomorrowHighC = (string)tomorrow.Element("high").Element("celsius");
+                    weatherCurrent.tempC = (string)currentObservation.Element("temp_c");
+                    weatherCurrent.todayLowC = (string)today.Element("low").Element("celsius");
+                    weatherCurrent.todayHighC = (string)today.Element("high").Element("celsius");
+                    weatherCurrent.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
+                    weatherCurrent.tomorrowHighC = (string)tomorrow.Element("high").Element("celsius");
 
-                    weather.tempF = (string)currentObservation.Element("temp_f");
-                    weather.todayLowF = (string)today.Element("low").Element("fahrenheit");
-                    weather.todayHighF = (string)today.Element("high").Element("fahrenheit");
-                    weather.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
-                    weather.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
+                    weatherCurrent.tempF = (string)currentObservation.Element("temp_f");
+                    weatherCurrent.todayLowF = (string)today.Element("low").Element("fahrenheit");
+                    weatherCurrent.todayHighF = (string)today.Element("high").Element("fahrenheit");
+                    weatherCurrent.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
+                    weatherCurrent.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
 
                     //get weather icons
-                    Uri[] weatherIcons = getWeatherIcons(weather.currentConditions);
+                    Uri[] weatherIcons = getWeatherIcons(weatherCurrent.currentConditions);
                     normalIcon = weatherIcons[0];
                     smallIcon = weatherIcons[1];
 
@@ -1456,19 +1460,19 @@ namespace WeatherLock
 
                     if (tempUnitIsC)
                     {
-                        getTemp = new convertTemp(weather.tempC);
-                        todayHigh = weather.todayHighC;
-                        todayLow = weather.todayLowC;
-                        tomorrowHigh = weather.todayHighC;
-                        tomorrowLow = weather.todayLowC;
+                        getTemp = new convertTemp(weatherCurrent.tempC);
+                        todayHigh = weatherCurrent.todayHighC;
+                        todayLow = weatherCurrent.todayLowC;
+                        tomorrowHigh = weatherCurrent.todayHighC;
+                        tomorrowLow = weatherCurrent.todayLowC;
                     }
                     else
                     {
-                        getTemp = new convertTemp(weather.tempF);
-                        todayHigh = weather.todayHighF;
-                        todayLow = weather.todayLowF;
-                        tomorrowHigh = weather.todayHighF;
-                        tomorrowLow = weather.todayLowF;
+                        getTemp = new convertTemp(weatherCurrent.tempF);
+                        todayHigh = weatherCurrent.todayHighF;
+                        todayLow = weatherCurrent.todayLowF;
+                        tomorrowHigh = weatherCurrent.todayHighF;
+                        tomorrowLow = weatherCurrent.todayLowF;
                     }
                     int temp = getTemp.temp;
 
@@ -1500,15 +1504,15 @@ namespace WeatherLock
                                         SmallIconImage = smallIcon,
                                         Title = cityName,
                                         Count = temp,
-                                        WideContent1 = string.Format("Currently: " + weather + ", " + temp + " degrees"),
-                                        WideContent2 = string.Format("Today: " + weather.todayShort + " " + todayHigh + "/" + todayLow),
-                                        WideContent3 = string.Format("Tomorrow: " + weather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
+                                        WideContent1 = string.Format("Currently: " + weatherCurrent.currentConditions + ", " + temp + " degrees"),
+                                        WideContent2 = string.Format("Today: " + weatherCurrent.todayShort + " " + todayHigh + "/" + todayLow),
+                                        WideContent3 = string.Format("Tomorrow: " + weatherCurrent.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
 
                                     };
                                     tile.Update(TileData);
 
                                     //mark the tile as finished updating
-                                    markUpdated("current location", weather.city, weather.state, true);
+                                    markUpdated("current location", weatherCurrent.city, weatherCurrent.state, true);
 
                                     //stop looping
                                     break;
@@ -1519,30 +1523,40 @@ namespace WeatherLock
                 }
                 else if (!error)
                 {
-                    errorText = weather.error;
+                    errorText = weatherCurrent.error;
                     error = true;
 
                     foreach (ShellTile tile in ShellTile.ActiveTiles)
                     {
-                        if (tile.NavigationUri.OriginalString == "/")
+                        if (tile.NavigationUri.ToString() != "/")
                         {
-                            IconicTileData TileData = new IconicTileData
+                            //get name and location from tile url
+                            string tileLoc = tile.NavigationUri.ToString().Split('&')[0].Split('=')[1];
+                            bool tileIsCurrent = Convert.ToBoolean(tile.NavigationUri.ToString().Split('&')[2].Split('=')[1]);
+
+                            foreach (Pins pin in pinnedList)
                             {
-                                IconImage = normalIcon,
-                                SmallIconImage = smallIcon,
-                                Title = "Error",
-                                Count = 0,
-                                WideContent1 = errorText,
-                                WideContent2 = null,
-                                WideContent3 = null,
-                            };
-                            tile.Update(TileData);
+                                if (tileIsCurrent && pin.currentLoc && !pin.LocName.Contains("default location"))
+                                {
+                                    IconicTileData TileData = new IconicTileData
+                                    {
+                                        IconImage = normalIcon,
+                                        SmallIconImage = smallIcon,
+                                        Title = "Error",
+                                        Count = 0,
+                                        WideContent1 = errorText,
+                                        WideContent2 = "Try checking location services",
+                                        WideContent3 = ""
+                                    };
+                                    tile.Update(TileData);
 
-                            //mark tile as updated
-                            markUpdated("default location", "null", "null", false);
+                                    //mark tile as updated
+                                    markUpdated("default location", "null", "null", false);
 
-                            //stop looping
-                            break;
+                                    //stop looping
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
@@ -1550,36 +1564,48 @@ namespace WeatherLock
                 {
                     foreach (ShellTile tile in ShellTile.ActiveTiles)
                     {
-                        if (tile.NavigationUri.OriginalString == "/")
+                        if (tile.NavigationUri.ToString() != "/")
                         {
-                            IconicTileData TileData = new IconicTileData
+                            //get name and location from tile url
+                            string tileLoc = tile.NavigationUri.ToString().Split('&')[0].Split('=')[1];
+                            bool tileIsCurrent = Convert.ToBoolean(tile.NavigationUri.ToString().Split('&')[2].Split('=')[1]);
+
+                            foreach (Pins pin in pinnedList)
                             {
-                                IconImage = normalIcon,
-                                SmallIconImage = smallIcon,
-                                Title = "Error",
-                                Count = 0,
-                                WideContent1 = errorText,
-                                WideContent2 = null,
-                                WideContent3 = null
-                            };
-                            tile.Update(TileData);
+                                if (tileIsCurrent && pin.currentLoc && !pin.LocName.Contains("default location"))
+                                {
+                                    IconicTileData TileData = new IconicTileData
+                                    {
+                                        IconImage = normalIcon,
+                                        SmallIconImage = smallIcon,
+                                        Title = "Error",
+                                        Count = 0,
+                                        WideContent1 = errorText,
+                                        WideContent2 = "Try checking location services",
+                                        WideContent3 = ""
+                                    };
+                                    tile.Update(TileData);
 
-                            //mark tile as updated
-                            markUpdated("default location", "null", "null", false);
+                                    //mark tile as updated
+                                    markUpdated("default location", "null", "null", false);
 
-                            //stop looping
-                            break;
+                                    //stop looping
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
                 if (finished())
                 {
                     progTile.IsVisible = false;
+                    return;
                 }
             }
             else
             {
                 progTile.IsVisible = false;
+                return;
             }
         }
 

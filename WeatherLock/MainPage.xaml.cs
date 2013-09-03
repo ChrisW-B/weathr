@@ -1396,47 +1396,61 @@ namespace WeatherLock
                 {
                     if (store.Contains("lockUnitIsC"))
                     {
-                        #region variables
-                        convertTemp getTemp;
-                        string todayHigh;
-                        string todayLow;
-                        string tomorrowHigh;
-                        string tomorrowLow;
-                        Uri normalIcon;
-                        Uri smallIcon;
-                        #endregion
-
-                        IconicTileData locTile = new IconicTileData();
-                        Uri[] weatherIcons = getWeatherIcons(weather.currentConditions);
-                        normalIcon = weatherIcons[0];
-                        smallIcon = weatherIcons[1];
-
-                        locTile.IconImage = normalIcon;
-                        locTile.SmallIconImage = smallIcon;
-                        locTile.Title = cityNameLoad;
-
-                        if ((bool)store["lockUnitIsC"])
+                        if (weather != null)
                         {
-                            getTemp = new convertTemp(weather.tempC);
-                            todayHigh = weather.todayHighC;
-                            todayLow = weather.todayLowC;
-                            tomorrowHigh = weather.tomorrowHighC;
-                            tomorrowLow = weather.tomorrowLowC;
+                            #region variables
+                            convertTemp getTemp;
+                            string todayHigh;
+                            string todayLow;
+                            string tomorrowHigh;
+                            string tomorrowLow;
+                            Uri normalIcon;
+                            Uri smallIcon;
+                            #endregion
+
+                            IconicTileData locTile = new IconicTileData();
+                            Uri[] weatherIcons = getWeatherIcons(weather.currentConditions);
+                            normalIcon = weatherIcons[0];
+                            smallIcon = weatherIcons[1];
+
+                            locTile.IconImage = normalIcon;
+                            locTile.SmallIconImage = smallIcon;
+                            locTile.Title = cityNameLoad;
+
+                            if ((bool)store["lockUnitIsC"])
+                            {
+                                getTemp = new convertTemp(weather.tempC);
+                                todayHigh = weather.todayHighC;
+                                todayLow = weather.todayLowC;
+                                tomorrowHigh = weather.tomorrowHighC;
+                                tomorrowLow = weather.tomorrowLowC;
+                            }
+                            else
+                            {
+                                getTemp = new convertTemp(weather.tempF);
+                                todayHigh = weather.todayHighF;
+                                todayLow = weather.todayLowF;
+                                tomorrowHigh = weather.tomorrowHighF;
+                                tomorrowLow = weather.tomorrowLowF;
+                            }
+                            locTile.Count = getTemp.temp;
+                            locTile.WideContent1 = string.Format("Currently: " + weather.currentConditions + ", " + getTemp.temp + " degrees");
+                            locTile.WideContent2 = string.Format("Today: " + weather.todayShort + " " + todayHigh + "/" + todayLow);
+                            locTile.WideContent3 = string.Format("Tomorrow: " + weather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow);
+
+                            ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + cityName + "&url=" + urlKey + "&isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative), locTile, true);
                         }
                         else
                         {
-                            getTemp = new convertTemp(weather.tempF);
-                            todayHigh = weather.todayHighF;
-                            todayLow = weather.todayLowF;
-                            tomorrowHigh = weather.tomorrowHighF;
-                            tomorrowLow = weather.tomorrowLowF;
-                        }
-                        locTile.Count = getTemp.temp;
-                        locTile.WideContent1 = string.Format("Currently: " + weather.currentConditions + ", " + getTemp.temp + " degrees");
-                        locTile.WideContent2 = string.Format("Today: " + weather.todayShort + " " + todayHigh + "/" + todayLow);
-                        locTile.WideContent3 = string.Format("Tomorrow: " + weather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow);
+                            IconicTileData locTile = new IconicTileData
+                            {
+                                IconImage = new Uri("SunCloud202.png", UriKind.Relative),
+                                SmallIconImage = new Uri("SunCloud110.png", UriKind.Relative),
+                                Title = cityNameLoad
+                            };
 
-                        ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + cityName + "&url=" + urlKey + "&isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative), locTile, true);
+                            ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + cityName + "&url=" + urlKey + "&isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative), locTile, true);
+                        }
                     }
                     else
                     {
@@ -1444,14 +1458,14 @@ namespace WeatherLock
                         pin_Click(sender, e);
                     }
                 }
-                else
+            }
+            else
+            {
+                MessageBoxResult m = MessageBox.Show("Multiple location Pinning is only supported in the full version. Buy now?", "Trial Mode", MessageBoxButton.OKCancel);
+                if (m == MessageBoxResult.OK)
                 {
-                    MessageBoxResult m = MessageBox.Show("Multiple location Pinning is only supported in the full version. Buy now?", "Trial Mode", MessageBoxButton.OKCancel);
-                    if (m == MessageBoxResult.OK)
-                    {
-                        MarketplaceDetailTask task = new MarketplaceDetailTask();
-                        task.Show();
-                    }
+                    MarketplaceDetailTask task = new MarketplaceDetailTask();
+                    task.Show();
                 }
             }
         }

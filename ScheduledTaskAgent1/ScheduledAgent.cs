@@ -27,7 +27,8 @@ namespace ScheduledTaskAgent1
         private String latitude;
         private String longitude;
 
-        private int locationSearchTimes;
+        private int locationSearchTimesDefault;
+        private int locationSearchTimesCurrent;
         private Boolean error;
         private string errorText;
 
@@ -172,8 +173,8 @@ namespace ScheduledTaskAgent1
         private void updateDefault()
         {
             //set location
-            locationSearchTimes = 0;
-            checkLocation();
+            locationSearchTimesDefault = 0;
+            checkLocationDefault();
 
             //check get url
             bool mainCurrent = isCurrent;
@@ -203,8 +204,8 @@ namespace ScheduledTaskAgent1
                 }
                 if (pinnedTile.currentLoc && !pinnedTile.LocName.Contains("default location"))
                 {
-                    locationSearchTimes = 0;
-                    checkLocation();
+                    locationSearchTimesCurrent = 0;
+                    checkLocationCurrent();
                     string pinnedUrl = getUrl(pinnedTile.currentLoc);
                     checkUnits();
                     var client = new WebClient();
@@ -343,7 +344,6 @@ namespace ScheduledTaskAgent1
                                     //stop looping
                                     break;
                                 }
-
                             }
                         }
                     }
@@ -365,8 +365,8 @@ namespace ScheduledTaskAgent1
                                 Title = "Error",
                                 Count = 0,
                                 WideContent1 = errorText,
-                                WideContent2 = null,
-                                WideContent3 = null,
+                                WideContent2 = "Try checking location services",
+                                WideContent3 = ""
                             };
                             tile.Update(TileData);
 
@@ -391,8 +391,8 @@ namespace ScheduledTaskAgent1
                                 Title = "Error",
                                 Count = 0,
                                 WideContent1 = errorText,
-                                WideContent2 = null,
-                                WideContent3 = null
+                                WideContent2 = "Try checking location services",
+                                WideContent3 = ""
                             };
                             tile.Update(TileData);
 
@@ -666,25 +666,35 @@ namespace ScheduledTaskAgent1
 
                     foreach (ShellTile tile in ShellTile.ActiveTiles)
                     {
-                        if (tile.NavigationUri.OriginalString == "/")
+                        if (tile.NavigationUri.ToString() != "/")
                         {
-                            IconicTileData TileData = new IconicTileData
+                            //get name and location from tile url
+                            string tileLoc = tile.NavigationUri.ToString().Split('&')[0].Split('=')[1];
+                            bool tileIsCurrent = Convert.ToBoolean(tile.NavigationUri.ToString().Split('&')[2].Split('=')[1]);
+
+                            foreach (Pins pin in pinnedList)
                             {
-                                IconImage = normalIcon,
-                                SmallIconImage = smallIcon,
-                                Title = "Error",
-                                Count = 0,
-                                WideContent1 = errorText,
-                                WideContent2 = null,
-                                WideContent3 = null,
-                            };
-                            tile.Update(TileData);
+                                if (tileIsCurrent && pin.currentLoc && !pin.LocName.Contains("default location"))
+                                {
+                                    IconicTileData TileData = new IconicTileData
+                                    {
+                                        IconImage = normalIcon,
+                                        SmallIconImage = smallIcon,
+                                        Title = "Error",
+                                        Count = 0,
+                                        WideContent1 = errorText,
+                                        WideContent2 = "Try checking location services",
+                                        WideContent3 = ""
+                                    };
+                                    tile.Update(TileData);
 
-                            //mark tile as updated
-                            markUpdated("default location", "null", "null", false);
+                                    //mark tile as updated
+                                    markUpdated("current location", "null", "null", true);
 
-                            //stop looping
-                            break;
+                                    //stop looping
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
@@ -692,25 +702,35 @@ namespace ScheduledTaskAgent1
                 {
                     foreach (ShellTile tile in ShellTile.ActiveTiles)
                     {
-                        if (tile.NavigationUri.OriginalString == "/")
+                        if (tile.NavigationUri.ToString() != "/")
                         {
-                            IconicTileData TileData = new IconicTileData
+                            //get name and location from tile url
+                            string tileLoc = tile.NavigationUri.ToString().Split('&')[0].Split('=')[1];
+                            bool tileIsCurrent = Convert.ToBoolean(tile.NavigationUri.ToString().Split('&')[2].Split('=')[1]);
+
+                            foreach (Pins pin in pinnedList)
                             {
-                                IconImage = normalIcon,
-                                SmallIconImage = smallIcon,
-                                Title = "Error",
-                                Count = 0,
-                                WideContent1 = errorText,
-                                WideContent2 = null,
-                                WideContent3 = null
-                            };
-                            tile.Update(TileData);
+                                if (tileIsCurrent && pin.currentLoc && !pin.LocName.Contains("default location"))
+                                {
+                                    IconicTileData TileData = new IconicTileData
+                                    {
+                                        IconImage = normalIcon,
+                                        SmallIconImage = smallIcon,
+                                        Title = "Error",
+                                        Count = 0,
+                                        WideContent1 = errorText,
+                                        WideContent2 = "Try checking location services",
+                                        WideContent3 = ""
+                                    };
+                                    tile.Update(TileData);
 
-                            //mark tile as updated
-                            markUpdated("default location", "null", "null", false);
+                                    //mark tile as updated
+                                    markUpdated("current location", "null", "null", true);
 
-                            //stop looping
-                            break;
+                                    //stop looping
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
@@ -838,14 +858,14 @@ namespace ScheduledTaskAgent1
         }
 
         //check location settings, return location
-        private void checkLocation()
+        private void checkLocationDefault()
         {
             //Check to see if allowed to get location
             if (store.Contains("enableLocation"))
             {
                 if ((bool)store["enableLocation"])
                 {
-                    if (locationSearchTimes <= 5)
+                    if (locationSearchTimesDefault <= 5)
                     {
                         //get location
                         var getLocation = new getLocation();
@@ -858,11 +878,61 @@ namespace ScheduledTaskAgent1
                         }
                         else
                         {
-                            locationSearchTimes++;
-                            checkLocation();
+                            locationSearchTimesDefault++;
+                            checkLocationDefault();
                         }
                     }
-                    if (locationSearchTimes > 5)
+                    if (locationSearchTimesDefault > 5)
+                    {
+                        if (store.Contains("loc"))
+                        {
+                            String[] latlng = new String[2];
+                            latlng = (String[])store["loc"];
+                            latitude = latlng[0];
+                            longitude = latlng[1];
+
+                            //stop reuse of the location too many times
+                            store.Remove("loc");
+                        }
+                        else
+                        {
+                            error = true;
+                            errorText = "Cannot get location";
+                        }
+                    }
+                }
+                else
+                {
+                    error = true;
+                    errorText = "Cannot get location";
+                }
+            }
+        }
+        private void checkLocationCurrent()
+        {
+            //Check to see if allowed to get location
+            if (store.Contains("enableLocation"))
+            {
+                if ((bool)store["enableLocation"])
+                {
+                    if (locationSearchTimesCurrent <= 5)
+                    {
+                        //get location
+                        var getLocation = new getLocation();
+                        if (getLocation.getLat() != null && getLocation.getLat() != "NA")
+                        {
+                            latitude = getLocation.getLat();
+                            longitude = getLocation.getLong();
+                            String[] loc = { latitude, longitude };
+                            store["loc"] = loc;
+                        }
+                        else
+                        {
+                            locationSearchTimesCurrent++;
+                            checkLocationCurrent();
+                        }
+                    }
+                    if (locationSearchTimesCurrent > 5)
                     {
                         if (store.Contains("loc"))
                         {
