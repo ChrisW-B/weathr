@@ -40,7 +40,7 @@
         <!--Pivot Control-->
         <phone:Pivot Title="SETTINGS" SelectionChanged="Pivot_SelectionChanged">
 
-            <!--Pivot item 1-->
+            <!--Now-->
             <phone:PivotItem Header="now">
                 <Grid>
                     <StackPanel>
@@ -55,30 +55,30 @@
                         </StackPanel>
                         <CheckBox Name="flickrPics" Content="Use Pictures from Flickr" IsChecked="{Binding flickrChecked}" Checked="flickrPics_Checked" Unchecked="flickrPics_Unchecked"/>
                         <StackPanel>
-                        <CheckBox Name="weatherGroup" Content="Use Pictures from Yahoo Weather App" IsChecked="{Binding weatherChecked}" Checked="weatherGroup_Checked" Unchecked="weatherGroup_Unchecked"/>
+                            <CheckBox Name="weatherGroup" Content="Use Pictures from Yahoo Weather App" IsChecked="{Binding weatherChecked}" Checked="weatherGroup_Checked" Unchecked="weatherGroup_Unchecked"/>
                             <TextBlock Text="using pictures from the yahoo weather app group should increase relevant pictures, but there may be fewer overall" FontSize="16" TextWrapping="Wrap" Width="407" Height="61" Foreground="#FF9E9E9E" HorizontalAlignment="Right" VerticalAlignment="Top" LineStackingStrategy="BlockLineHeight"/>
                         </StackPanel>
                     </StackPanel>
                 </Grid>
             </phone:PivotItem>
 
-            <!--Pivot item 2-->
+            <!--Locations-->
             <phone:PivotItem Header="locations">
                 <StackPanel>
                     <CheckBox Name="enableLocation" Content="Enable location services" Checked="enableLocation_Checked" Unchecked="enableLocation_Unchecked" />
-                    <ListBox x:Name="LocationListBox" Margin="10,0,0,30" HorizontalAlignment="Left" Width="436" SelectionChanged="LocationListBox_SelectionChanged">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
+                    <StackPanel Height="561">
+                        <ListBox x:Name="LocationListBox" HorizontalAlignment="Left" SelectionChanged="LocationListBox_SelectionChanged" VerticalAlignment="Top" Height="487" Width="436" Margin="10,0,0,0">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Rectangle Fill="{StaticResource PhoneAccentBrush}" Width="45" Height="45">
+                                            <Rectangle.OpacityMask>
+                                                <ImageBrush ImageSource="{Binding ImageSource}"/>
+                                            </Rectangle.OpacityMask>
+                                        </Rectangle>
 
-                            <StackPanel Orientation="Horizontal">
-                                <Rectangle Fill="{StaticResource PhoneAccentBrush}" Width="45" Height="45">
-                                    <Rectangle.OpacityMask>
-                                        <ImageBrush ImageSource="{Binding ImageSource}"/>
-                                    </Rectangle.OpacityMask>
-                                </Rectangle>
-
-                                <StackPanel Width="370">
-                                    <ListBoxItem x:Name="locationName"
+                                        <StackPanel Width="370">
+                                            <ListBoxItem x:Name="locationName"
                                        Content="{Binding LocName}"
                                        FontFamily="Segoe WP SemiLight"
                                        FontSize="30"
@@ -86,19 +86,20 @@
                                        toolkit:TiltEffect.IsTiltEnabled="True"
                                                  >
 
-                                        <toolkit:ContextMenuService.ContextMenu>
-                                            <toolkit:ContextMenu>
-                                                <toolkit:MenuItem toolkit:TiltEffect.IsTiltEnabled="True" Name="delete" Header="delete" Tag="{Binding LocName}" Click="delete_Click"/>
-                                                <toolkit:MenuItem toolkit:TiltEffect.IsTiltEnabled="True" Name="pin" Header="pin to start" Tag="{Binding LocName}" Click="pin_Click"/>
-                                                <toolkit:MenuItem toolkit:TiltEffect.IsTiltEnabled="True" Name="default" Header="make default location" Tag="{Binding LocName}" Click="default_Click"/>
-                                            </toolkit:ContextMenu>
-                                        </toolkit:ContextMenuService.ContextMenu>
-                                    </ListBoxItem>
-                                </StackPanel>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                                                <toolkit:ContextMenuService.ContextMenu>
+                                                    <toolkit:ContextMenu>
+                                                        <toolkit:MenuItem toolkit:TiltEffect.IsTiltEnabled="True" Name="delete" Header="delete" Tag="{Binding LocName}" Click="delete_Click"/>
+                                                        <toolkit:MenuItem toolkit:TiltEffect.IsTiltEnabled="True" Name="pin" Header="pin to start" Tag="{Binding LocName}" Click="pin_Click"/>
+                                                        <toolkit:MenuItem toolkit:TiltEffect.IsTiltEnabled="True" Name="default" Header="make default location" Tag="{Binding LocName}" Click="default_Click"/>
+                                                    </toolkit:ContextMenu>
+                                                </toolkit:ContextMenuService.ContextMenu>
+                                            </ListBoxItem>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
                 </StackPanel>
             </phone:PivotItem>
 

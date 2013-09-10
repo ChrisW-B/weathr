@@ -101,15 +101,21 @@ namespace WeatherLock
             InitializeComponent();
 
             //Testing Key
-            apiKey = "fb1dd3f4321d048d";
-
+            //apiKey = "fb1dd3f4321d048d";
+            ApplicationBar.StateChanged += ApplicationBar_StateChanged;
             initializeProgIndicators();
-            //noParams();
             setUnits();
             restoreWeather();
             this.clock = new Clock(this);
         }
 
+        //show system tray on app bar swipe
+        private void ApplicationBar_StateChanged(object sender, ApplicationBarStateChangedEventArgs e)
+        {
+            SystemTray.Opacity = .5;
+            SystemTray.IsVisible = e.IsMenuVisible;
+        }
+        
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
 
@@ -445,6 +451,7 @@ namespace WeatherLock
         {
             setURL();
             setUnits();
+            initializeStores();
 
             if (store.Contains("lastUpdated"))
             {
@@ -454,42 +461,53 @@ namespace WeatherLock
                 if ((int)timeDiff.TotalMinutes > 15)
                 {
                     getBackground = true;
-                    //clearWeather();
+                    clearWeather();
                     updateWeather();
                     store["lastUpdated"] = DateTime.Now;
                 }
-                if (store.Contains("locChanged"))
+                else if ((bool)store["locChanged"])
                 {
-                    if ((bool)store["locChanged"])
-                    {
-                        //clearWeather();
-                        store["locChanged"] = false;
-                        getBackground = true;
-                        updateWeather();
-                        store["lastUpdated"] = DateTime.Now;
-                    }
+                    clearWeather();
+                    store["locChanged"] = false;
+                    getBackground = true;
+                    updateWeather();
+                    store["lastUpdated"] = DateTime.Now;
                 }
-                if (store.Contains("unitChanged"))
+                else if ((bool)store["unitChanged"])
                 {
-                    if ((bool)store["unitChanged"])
-                    {
-                        store["unitChanged"] = false;
-                        restoreWeather();
-                    }
+                    store["unitChanged"] = false;
+                    restoreWeather();
                 }
-                if (store.Contains("groupChanged"))
+                else if ((bool)store["groupChanged"])
                 {
-                    if ((bool)store["groupChanged"])
-                    {
-                        store["groupChanged"] = false;
-                        getFlickrPic();
-                    }
+                    store["groupChanged"] = false;
+                    getFlickrPic();
+                }
+                else
+                {
+                    getFlickrPic();
                 }
             }
             else
             {
+                getBackground = true;
                 updateWeather();
                 store["lastUpdated"] = DateTime.Now;
+            }
+        }
+        private void initializeStores()
+        {
+            if (!store.Contains("locChanged"))
+            {
+                store["locChanged"] = false;
+            }
+            if (!store.Contains("unitChanged"))
+            {
+                store["unitChanged"] = false;
+            }
+            if (!store.Contains("groupChanged"))
+            {
+                store["groupChanged"] = false;
             }
         }
 
@@ -592,21 +610,21 @@ namespace WeatherLock
         private void startWeatherProg()
         {
             SystemTray.SetIsVisible(this, true);
-            SystemTray.SetOpacity(this, 0);
+            SystemTray.SetOpacity(this, 0.5);
             progWeather.IsVisible = true;
             SystemTray.SetProgressIndicator(this, progWeather);
         }
         private void startFlickrProg()
         {
             SystemTray.SetIsVisible(this, true);
-            SystemTray.SetOpacity(this, 0);
+            SystemTray.SetOpacity(this, 0.5);
             progFlickr.IsVisible = true;
             SystemTray.SetProgressIndicator(this, progFlickr);
         }
         private void startAlertProg()
         {
             SystemTray.SetIsVisible(this, true);
-            SystemTray.SetOpacity(this, 0);
+            SystemTray.SetOpacity(this, 0.5);
             progAlerts.IsVisible = true;
             SystemTray.SetProgressIndicator(this, progAlerts);
         }
@@ -617,6 +635,8 @@ namespace WeatherLock
                 SystemTray.SetIsVisible(this, false);
             }
         }
+
+        
 
         //Getting and Setting Weather data
         private void setWeather()
@@ -908,7 +928,7 @@ namespace WeatherLock
                     #region tile stuff
                     weather.todayShort = (string)today.Element("conditions");
                     weather.tomorrowShort = (string)tomorrow.Element("conditions");
- 
+
                     weather.todayLowC = (string)today.Element("low").Element("celsius");
                     weather.todayHighC = (string)today.Element("high").Element("celsius");
                     weather.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
@@ -1126,7 +1146,7 @@ namespace WeatherLock
             {
                 if ((bool)store["useFlickr"])
                 {
-                    if (weather.currentConditions == null)
+                    if (weather == null)
                     {
                         flickrTags = "sky";
                     }

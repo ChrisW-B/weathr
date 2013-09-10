@@ -22,7 +22,7 @@ namespace ScheduledTaskAgent1
         private String url;
         private String locUrl;
         private Boolean isCurrent;
-        private String apiKey = "fb1dd3f4321d048d";
+        private String apiKey = "102b8ec7fbd47a05";
 
         private String latitude;
         private String longitude;
@@ -71,6 +71,9 @@ namespace ScheduledTaskAgent1
         //Do this stuff first
         protected override void OnInvoke(ScheduledTask task)
         {
+            //Testing Key
+            //apiKey = "fb1dd3f4321d048d";
+
             error = false;
             checkUnits();
             foreach (ShellTile tile in ShellTile.ActiveTiles)

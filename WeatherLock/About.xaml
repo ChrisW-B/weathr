@@ -111,7 +111,7 @@
                             <Run Text="-Redo of data handling in app"/>
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-More stuff coming as well"/>
+                            <Run Text="-Code Cleanups"/>
                         </Paragraph>
                         <Paragraph>
                             <Run/>

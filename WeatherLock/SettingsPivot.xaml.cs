@@ -1,4 +1,4 @@
-﻿#define DEBUG_AGENT
+﻿//#define DEBUG_AGENT
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Marketplace;
 using Microsoft.Phone.Scheduler;
@@ -22,25 +22,35 @@ namespace WeatherLock
     {
         #region variables
 
+        //Weather object
         private WeatherInfo weather;
 
-        private String defaultCityName;
+        //Flags for getting data/comparing city
         private Boolean tempUnitIsC;
+        private Boolean isCurrent;
+        private int locationSearchTimes;
+        public bool agentsAreEnabled = true;
+
+        //info
         private String url;
         private String locUrl;
-        private Boolean isCurrent;
-        private String apiKey = "fb1dd3f4321d048d";
+        private String defaultCityName;
+        private String apiKey = "102b8ec7fbd47a05";
+       
 
+        //coordinates
         private String latitude;
         private String longitude;
 
-        private int locationSearchTimes;
+        //handling errors with getting data
         private Boolean error;
         private string errorText;
 
+        //data lists for updating tiles
         List<Pins> pinnedList = new List<Pins>();
         List<Pins> pinnedListCopy = new List<Pins>();
 
+        //tile info
         public class Pins
         {
             public string LocName;
@@ -49,12 +59,11 @@ namespace WeatherLock
             public bool updated;
         }
 
-
+        //periodic task starting
         PeriodicTask periodicTask;
-
         string periodicTaskName = "PeriodicAgent";
-        public bool agentsAreEnabled = true;
 
+        //Progress bar
         ProgressIndicator progTile;
 
         //Check to see if app is running as trial
@@ -68,6 +77,9 @@ namespace WeatherLock
         public SettingsPivot()
         {
             InitializeComponent();
+            //Testing Key
+            //private String apiKey = "fb1dd3f4321d048d";
+            SystemTray.Opacity = .5;
         }
 
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
@@ -410,8 +422,18 @@ namespace WeatherLock
         //Location Pivot
         #region variables
         ObservableCollection<Locations> locations = new ObservableCollection<Locations>();
-
+        public class Locations
+        {
+            public string LocName { get; set; }
+            public string LocUrl { get; set; }
+            public bool IsCurrent { get; set; }
+            public string Lat { get; set; }
+            public string Lon { get; set; }
+            public string ImageSource { get; set; }
+        }
         #endregion
+
+        ///checkboxes and buttons
         private void enableLocation_Checked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -434,9 +456,82 @@ namespace WeatherLock
                 store["enableLocation"] = false;
             }
         }
+        private void delete_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = (MenuItem)sender;
+            removeLocation(menuItem.Tag.ToString());
+        }
+        private void pin_Click(object sender, RoutedEventArgs e)
+        {
+            if (!isTrial)
+            {
+
+                MenuItem menuItem = (MenuItem)sender;
+
+                Locations location = getLocation(menuItem.Tag.ToString());
+
+                foreach (ShellTile tile in ShellTile.ActiveTiles)
+                {
+                    if (tile.NavigationUri.ToString().Contains(location.LocName) && !tile.NavigationUri.ToString().Contains("isCurrent=True"))
+                    {
+                        MessageBoxResult m = MessageBox.Show("Already Pinned!", "", MessageBoxButton.OK);
+                        return;
+                    }
+                    else if (tile.NavigationUri.ToString().Contains("isCurrent=True") && location.IsCurrent)
+                    {
+                        MessageBoxResult m = MessageBox.Show("Already Pinned!", "", MessageBoxButton.OK);
+                        return;
+                    }
+                }
+
+                if (checkPeriodic(sender, e))
+                {
+                    IconicTileData locTile = new IconicTileData
+                    {
+                        IconImage = new Uri("SunCloud202.png", UriKind.Relative),
+                        SmallIconImage = new Uri("SunCloud110.png", UriKind.Relative),
+                        Title = location.LocName
+                    };
+
+
+
+
+                    ShellTile.Create(new Uri(
+                "/MainPage.xaml?cityName=" + location.LocName
+                + "&url=" + location.LocUrl
+                + "&isCurrent=" + location.IsCurrent
+                + "&lat=" + location.Lat
+                + "&lon=" + location.Lon,
+                UriKind.Relative),
+                locTile,
+                true);
+
+                }
+                else
+                {
+                    MessageBoxResult m = MessageBox.Show("Multiple location Pinning is only supported in the full version. Buy now?", "Trial Mode", MessageBoxButton.OKCancel);
+                    if (m == MessageBoxResult.OK)
+                    {
+                        MarketplaceDetailTask task = new MarketplaceDetailTask();
+                        task.Show();
+                    }
+                }
+            }
+        }
+        private void default_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = (MenuItem)sender;
+            Locations location = getLocation(menuItem.Tag.ToString());
+            changeDefault(menuItem.Tag.ToString());
+            store["defaultLocation"] = location.LocName;
+            store["defaultUrl"] = location.LocUrl;
+            store["defaultCurrent"] = location.IsCurrent;
+        }
+
+        ///handling data
         private void initializeLocations()
         {
-            locations.Add(new Locations() { LocName = "Current Location", CurrentLoc = true, ImageSource = "/Images/favs.png" });
+            locations.Add(new Locations() { LocName = "Current Location", IsCurrent = true, ImageSource = "/Images/favs.png" });
             LocationListBox.ItemsSource = locations;
             createDefaultLoc();
         }
@@ -490,11 +585,11 @@ namespace WeatherLock
                     }
                     if (!locationName.Contains("Current Location"))
                     {
-                        locations.Add(new Locations() { LocName = locationName, CurrentLoc = false, LocUrl = locationUrl, Lat = lat, Lon = lon, ImageSource = "/Images/Clear.png" });
+                        locations.Add(new Locations() { LocName = locationName, IsCurrent = false, LocUrl = locationUrl, Lat = lat, Lon = lon, ImageSource = "/Images/Clear.png" });
                     }
                     else
                     {
-                        locations.Add(new Locations() { LocName = locationName, CurrentLoc = true, LocUrl = locationUrl, Lat = lat, Lon = lon, ImageSource = "/Images/Clear.png" });
+                        locations.Add(new Locations() { LocName = locationName, IsCurrent = true, LocUrl = locationUrl, Lat = lat, Lon = lon, ImageSource = "/Images/Clear.png" });
                     }
                     LocationListBox.ItemsSource = locations;
                     backupLocations();
@@ -505,15 +600,6 @@ namespace WeatherLock
                 }
             }
         }
-        public class Locations
-        {
-            public string LocName { get; set; }
-            public string LocUrl { get; set; }
-            public bool CurrentLoc { get; set; }
-            public string Lat { get; set; }
-            public string Lon { get; set; }
-            public string ImageSource { get; set; }
-        }
         private void createDefaultLoc()
         {
             if (!store.Contains("defaultLocation") || !store.Contains("defaultUrl") || !store.Contains("defaultCurrent"))
@@ -523,60 +609,6 @@ namespace WeatherLock
                 store["defaultCurrent"] = true;
 
                 store.Save();
-            }
-        }
-        private void delete_Click(object sender, RoutedEventArgs e)
-        {
-            MenuItem menuItem = (MenuItem)sender;
-            removeLocation(menuItem.Tag.ToString());
-        }
-        private void pin_Click(object sender, RoutedEventArgs e)
-        {
-            if (!isTrial)
-            {
-
-                MenuItem menuItem = (MenuItem)sender;
-
-                String[] resArray = getArray(menuItem.Tag.ToString());
-
-                foreach (ShellTile tile in ShellTile.ActiveTiles)
-                {
-                    if (tile.NavigationUri.ToString().Contains(resArray[0]) && !tile.NavigationUri.ToString().Contains("isCurrent=True"))
-                    {
-                        MessageBoxResult m = MessageBox.Show("Already Pinned!", "", MessageBoxButton.OK);
-                        return;
-                    }
-                    else if (tile.NavigationUri.ToString().Contains("isCurrent=True") && resArray[2] == "True")
-                    {
-                        MessageBoxResult m = MessageBox.Show("Already Pinned!", "", MessageBoxButton.OK);
-                        return;
-                    }
-                }
-
-                if (checkPeriodic(sender, e))
-                {
-                    IconicTileData locTile = new IconicTileData
-                    {
-                        IconImage = new Uri("SunCloud202.png", UriKind.Relative),
-                        SmallIconImage = new Uri("SunCloud110.png", UriKind.Relative),
-                        Title = resArray[0]
-                    };
-
-
-
-
-                    ShellTile.Create(new Uri("/MainPage.xaml?cityName=" + resArray[0] + "&url=" + resArray[1] + "&isCurrent=" + resArray[2] + "&lat=" + resArray[3] + "&lon=" + resArray[4], UriKind.Relative), locTile, true);
-
-                }
-                else
-                {
-                    MessageBoxResult m = MessageBox.Show("Multiple location Pinning is only supported in the full version. Buy now?", "Trial Mode", MessageBoxButton.OKCancel);
-                    if (m == MessageBoxResult.OK)
-                    {
-                        MarketplaceDetailTask task = new MarketplaceDetailTask();
-                        task.Show();
-                    }
-                }
             }
         }
         private bool checkPeriodic(object sender, RoutedEventArgs e)
@@ -605,15 +637,6 @@ namespace WeatherLock
             }
             return true;
         }
-        private void default_Click(object sender, RoutedEventArgs e)
-        {
-            MenuItem menuItem = (MenuItem)sender;
-            String[] resArray = getArray(menuItem.Tag.ToString());
-            changeDefault(menuItem.Tag.ToString());
-            store["defaultLocation"] = resArray[0];
-            store["defaultUrl"] = resArray[1];
-            store["defaultCurrent"] = resArray[2];
-        }
         private void changeDefault(string loc)
         {
             //set new default
@@ -633,21 +656,13 @@ namespace WeatherLock
             backupLocations();
 
         }
-        private String[] getArray(string loc)
+        private Locations getLocation(string loc)
         {
             foreach (Locations location in locations)
             {
                 if (location.LocName == loc)
                 {
-                    String[] thisLocation =  {
-                                               location.LocName,
-                                               location.LocUrl,
-                                               Convert.ToString(location.CurrentLoc),
-                                               location.Lat,
-                                               location.Lon,
-                                               location.ImageSource
-                                           };
-                    return thisLocation;
+                    return location;
                 }
             }
             return null;
@@ -676,7 +691,7 @@ namespace WeatherLock
                 {
                     var resArray = locations.ToArray()[LocationListBox.SelectedIndex];
                     string current = (string)resArray.LocName;
-                    store["isCurrent"] = resArray.CurrentLoc;
+                    store["isCurrent"] = resArray.IsCurrent;
                     store["locUrl"] = resArray.LocUrl;
                     store["locName"] = resArray.LocName;
                     store["locChanged"] = true;
@@ -692,9 +707,15 @@ namespace WeatherLock
             ListBoxItem lbItem = (ListBoxItem)sender;
             String loc = lbItem.Content.ToString();
 
-            String[] resArray = getArray(loc);
+            Locations location = getLocation(loc);
 
-            NavigationService.Navigate(new Uri("/MainPage.xaml?cityName=" + resArray[0] + "&url=" + resArray[1] + "&isCurrent=" + resArray[2] + "&lat=" + resArray[3] + "&lon=" + resArray[4], UriKind.Relative));
+            NavigationService.Navigate(new Uri(
+                "/MainPage.xaml?cityName=" + location.LocName
+                + "&url=" + location.LocUrl
+                + "&isCurrent=" + location.IsCurrent
+                + "&lat=" + location.Lat
+                + "&lon=" + location.Lon,
+                UriKind.Relative));
         }
 
         //Forecast Pivot
@@ -859,9 +880,9 @@ namespace WeatherLock
             {
                 ScheduledActionService.Add(periodicTask);
                 PeriodicStackPanel.DataContext = periodicTask;
-              #if(DEBUG_AGENT)
-              ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
-              #endif
+                //#if(DEBUG_AGENT)
+                //ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
+                //#endif
 
             }
             catch (InvalidOperationException exception)
