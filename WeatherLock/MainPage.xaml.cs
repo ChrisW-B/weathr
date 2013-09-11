@@ -101,7 +101,7 @@ namespace WeatherLock
             InitializeComponent();
 
             //Testing Key
-            //apiKey = "fb1dd3f4321d048d";
+            apiKey = "fb1dd3f4321d048d";
             ApplicationBar.StateChanged += ApplicationBar_StateChanged;
             initializeProgIndicators();
             setUnits();
@@ -865,11 +865,11 @@ namespace WeatherLock
 
                     if (weather.todayHighIntC > weather.tomorrowHighIntC + 3)
                     {
-                        weather.tempCompareC = "COOLER THAN";
+                        weather.tempCompareC = "WARMER THAN";
                     }
                     else if (weather.todayHighIntC < weather.tomorrowHighIntC - 3)
                     {
-                        weather.tempCompareC = "WARMER THAN";
+                        weather.tempCompareC = "COOLER THAN";
                     }
                     else
                     {
@@ -878,11 +878,11 @@ namespace WeatherLock
 
                     if (weather.todayHighIntF > weather.tomorrowHighIntF + 3)
                     {
-                        weather.tempCompareF = "COOLER THAN";
+                        weather.tempCompareF = "WARMER THAN";
                     }
                     else if (weather.todayHighIntF < weather.tomorrowHighIntF - 3)
                     {
-                        weather.tempCompareF = "WARMER THAN";
+                        weather.tempCompareF = "COOLER THAN";
                     }
                     else
                     {

@@ -72,7 +72,7 @@ namespace ScheduledTaskAgent1
         protected override void OnInvoke(ScheduledTask task)
         {
             //Testing Key
-            //apiKey = "fb1dd3f4321d048d";
+            apiKey = "fb1dd3f4321d048d";
 
             error = false;
             checkUnits();
@@ -238,25 +238,25 @@ namespace ScheduledTaskAgent1
                     weatherMain.city = (string)currentObservation.Element("display_location").Element("city");
                     weatherMain.state = (string)currentObservation.Element("display_location").Element("state_name");
                     string cityName = weatherMain.city + ", " + weatherMain.state;
+
+
                     weatherMain.currentConditions = (string)currentObservation.Element("weather");
+                    weatherMain.tempC = (string)currentObservation.Element("temp_c");
+                    weatherMain.tempF = (string)currentObservation.Element("temp_f");
 
                     XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
 
                     XElement today = forecastDays.Element("forecastday");
-                    XElement tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
-
                     weatherMain.todayShort = (string)today.Element("conditions");
-                    weatherMain.tomorrowShort = (string)tomorrow.Element("conditions");
-                           
-                    weatherMain.tempC = (string)currentObservation.Element("temp_c");
                     weatherMain.todayLowC = (string)today.Element("low").Element("celsius");
                     weatherMain.todayHighC = (string)today.Element("high").Element("celsius");
-                    weatherMain.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
-                    weatherMain.tomorrowHighC = (string)tomorrow.Element("high").Element("celsius");
-                           
-                    weatherMain.tempF = (string)currentObservation.Element("temp_f");
                     weatherMain.todayLowF = (string)today.Element("low").Element("fahrenheit");
                     weatherMain.todayHighF = (string)today.Element("high").Element("fahrenheit");
+
+                    XElement tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
+                    weatherMain.tomorrowShort = (string)tomorrow.Element("conditions");
+                    weatherMain.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
+                    weatherMain.tomorrowHighC = (string)tomorrow.Element("high").Element("celsius");
                     weatherMain.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
                     weatherMain.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
 
@@ -277,16 +277,16 @@ namespace ScheduledTaskAgent1
                         getTemp = new convertTemp(weatherMain.tempC);
                         todayHigh = weatherMain.todayHighC;
                         todayLow = weatherMain.todayLowC;
-                        tomorrowHigh = weatherMain.todayHighC;
-                        tomorrowLow = weatherMain.todayLowC;
+                        tomorrowHigh = weatherMain.tomorrowHighC;
+                        tomorrowLow = weatherMain.tomorrowLowC;
                     }
                     else
                     {
                         getTemp = new convertTemp(weatherMain.tempF);
                         todayHigh = weatherMain.todayHighF;
                         todayLow = weatherMain.todayLowF;
-                        tomorrowHigh = weatherMain.todayHighF;
-                        tomorrowLow = weatherMain.todayLowF;
+                        tomorrowHigh = weatherMain.tomorrowHighF;
+                        tomorrowLow = weatherMain.tomorrowLowF;
                     }
                     int temp = getTemp.temp;
 
@@ -474,16 +474,16 @@ namespace ScheduledTaskAgent1
                         getTemp = new convertTemp(weather.tempC);
                         todayHigh = weather.todayHighC;
                         todayLow = weather.todayLowC;
-                        tomorrowHigh = weather.todayHighC;
-                        tomorrowLow = weather.todayLowC;
+                        tomorrowHigh = weather.tomorrowHighC;
+                        tomorrowLow = weather.tomorrowLowC;
                     }
                     else
                     {
                         getTemp = new convertTemp(weather.tempF);
                         todayHigh = weather.todayHighF;
                         todayLow = weather.todayLowF;
-                        tomorrowHigh = weather.todayHighF;
-                        tomorrowLow = weather.todayLowF;
+                        tomorrowHigh = weather.tomorrowHighF;
+                        tomorrowLow = weather.tomorrowLowF;
                     }
                     int temp = getTemp.temp;
 
@@ -604,16 +604,16 @@ namespace ScheduledTaskAgent1
                         getTemp = new convertTemp(weatherCurrent.tempC);
                         todayHigh = weatherCurrent.todayHighC;
                         todayLow = weatherCurrent.todayLowC;
-                        tomorrowHigh = weatherCurrent.todayHighC;
-                        tomorrowLow = weatherCurrent.todayLowC;
+                        tomorrowHigh = weatherCurrent.tomorrowHighC;
+                        tomorrowLow = weatherCurrent.tomorrowLowC;
                     }
                     else
                     {
                         getTemp = new convertTemp(weatherCurrent.tempF);
                         todayHigh = weatherCurrent.todayHighF;
                         todayLow = weatherCurrent.todayLowF;
-                        tomorrowHigh = weatherCurrent.todayHighF;
-                        tomorrowLow = weatherCurrent.todayLowF;
+                        tomorrowHigh = weatherCurrent.tomorrowHighF;
+                        tomorrowLow = weatherCurrent.tomorrowLowF;
                     }
                     int temp = getTemp.temp;
 
