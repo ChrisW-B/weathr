@@ -13,7 +13,7 @@
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="White"
-    SupportedOrientations="Portrait"  Orientation="Portrait" shell:SystemTray.ForegroundColor="LightGray"
+    SupportedOrientations="Portrait"  Orientation="Portrait" 
     >
 
     <toolkit:TransitionService.NavigationInTransition>

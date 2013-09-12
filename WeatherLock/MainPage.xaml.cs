@@ -113,7 +113,15 @@ namespace WeatherLock
         private void ApplicationBar_StateChanged(object sender, ApplicationBarStateChangedEventArgs e)
         {
             SystemTray.Opacity = .5;
-            SystemTray.IsVisible = e.IsMenuVisible;
+            
+            if (!e.IsMenuVisible)
+            {
+                HideTray();
+            }
+            else
+            {
+                SystemTray.IsVisible = e.IsMenuVisible;
+            }
         }
         
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
