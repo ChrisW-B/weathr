@@ -122,11 +122,11 @@ namespace WeatherLock
             string lng = (string)location.Element("lng").Value;
             if (lat.Contains(","))
             {
-                lat.Replace(',', '.');
+                lat = lat.Replace(',', '.');
             }
             if (lng.Contains(","))
             {
-                lng.Replace(',', '.');
+                lng = lng.Replace(',', '.');
             }
             String[] loc = { lat, lng };
             store["newLoc"] = loc;

@@ -99,6 +99,15 @@
                 <ScrollViewer>
                     <RichTextBox>
                         <Paragraph>
+                            <Run Text="Version 1.2.4"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Bugfixes, stuff that I missed in 1.2.3 from data handling fixes"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run/>
+                        </Paragraph>
+                        <Paragraph>
                             <Run Text="Version 1.2.3"/>
                         </Paragraph>
                         <Paragraph>

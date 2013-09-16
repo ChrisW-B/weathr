@@ -101,7 +101,7 @@ namespace WeatherLock
             InitializeComponent();
 
             //Testing Key
-            apiKey = "fb1dd3f4321d048d";
+            //apiKey = "fb1dd3f4321d048d";
             ApplicationBar.StateChanged += ApplicationBar_StateChanged;
             initializeProgIndicators();
             setUnits();
@@ -113,7 +113,7 @@ namespace WeatherLock
         private void ApplicationBar_StateChanged(object sender, ApplicationBarStateChangedEventArgs e)
         {
             SystemTray.Opacity = .5;
-            
+
             if (!e.IsMenuVisible)
             {
                 HideTray();
@@ -123,7 +123,7 @@ namespace WeatherLock
                 SystemTray.IsVisible = e.IsMenuVisible;
             }
         }
-        
+
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
 
@@ -644,7 +644,7 @@ namespace WeatherLock
             }
         }
 
-        
+
 
         //Getting and Setting Weather data
         private void setWeather()
@@ -860,22 +860,30 @@ namespace WeatherLock
                     XElement tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
 
                     //Tomorrow's High/Low
-                    weather.tomorrowHighC = (string)tomorrow.Element("low").Element("celsius");
-                    weather.tomorrowLowC = (string)tomorrow.Element("high").Element("celsius");
+                    weather.tomorrowHighC = (string)tomorrow.Element("high").Element("celsius");
+                    weather.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
                     weather.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
                     weather.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
 
                     //convert to ints
                     weather.todayHighIntC = Convert.ToInt32(weather.todayHighC);
-                    weather.tomorrowHighIntC = Convert.ToInt32(weather.tomorrowLowC);
+                    weather.tomorrowHighIntC = Convert.ToInt32(weather.tomorrowHighC);
                     weather.todayHighIntF = Convert.ToInt32(weather.todayHighF);
-                    weather.tomorrowHighIntF = Convert.ToInt32(weather.tomorrowLowF);
+                    weather.tomorrowHighIntF = Convert.ToInt32(weather.tomorrowHighF);
 
-                    if (weather.todayHighIntC > weather.tomorrowHighIntC + 3)
+                    if (weather.todayHighIntC + 10 < weather.tomorrowHighIntC)
+                    {
+                        weather.tempCompareC = "MUCH WARMER THAN";
+                    }
+                    else if (weather.todayHighIntC + 3 < weather.tomorrowHighIntC)
                     {
                         weather.tempCompareC = "WARMER THAN";
+                    }                    
+                    else if (weather.todayHighIntC - 10 > weather.tomorrowHighIntC)
+                    {
+                        weather.tempCompareC = "MUCH COOLER THAN";
                     }
-                    else if (weather.todayHighIntC < weather.tomorrowHighIntC - 3)
+                    else if (weather.todayHighIntC - 3 > weather.tomorrowHighIntC)
                     {
                         weather.tempCompareC = "COOLER THAN";
                     }
@@ -884,11 +892,19 @@ namespace WeatherLock
                         weather.tempCompareC = "ABOUT THE SAME AS";
                     }
 
-                    if (weather.todayHighIntF > weather.tomorrowHighIntF + 3)
+                    if (weather.todayHighIntF + 20 < weather.tomorrowHighIntF)
+                    {
+                        weather.tempCompareF = "MUCH WARMER THAN";
+                    }
+                    else if (weather.todayHighIntF + 5 < weather.tomorrowHighIntF)
                     {
                         weather.tempCompareF = "WARMER THAN";
                     }
-                    else if (weather.todayHighIntF < weather.tomorrowHighIntF - 3)
+                    else if (weather.todayHighIntF - 20 > weather.tomorrowHighIntF)
+                    {
+                        weather.tempCompareF = "MUCH COOLER THAN";
+                    }
+                    else if (weather.todayHighIntF - 5 > weather.tomorrowHighIntF)
                     {
                         weather.tempCompareF = "COOLER THAN";
                     }
@@ -1239,7 +1255,16 @@ namespace WeatherLock
 
                 var rand = new Random();
 
-                int numPhotos = Convert.ToInt32(photos.Attribute("total").Value);
+                int numPhotos;
+                if (photos.Attribute("total") != null)
+                {
+                    numPhotos = Convert.ToInt32(photos.Attribute("total").Value);
+                }
+                else
+                {
+                    numPhotos = 0;
+                }
+
                 if (numPhotos == 0 && numFlickrAttempts <= 5)
                 {
                     numFlickrAttempts++;

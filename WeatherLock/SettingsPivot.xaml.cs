@@ -78,7 +78,7 @@ namespace WeatherLock
         {
             InitializeComponent();
             //Testing Key
-             apiKey = "fb1dd3f4321d048d";
+            //apiKey = "fb1dd3f4321d048d";
             SystemTray.Opacity = .5;
         }
 
@@ -1152,16 +1152,16 @@ namespace WeatherLock
                         getTemp = new convertTemp(weather.tempC);
                         todayHigh = weather.todayHighC;
                         todayLow = weather.todayLowC;
-                        tomorrowHigh = weather.todayHighC;
-                        tomorrowLow = weather.todayLowC;
+                        tomorrowHigh = weather.tomorrowHighC;
+                        tomorrowLow = weather.tomorrowLowC;
                     }
                     else
                     {
                         getTemp = new convertTemp(weather.tempF);
                         todayHigh = weather.todayHighF;
                         todayLow = weather.todayLowF;
-                        tomorrowHigh = weather.todayHighF;
-                        tomorrowLow = weather.todayLowF;
+                        tomorrowHigh = weather.tomorrowHighF;
+                        tomorrowLow = weather.tomorrowLowF;
                     }
                     int temp = getTemp.temp;
 
@@ -1209,7 +1209,7 @@ namespace WeatherLock
                                         SmallIconImage = smallIcon,
                                         Title = cityName,
                                         Count = temp,
-                                        WideContent1 = string.Format("Currently: " + weather + ", " + temp + " degrees"),
+                                        WideContent1 = string.Format("Currently: " + weather.currentConditions + ", " + temp + " degrees"),
                                         WideContent2 = string.Format("Today: " + weather.todayShort + " " + todayHigh + "/" + todayLow),
                                         WideContent3 = string.Format("Tomorrow: " + weather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
 
@@ -1352,16 +1352,16 @@ namespace WeatherLock
                         getTemp = new convertTemp(weather.tempC);
                         todayHigh = weather.todayHighC;
                         todayLow = weather.todayLowC;
-                        tomorrowHigh = weather.todayHighC;
-                        tomorrowLow = weather.todayLowC;
+                        tomorrowHigh = weather.tomorrowHighC;
+                        tomorrowLow = weather.tomorrowLowC;
                     }
                     else
                     {
                         getTemp = new convertTemp(weather.tempF);
                         todayHigh = weather.todayHighF;
                         todayLow = weather.todayLowF;
-                        tomorrowHigh = weather.todayHighF;
-                        tomorrowLow = weather.todayLowF;
+                        tomorrowHigh = weather.tomorrowHighF;
+                        tomorrowLow = weather.tomorrowLowF;
                     }
                     int temp = getTemp.temp;
 
@@ -1398,7 +1398,7 @@ namespace WeatherLock
                                         SmallIconImage = smallIcon,
                                         Title = cityName,
                                         Count = temp,
-                                        WideContent1 = string.Format("Currently: " + weather + ", " + temp + " degrees"),
+                                        WideContent1 = string.Format("Currently: " + weather.currentConditions + ", " + temp + " degrees"),
                                         WideContent2 = string.Format("Today: " + weather.todayShort + " " + todayHigh + "/" + todayLow),
                                         WideContent3 = string.Format("Tomorrow: " + weather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
 
@@ -1484,16 +1484,16 @@ namespace WeatherLock
                         getTemp = new convertTemp(weatherCurrent.tempC);
                         todayHigh = weatherCurrent.todayHighC;
                         todayLow = weatherCurrent.todayLowC;
-                        tomorrowHigh = weatherCurrent.todayHighC;
-                        tomorrowLow = weatherCurrent.todayLowC;
+                        tomorrowHigh = weatherCurrent.tomorrowHighC;
+                        tomorrowLow = weatherCurrent.tomorrowLowC;
                     }
                     else
                     {
                         getTemp = new convertTemp(weatherCurrent.tempF);
                         todayHigh = weatherCurrent.todayHighF;
                         todayLow = weatherCurrent.todayLowF;
-                        tomorrowHigh = weatherCurrent.todayHighF;
-                        tomorrowLow = weatherCurrent.todayLowF;
+                        tomorrowHigh = weatherCurrent.tomorrowHighF;
+                        tomorrowLow = weatherCurrent.tomorrowLowF;
                     }
                     int temp = getTemp.temp;
 
