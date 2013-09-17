@@ -20,6 +20,7 @@ using System.Windows.Controls;
 using Microsoft.Phone.Tasks;
 using Helpers;
 using WeatherData;
+using System.Globalization;
 
 namespace WeatherLock
 {
@@ -1062,20 +1063,9 @@ namespace WeatherLock
             }
             if (latitude != null && longitude != null && latitude != "" && longitude != "" && radTries < 5)
             {
-                double lat;
-                double lon;
-                try
-                {
-                    lat = Convert.ToDouble(latitude);
-                    lon = Convert.ToDouble(longitude);
-                }
-                catch (FormatException)
-                {
-                    string latReplace = latitude.Replace(".", ",");
-                    string lonReplace = longitude.Replace(".", ",");
-                    lat = Convert.ToDouble(latReplace);
-                    lon = Convert.ToDouble(lonReplace);
-                }
+                double lat = Convert.ToDouble(latitude, new CultureInfo("en-US"));
+                double lon = Convert.ToDouble(longitude, new CultureInfo("en-US"));
+               
                 radarMap.Center = new GeoCoordinate(lat, lon);
 
                 radarMap.CartographicMode = MapCartographicMode.Road;
@@ -1149,20 +1139,8 @@ namespace WeatherLock
             }
             if (latitude != null && longitude != null && latitude != "" && longitude != "" && satTries < 5)
             {
-                double lat;
-                double lon;
-                try
-                {
-                    lat = Convert.ToDouble(latitude);
-                    lon = Convert.ToDouble(longitude);
-                }
-                catch (FormatException)
-                {
-                    string latReplace = latitude.Replace(".", ",");
-                    string lonReplace = longitude.Replace(".", ",");
-                    lat = Convert.ToDouble(latReplace);
-                    lon = Convert.ToDouble(lonReplace);
-                }
+                double lat = Convert.ToDouble(latitude, new CultureInfo("en-US"));
+                double lon = Convert.ToDouble(longitude, new CultureInfo("en-US"));
                 satMap.Center = new GeoCoordinate(lat, lon);
                 satMap.CartographicMode = MapCartographicMode.Road;
                 satMap.ZoomLevel = 5;

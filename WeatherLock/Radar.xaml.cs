@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Helpers;
+using System.Globalization;
 
 namespace WeatherLock
 {
@@ -62,20 +63,9 @@ namespace WeatherLock
             if (latitude != null && longitude != null && latitude != "" && longitude != "" && radTries<5)
             {
 
-                double lat;
-                double lon;
-                try
-                {
-                    lat = Convert.ToDouble(latitude);
-                    lon = Convert.ToDouble(longitude);
-                }
-                catch (FormatException)
-                {
-                    string latReplace = latitude.Replace(".", ",");
-                    string lonReplace = longitude.Replace(".", ",");
-                    lat = Convert.ToDouble(latReplace);
-                    lon = Convert.ToDouble(lonReplace);
-                }
+                double lat = Convert.ToDouble(latitude, new CultureInfo("en-US"));
+                double lon = Convert.ToDouble(longitude, new CultureInfo("en-US"));
+
                 map.Center = new GeoCoordinate(lat, lon);
                 map.CartographicMode = MapCartographicMode.Road;
                 map.ZoomLevel = 7;
