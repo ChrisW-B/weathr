@@ -62,13 +62,25 @@ namespace WeatherLock
             if (latitude != null && longitude != null && latitude != "" && longitude != "" && radTries<5)
             {
 
-                double lat = Convert.ToDouble(latitude);
-                double lon = Convert.ToDouble(longitude);
+                double lat;
+                double lon;
+                try
+                {
+                    lat = Convert.ToDouble(latitude);
+                    lon = Convert.ToDouble(longitude);
+                }
+                catch (FormatException)
+                {
+                    string latReplace = latitude.Replace(".", ",");
+                    string lonReplace = longitude.Replace(".", ",");
+                    lat = Convert.ToDouble(latReplace);
+                    lon = Convert.ToDouble(lonReplace);
+                }
                 map.Center = new GeoCoordinate(lat, lon);
                 map.CartographicMode = MapCartographicMode.Road;
                 map.ZoomLevel = 7;
 
-                showRadarLocation();
+                showRadarLocation(lat, lon);
                 
             }
             else if (radTries >= 5)
@@ -90,9 +102,6 @@ namespace WeatherLock
         }
         void addRadar(object sender, RoutedEventArgs e)
         {
-            
-
-
             RadarCache radarCache = new RadarCache();
             for (int i = 0; i < 51; i = i + 5)
             {
@@ -206,9 +215,6 @@ namespace WeatherLock
             animate();
         }
 
-
-
-
         public class RadarCache
         {
             public TileSource current { get; set; }
@@ -224,7 +230,7 @@ namespace WeatherLock
             public TileSource fifty { get; set; }
 
         }
-        private void showRadarLocation()
+        private void showRadarLocation(double lat, double lon)
         {
 
             //create a marker
@@ -243,9 +249,6 @@ namespace WeatherLock
 
             // Create a MapOverlay to contain the marker
             MapOverlay myLocationOverlay = new MapOverlay();
-
-            double lat = Convert.ToDouble(latitude);
-            double lon = Convert.ToDouble(longitude);
 
             myLocationOverlay.Content = triangle;
             myLocationOverlay.PositionOrigin = new Point(0, 0);

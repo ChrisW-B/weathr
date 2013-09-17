@@ -101,7 +101,7 @@ namespace WeatherLock
             InitializeComponent();
 
             //Testing Key
-            //apiKey = "fb1dd3f4321d048d";
+            apiKey = "fb1dd3f4321d048d";
             ApplicationBar.StateChanged += ApplicationBar_StateChanged;
             initializeProgIndicators();
             setUnits();
@@ -158,10 +158,33 @@ namespace WeatherLock
 
                 if (store.Contains("cityName") && !isCurrent)
                 {
-                    string citySplit = (string)store["cityName"].Split(',')[0];
-                    string stateSplit = (string)store["cityName"].Split(',')[1];
-                    string cityLoadSplit = cityNameLoad.Split(',')[0];
-                    string stateLoadSplit = cityNameLoad.Split(',')[1];
+                    string stateLoadSplit;
+                    string cityLoadSplit;
+                    string citySplit;
+                    string stateSplit;
+
+                    string cityStore = (string)store["cityName"];
+
+                    if (cityStore.Contains(','))
+                    {
+                    citySplit = cityStore.Split(',')[0];
+                    stateSplit = cityStore.Split(',')[1];
+                    }
+                    else
+                    {
+                        citySplit = cityStore;
+                        stateSplit = "";
+                    }
+
+                    if (cityNameLoad.Contains(',')) {
+                        cityLoadSplit = cityNameLoad.Split(',')[0];
+                        stateLoadSplit = cityNameLoad.Split(',')[1];
+                    }
+                    else
+                    {
+                        cityLoadSplit = cityNameLoad;
+                        stateLoadSplit = "";
+                    }
 
                     if (!cityLoadSplit.Contains(citySplit))
                     {
@@ -402,8 +425,17 @@ namespace WeatherLock
                         {
                             errorSet = false;
                             //Set long and lat
-                            this.latitude = getLocation.getLat();
-                            this.longitude = getLocation.getLong();
+                            latitude = getLocation.getLat();
+                            longitude = getLocation.getLong();
+
+                            if (latitude.Contains(","))
+                            {
+                                latitude = latitude.Replace(",", ".");
+                            }
+                            if (longitude.Contains(","))
+                            {
+                                longitude = longitude.Replace(",", ".");
+                            }
 
                             //Save
                             String[] loc = { latitude, longitude };
@@ -423,6 +455,15 @@ namespace WeatherLock
                             String[] loc = (string[])store["loc"];
                             latitude = loc[0];
                             longitude = loc[1];
+
+                            if (latitude.Contains(","))
+                            {
+                                latitude = latitude.Replace(",", ".");
+                            }
+                            if (longitude.Contains(","))
+                            {
+                                longitude = longitude.Replace(",", ".");
+                            }
 
                             //prevent reuse of same location
                             store.Remove("loc");
@@ -980,7 +1021,11 @@ namespace WeatherLock
 
                     errorSet = true;
                     string errorDescrip = weather.error;
-                    if (errorDescrip.Contains("location"))
+                    if(errorDescrip.Contains("you must supply a location query"))
+                    {
+                        errorDescrip = "No info for this location, try selecting another";
+                    }
+                    else if (errorDescrip.Contains("location"))
                     {
                         errorDescrip += Environment.NewLine + "Try checking your location settings.";
                     }
@@ -1017,13 +1062,26 @@ namespace WeatherLock
             }
             if (latitude != null && longitude != null && latitude != "" && longitude != "" && radTries < 5)
             {
-                double lat = Convert.ToDouble(latitude);
-                double lon = Convert.ToDouble(longitude);
+                double lat;
+                double lon;
+                try
+                {
+                    lat = Convert.ToDouble(latitude);
+                    lon = Convert.ToDouble(longitude);
+                }
+                catch (FormatException)
+                {
+                    string latReplace = latitude.Replace(".", ",");
+                    string lonReplace = longitude.Replace(".", ",");
+                    lat = Convert.ToDouble(latReplace);
+                    lon = Convert.ToDouble(lonReplace);
+                }
                 radarMap.Center = new GeoCoordinate(lat, lon);
+
                 radarMap.CartographicMode = MapCartographicMode.Road;
                 radarMap.ZoomLevel = 5;
 
-                showRadarLocation();
+                showRadarLocation(lat, lon);
             }
             else if (radTries >= 5)
             {
@@ -1042,7 +1100,7 @@ namespace WeatherLock
             TileSource radar = new CurrentRadar();
             radarMap.TileSources.Add(radar);
         }
-        private void showRadarLocation()
+        private void showRadarLocation(double lat, double lon)
         {
 
             //create a marker
@@ -1062,9 +1120,6 @@ namespace WeatherLock
 
             // Create a MapOverlay to contain the marker
             MapOverlay myLocationOverlay = new MapOverlay();
-
-            double lat = Convert.ToDouble(latitude);
-            double lon = Convert.ToDouble(longitude);
 
             myLocationOverlay.Content = triangle;
             myLocationOverlay.PositionOrigin = new Point(0, 0);
@@ -1094,14 +1149,26 @@ namespace WeatherLock
             }
             if (latitude != null && longitude != null && latitude != "" && longitude != "" && satTries < 5)
             {
-                double lat = Convert.ToDouble(latitude);
-                double lon = Convert.ToDouble(longitude);
+                double lat;
+                double lon;
+                try
+                {
+                    lat = Convert.ToDouble(latitude);
+                    lon = Convert.ToDouble(longitude);
+                }
+                catch (FormatException)
+                {
+                    string latReplace = latitude.Replace(".", ",");
+                    string lonReplace = longitude.Replace(".", ",");
+                    lat = Convert.ToDouble(latReplace);
+                    lon = Convert.ToDouble(lonReplace);
+                }
                 satMap.Center = new GeoCoordinate(lat, lon);
                 satMap.CartographicMode = MapCartographicMode.Road;
                 satMap.ZoomLevel = 5;
 
 
-                showSatLocation();
+                showSatLocation(lat, lon);
 
             }
             else if (satTries >= 5)
@@ -1120,7 +1187,7 @@ namespace WeatherLock
             TileSource sat = new CurrentSat();
             satMap.TileSources.Add(sat);
         }
-        private void showSatLocation()
+        private void showSatLocation(double lat, double lon)
         {
 
             //create a marker
@@ -1140,9 +1207,6 @@ namespace WeatherLock
 
             // Create a MapOverlay to contain the marker
             MapOverlay myLocationOverlay = new MapOverlay();
-
-            double lat = Convert.ToDouble(latitude);
-            double lon = Convert.ToDouble(longitude);
 
             myLocationOverlay.Content = triangle;
             myLocationOverlay.PositionOrigin = new Point(0, 0);
@@ -1174,6 +1238,10 @@ namespace WeatherLock
                     {
                         flickrTags = "sky";
                     }
+                    else if (weather.currentConditions == null)
+                    {
+                        flickrTags = "sky";
+                    }
                     else
                     {
                         editFlickrTags();
@@ -1201,39 +1269,46 @@ namespace WeatherLock
         }
         private void editFlickrTags()
         {
-            string weatherUpper = weather.currentConditions.ToUpper();
-
-            if (weatherUpper.Contains("THUNDER"))
+            if (weather.currentConditions == null)
             {
-                flickrTags = "thunder, thunderstorm, lightning, storm";
-            }
-            else if (weather.currentConditions.Contains("RAIN"))
-            {
-                flickrTags = "rain, drizzle";
-            }
-            else if (weatherUpper.Contains("SNOW") || weatherUpper.Contains("FLURRY"))
-            {
-                flickrTags = "snow, flurry, snowing";
-            }
-            else if (weatherUpper.Contains("FOG") || weatherUpper.Contains("MIST"))
-            {
-                flickrTags = "fog, foggy, mist";
-            }
-            else if (weatherUpper.Contains("CLEAR"))
-            {
-                flickrTags = "clear, sun, sunny, blue sky";
-            }
-            else if (weatherUpper.Contains("OVERCAST"))
-            {
-                flickrTags = "overcast, cloudy";
-            }
-            else if (weatherUpper.Contains("CLOUDS") || weatherUpper.Contains("CLOUDY"))
-            {
-                flickrTags = "cloudy, clouds, fluffy cloud";
+                return;
             }
             else
             {
-                flickrTags = weatherUpper;
+                string weatherUpper = weather.currentConditions.ToUpper();
+
+                if (weatherUpper.Contains("THUNDER"))
+                {
+                    flickrTags = "thunder, thunderstorm, lightning, storm";
+                }
+                else if (weather.currentConditions.Contains("RAIN"))
+                {
+                    flickrTags = "rain, drizzle";
+                }
+                else if (weatherUpper.Contains("SNOW") || weatherUpper.Contains("FLURRY"))
+                {
+                    flickrTags = "snow, flurry, snowing";
+                }
+                else if (weatherUpper.Contains("FOG") || weatherUpper.Contains("MIST"))
+                {
+                    flickrTags = "fog, foggy, mist";
+                }
+                else if (weatherUpper.Contains("CLEAR"))
+                {
+                    flickrTags = "clear, sun, sunny, blue sky";
+                }
+                else if (weatherUpper.Contains("OVERCAST"))
+                {
+                    flickrTags = "overcast, cloudy";
+                }
+                else if (weatherUpper.Contains("CLOUDS") || weatherUpper.Contains("CLOUDY"))
+                {
+                    flickrTags = "cloudy, clouds, fluffy cloud";
+                }
+                else
+                {
+                    flickrTags = weatherUpper;
+                }
             }
         }
         private void getFlickrXml(object sender, DownloadStringCompletedEventArgs e)
@@ -1256,7 +1331,7 @@ namespace WeatherLock
                 var rand = new Random();
 
                 int numPhotos;
-                if (photos.Attribute("total") != null)
+                if (photos.Attribute("total") != null && (string)photos.Attribute("total") != "" )
                 {
                     numPhotos = Convert.ToInt32(photos.Attribute("total").Value);
                 }

@@ -57,13 +57,25 @@ namespace WeatherLock
             }
             if (latitude != null && longitude != null && latitude != "" && longitude != "" && satTries < 5)
             {
-                double lat = Convert.ToDouble(latitude);
-                double lon = Convert.ToDouble(longitude);
+                double lat;
+                double lon;
+                try
+                {
+                    lat = Convert.ToDouble(latitude);
+                    lon = Convert.ToDouble(longitude);
+                }
+                catch (FormatException)
+                {
+                    string latReplace = latitude.Replace(".", ",");
+                    string lonReplace = longitude.Replace(".", ",");
+                    lat = Convert.ToDouble(latReplace);
+                    lon = Convert.ToDouble(lonReplace);
+                }
                 map.Center = new GeoCoordinate(lat, lon);
                 map.CartographicMode = MapCartographicMode.Road;
                 map.ZoomLevel = 5;
 
-                showSatLocation();
+                showSatLocation(lat, lon);
                 
             }
             else if (satTries >= 5)
@@ -83,7 +95,7 @@ namespace WeatherLock
             TileSource sat = new CurrentSat();
             map.TileSources.Add(sat);
         }
-        private void showSatLocation()
+        private void showSatLocation(double lat, double lon)
         {
 
             //create a marker
@@ -103,9 +115,6 @@ namespace WeatherLock
 
             // Create a MapOverlay to contain the marker
             MapOverlay myLocationOverlay = new MapOverlay();
-
-            double lat = Convert.ToDouble(latitude);
-            double lon = Convert.ToDouble(longitude);
 
             myLocationOverlay.Content = triangle;
             myLocationOverlay.PositionOrigin = new Point(0, 0);

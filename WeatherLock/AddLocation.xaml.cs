@@ -34,7 +34,7 @@ namespace WeatherLock
             {
                 if ((bool)store["enableLocation"])
                 {
-                    locResults.Add(new LocResults() { LocName = "Current Location", LocUrl = "http://bing.com" });
+                    locResults.Add(new LocResults() { LocName = "Current Location", LocUrl = "" });
                 }
             }
             //HAP needs a HTML-Document as it is based on Linq/Xpath

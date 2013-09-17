@@ -99,6 +99,18 @@
                 <ScrollViewer>
                     <RichTextBox>
                         <Paragraph>
+                            <Run Text="Version 1.2.5"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Fixes for international geocoordinate problems"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Possible fix for the occasional flickr related crash"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run/>
+                        </Paragraph>
+                        <Paragraph>
                             <Run Text="Version 1.2.4"/>
                         </Paragraph>
                         <Paragraph>
