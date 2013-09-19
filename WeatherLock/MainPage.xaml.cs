@@ -102,7 +102,7 @@ namespace WeatherLock
             InitializeComponent();
 
             //Testing Key
-            apiKey = "fb1dd3f4321d048d";
+            //apiKey = "fb1dd3f4321d048d";
             ApplicationBar.StateChanged += ApplicationBar_StateChanged;
             initializeProgIndicators();
             setUnits();
@@ -1259,9 +1259,9 @@ namespace WeatherLock
                 {
                     flickrTags = "thunder, thunderstorm, lightning, storm";
                 }
-                else if (weather.currentConditions.Contains("RAIN"))
+                else if (weatherUpper.Contains("RAIN"))
                 {
-                    flickrTags = "rain, drizzle";
+                    flickrTags = "rain, drizzle, rainy";
                 }
                 else if (weatherUpper.Contains("SNOW") || weatherUpper.Contains("FLURRY"))
                 {

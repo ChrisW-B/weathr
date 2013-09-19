@@ -876,6 +876,16 @@ namespace ScheduledTaskAgent1
                         {
                             latitude = getLocation.getLat();
                             longitude = getLocation.getLong();
+
+                            if (latitude.Contains(","))
+                            {
+                                latitude = latitude.Replace(",", ".");
+                            }
+                            if (longitude.Contains(","))
+                            {
+                                longitude = longitude.Replace(",", ".");
+                            }
+
                             String[] loc = { latitude, longitude };
                             store["loc"] = loc;
                         }
@@ -893,6 +903,14 @@ namespace ScheduledTaskAgent1
                             latlng = (String[])store["loc"];
                             latitude = latlng[0];
                             longitude = latlng[1];
+                            if (latitude.Contains(","))
+                            {
+                                latitude = latitude.Replace(",", ".");
+                            }
+                            if (longitude.Contains(","))
+                            {
+                                longitude = longitude.Replace(",", ".");
+                            }
 
                             //stop reuse of the location too many times
                             store.Remove("loc");
@@ -926,6 +944,16 @@ namespace ScheduledTaskAgent1
                         {
                             latitude = getLocation.getLat();
                             longitude = getLocation.getLong();
+
+                            if (latitude.Contains(","))
+                            {
+                                latitude = latitude.Replace(",", ".");
+                            }
+                            if (longitude.Contains(","))
+                            {
+                                longitude = longitude.Replace(",", ".");
+                            }
+
                             String[] loc = { latitude, longitude };
                             store["loc"] = loc;
                         }
@@ -934,6 +962,8 @@ namespace ScheduledTaskAgent1
                             locationSearchTimesCurrent++;
                             checkLocationCurrent();
                         }
+
+                        
                     }
                     if (locationSearchTimesCurrent > 5)
                     {
@@ -943,7 +973,14 @@ namespace ScheduledTaskAgent1
                             latlng = (String[])store["loc"];
                             latitude = latlng[0];
                             longitude = latlng[1];
-
+                            if (latitude.Contains(","))
+                            {
+                                latitude = latitude.Replace(",", ".");
+                            }
+                            if (longitude.Contains(","))
+                            {
+                                longitude = longitude.Replace(",", ".");
+                            }
                             //stop reuse of the location too many times
                             store.Remove("loc");
                         }
