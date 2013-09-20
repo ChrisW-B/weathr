@@ -1,4 +1,4 @@
-﻿#define DEBUG_AGENT
+﻿//#define DEBUG_AGENT
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Marketplace;
 using Microsoft.Phone.Scheduler;
@@ -880,9 +880,9 @@ namespace WeatherLock
             {
                 ScheduledActionService.Add(periodicTask);
                 PeriodicStackPanel.DataContext = periodicTask;
-                #if(DEBUG_AGENT)
-                ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
-                #endif
+                //#if(DEBUG_AGENT)
+                //ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
+                //#endif
 
             }
             catch (InvalidOperationException exception)

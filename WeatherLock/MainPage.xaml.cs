@@ -208,9 +208,22 @@ namespace WeatherLock
             }
             title.Title = cityNameLoad;
 
+            restoreLastBackground();
             checkPinned();
             checkUpdated();
             showAd();
+        }
+
+        private void restoreLastBackground()
+        {
+            if ((bool)store.Contains("lastBackground"))
+            {
+                BitmapImage downloadedPhoto = new BitmapImage(store["lastBackground"]);
+                ImageBrush imageBrush = new ImageBrush();
+                imageBrush.ImageSource = downloadedPhoto;
+                imageBrush.Opacity = 0.7;
+                title.Background = imageBrush;
+            }
         }
 
         private void checkPinned()
@@ -685,8 +698,6 @@ namespace WeatherLock
                 SystemTray.SetIsVisible(this, false);
             }
         }
-
-
 
         //Getting and Setting Weather data
         private void setWeather()
@@ -1359,12 +1370,13 @@ namespace WeatherLock
 
                     string photoUrl = "http://farm" + farm + ".staticflickr.com/" + server + "/" + id + "_" + secret + "_b.jpg";
                     Uri photoUri = new Uri(photoUrl);
-                    var downloadedPhoto = new BitmapImage(photoUri);
-
+                    BitmapImage downloadedPhoto = new BitmapImage(photoUri);
+                    //store["lastBackground"] = downloadedPhoto;
                     ImageBrush imageBrush = new ImageBrush();
                     imageBrush.ImageSource = downloadedPhoto;
                     imageBrush.Opacity = 0.7;
                     title.Background = imageBrush;
+                    store.Save();
                     progFlickr.IsVisible = false;
                     HideTray();
                 }
@@ -1464,12 +1476,18 @@ namespace WeatherLock
         {
             if (isTrial)
             {
-                if (store.Contains("lastUpdated"))
+                if (temp.Text == null)
+                {
+                    getBackground = true;
+                    updateWeather();
+                    updateAlerts();
+                }
+                else if (store.Contains("lastUpdated"))
                 {
                     var appLastRun = Convert.ToDateTime(store["lastUpdated"]);
                     var now = DateTime.Now;
                     TimeSpan timeDiff = now.Subtract(appLastRun);
-                    if ((int)timeDiff.TotalMinutes > 45)
+                    if ((int)timeDiff.TotalMinutes > 30)
                     {
                         getBackground = true;
                         updateWeather();
@@ -1477,7 +1495,7 @@ namespace WeatherLock
                     }
                     else
                     {
-                        MessageBoxResult m = MessageBox.Show("Trial Mode can only be updated every 45 minutes, to save on cost. Buy now?", "Trial Mode", MessageBoxButton.OKCancel);
+                        MessageBoxResult m = MessageBox.Show("Trial Mode can only be updated every 30 minutes, to save on cost. Buy now?", "Trial Mode", MessageBoxButton.OKCancel);
                         if (m == MessageBoxResult.OK)
                         {
                             MarketplaceDetailTask task = new MarketplaceDetailTask();
