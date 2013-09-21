@@ -105,7 +105,21 @@
                             <Run Text="-Fixes for international geocoordinate problems"/>
                         </Paragraph>
                         <Paragraph>
+                            <Run Text="Thanks to Tomas (@" />
+                            <Hyperlink NavigateUri="http://twitter.com/thewp8blog" TargetName="twitter">
+                                <Run Text="The WP8Blog"/>
+                            </Hyperlink>
+                            <Run Text=") for telling me about them!"
+                            />
+                        </Paragraph>
+                        <Paragraph>
                             <Run Text="-Possible fix for the occasional flickr related crash"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Allow refreshes if nothings there"/>
+                        </Paragraph>
+                        <Paragraph>
+                            <Run Text="-Reduced refresh rate limit"/>
                         </Paragraph>
                         <Paragraph>
                             <Run/>
