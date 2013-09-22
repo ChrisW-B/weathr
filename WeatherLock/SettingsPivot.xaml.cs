@@ -22,9 +22,6 @@ namespace WeatherLock
     {
         #region variables
 
-        //Weather object
-        private WeatherInfo weather;
-
         //Flags for getting data/comparing city
         private Boolean tempUnitIsC;
         private Boolean isCurrent;
@@ -1097,8 +1094,7 @@ namespace WeatherLock
         //Async Calls to get weather data for each tile type
         private void updateMainTile(object sender, DownloadStringCompletedEventArgs e)
         {
-            weather = new WeatherInfo();
-
+            WeatherInfo mainTileWeather = new WeatherInfo();
             if (!e.Cancelled && e.Error == null)
             {
                 Uri normalIcon = new Uri("/SunCloud202.png", UriKind.Relative);
@@ -1108,35 +1104,13 @@ namespace WeatherLock
                 XElement weatherError = doc.Element("response").Element("error");
                 if (weatherError == null && !error)
                 {
-                    //Current Conditions
-                    XElement currentObservation = doc.Element("response").Element("current_observation");
-                    weather.city = (string)currentObservation.Element("display_location").Element("city");
-                    weather.state = (string)currentObservation.Element("display_location").Element("state_name");
-                    string cityName = weather.city + ", " + weather.state;
-                    weather.currentConditions = (string)currentObservation.Element("weather");
+                    WeatherToClass creator = new WeatherToClass();
+                    mainTileWeather = creator.weatherToClass(doc);
 
-                    XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
-
-                    XElement today = forecastDays.Element("forecastday");
-                    XElement tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
-
-                    weather.todayShort = (string)today.Element("conditions");
-                    weather.tomorrowShort = (string)tomorrow.Element("conditions");
-
-                    weather.tempC = (string)currentObservation.Element("temp_c");
-                    weather.todayLowC = (string)today.Element("low").Element("celsius");
-                    weather.todayHighC = (string)today.Element("high").Element("celsius");
-                    weather.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
-                    weather.tomorrowHighC = (string)tomorrow.Element("high").Element("celsius");
-
-                    weather.tempF = (string)currentObservation.Element("temp_f");
-                    weather.todayLowF = (string)today.Element("low").Element("fahrenheit");
-                    weather.todayHighF = (string)today.Element("high").Element("fahrenheit");
-                    weather.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
-                    weather.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
+                    string cityName = mainTileWeather.city + ", " + mainTileWeather.state;
 
                     //get weather icons
-                    Uri[] weatherIcons = getWeatherIcons(weather.currentConditions);
+                    Uri[] weatherIcons = getWeatherIcons(mainTileWeather.currentConditions);
                     normalIcon = weatherIcons[0];
                     smallIcon = weatherIcons[1];
 
@@ -1149,19 +1123,19 @@ namespace WeatherLock
 
                     if (tempUnitIsC)
                     {
-                        getTemp = new convertTemp(weather.tempC);
-                        todayHigh = weather.todayHighC;
-                        todayLow = weather.todayLowC;
-                        tomorrowHigh = weather.tomorrowHighC;
-                        tomorrowLow = weather.tomorrowLowC;
+                        getTemp = new convertTemp(mainTileWeather.tempC);
+                        todayHigh = mainTileWeather.todayHighC;
+                        todayLow = mainTileWeather.todayLowC;
+                        tomorrowHigh = mainTileWeather.tomorrowHighC;
+                        tomorrowLow = mainTileWeather.tomorrowLowC;
                     }
                     else
                     {
-                        getTemp = new convertTemp(weather.tempF);
-                        todayHigh = weather.todayHighF;
-                        todayLow = weather.todayLowF;
-                        tomorrowHigh = weather.tomorrowHighF;
-                        tomorrowLow = weather.tomorrowLowF;
+                        getTemp = new convertTemp(mainTileWeather.tempF);
+                        todayHigh = mainTileWeather.todayHighF;
+                        todayLow = mainTileWeather.todayLowF;
+                        tomorrowHigh = mainTileWeather.tomorrowHighF;
+                        tomorrowLow = mainTileWeather.tomorrowLowF;
                     }
                     int temp = getTemp.temp;
 
@@ -1186,15 +1160,15 @@ namespace WeatherLock
                                     SmallIconImage = smallIcon,
                                     Title = cityName,
                                     Count = temp,
-                                    WideContent1 = string.Format("Currently: " + weather.currentConditions + ", " + temp + " degrees"),
-                                    WideContent2 = string.Format("Today: " + weather.todayShort + " " + todayHigh + "/" + todayLow),
-                                    WideContent3 = string.Format("Tomorrow: " + weather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
+                                    WideContent1 = string.Format("Currently: " + mainTileWeather.currentConditions + ", " + temp + " degrees"),
+                                    WideContent2 = string.Format("Today: " + mainTileWeather.todayShort + " " + todayHigh + "/" + todayLow),
+                                    WideContent3 = string.Format("Tomorrow: " + mainTileWeather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
 
                                 };
                                 tile.Update(TileData);
 
                                 //mark tile as updated
-                                markUpdated("default location", weather.city, weather.state, false);
+                                markUpdated("default location", mainTileWeather.city, mainTileWeather.state, false);
 
                                 //stop looping
                                 break;
@@ -1209,15 +1183,15 @@ namespace WeatherLock
                                         SmallIconImage = smallIcon,
                                         Title = cityName,
                                         Count = temp,
-                                        WideContent1 = string.Format("Currently: " + weather.currentConditions + ", " + temp + " degrees"),
-                                        WideContent2 = string.Format("Today: " + weather.todayShort + " " + todayHigh + "/" + todayLow),
-                                        WideContent3 = string.Format("Tomorrow: " + weather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
+                                        WideContent1 = string.Format("Currently: " + mainTileWeather.currentConditions + ", " + temp + " degrees"),
+                                        WideContent2 = string.Format("Today: " + mainTileWeather.todayShort + " " + todayHigh + "/" + todayLow),
+                                        WideContent3 = string.Format("Tomorrow: " + mainTileWeather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
 
                                     };
                                     tile.Update(TileData);
 
                                     //mark tile as updated
-                                    markUpdated("default location", weather.city, weather.state, false);
+                                    markUpdated("default location", mainTileWeather.city, mainTileWeather.state, false);
 
                                     //stop looping
                                     break;
@@ -1229,8 +1203,8 @@ namespace WeatherLock
                 }
                 else if (!error)
                 {
-                    weather.error = doc.Element("response").Element("error").Element("description").Value;
-                    errorText = weather.error;
+                    mainTileWeather.error = doc.Element("response").Element("error").Element("description").Value;
+                    errorText = mainTileWeather.error;
                     error = true;
 
                     foreach (ShellTile tile in ShellTile.ActiveTiles)
@@ -1297,7 +1271,7 @@ namespace WeatherLock
         }
         private void updateOtherTiles(object sender, DownloadStringCompletedEventArgs e)
         {
-            weather = new WeatherInfo();
+            WeatherInfo otherTileWeather = new WeatherInfo();
 
             if (!e.Cancelled && e.Error == null)
             {
@@ -1308,35 +1282,15 @@ namespace WeatherLock
                 XElement weatherError = doc.Element("response").Element("error");
                 if (weatherError == null && !error)
                 {
-                    //Current Conditions
-                    XElement currentObservation = doc.Element("response").Element("current_observation");
-                    weather.city = (string)currentObservation.Element("display_location").Element("city");
-                    weather.state = (string)currentObservation.Element("display_location").Element("state_name");
-                    string cityName = weather.city + ", " + weather.state;
-                    weather.currentConditions = (string)currentObservation.Element("weather");
 
-                    XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
+                    WeatherToClass creator = new WeatherToClass();
+                    otherTileWeather = creator.weatherToClass(doc);
 
-                    XElement today = forecastDays.Element("forecastday");
-                    XElement tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
+                    string cityName = otherTileWeather.city + ", " + otherTileWeather.state;
 
-                    weather.todayShort = (string)today.Element("conditions");
-                    weather.tomorrowShort = (string)tomorrow.Element("conditions");
-
-                    weather.tempC = (string)currentObservation.Element("temp_c");
-                    weather.todayLowC = (string)today.Element("low").Element("celsius");
-                    weather.todayHighC = (string)today.Element("high").Element("celsius");
-                    weather.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
-                    weather.tomorrowHighC = (string)tomorrow.Element("high").Element("celsius");
-
-                    weather.tempF = (string)currentObservation.Element("temp_f");
-                    weather.todayLowF = (string)today.Element("low").Element("fahrenheit");
-                    weather.todayHighF = (string)today.Element("high").Element("fahrenheit");
-                    weather.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
-                    weather.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
 
                     //get weather icons
-                    Uri[] weatherIcons = getWeatherIcons(weather.currentConditions);
+                    Uri[] weatherIcons = getWeatherIcons(otherTileWeather.currentConditions);
                     normalIcon = weatherIcons[0];
                     smallIcon = weatherIcons[1];
 
@@ -1349,19 +1303,19 @@ namespace WeatherLock
 
                     if (tempUnitIsC)
                     {
-                        getTemp = new convertTemp(weather.tempC);
-                        todayHigh = weather.todayHighC;
-                        todayLow = weather.todayLowC;
-                        tomorrowHigh = weather.tomorrowHighC;
-                        tomorrowLow = weather.tomorrowLowC;
+                        getTemp = new convertTemp(otherTileWeather.tempC);
+                        todayHigh = otherTileWeather.todayHighC;
+                        todayLow = otherTileWeather.todayLowC;
+                        tomorrowHigh = otherTileWeather.tomorrowHighC;
+                        tomorrowLow = otherTileWeather.tomorrowLowC;
                     }
                     else
                     {
-                        getTemp = new convertTemp(weather.tempF);
-                        todayHigh = weather.todayHighF;
-                        todayLow = weather.todayLowF;
-                        tomorrowHigh = weather.tomorrowHighF;
-                        tomorrowLow = weather.tomorrowLowF;
+                        getTemp = new convertTemp(otherTileWeather.tempF);
+                        todayHigh = otherTileWeather.todayHighF;
+                        todayLow = otherTileWeather.todayLowF;
+                        tomorrowHigh = otherTileWeather.tomorrowHighF;
+                        tomorrowLow = otherTileWeather.tomorrowLowF;
                     }
                     int temp = getTemp.temp;
 
@@ -1389,7 +1343,7 @@ namespace WeatherLock
                                 {
                                     break;
                                 }
-                                else if (((tileLoc == cityName && pin.LocName == cityName) || (pin.LocName.Split(',')[0].Contains(weather.city) && tileLoc.Split(',')[0].Contains(weather.city) && pin.LocName.Split(',')[1].Contains(weather.state) && tileLoc.Split(',')[1].Contains(weather.state))) && !pin.updated)
+                                else if (((tileLoc == cityName && pin.LocName == cityName) || (pin.LocName.Split(',')[0].Contains(otherTileWeather.city) && tileLoc.Split(',')[0].Contains(otherTileWeather.city) && pin.LocName.Split(',')[1].Contains(otherTileWeather.state) && tileLoc.Split(',')[1].Contains(otherTileWeather.state))) && !pin.updated)
                                 {
                                     //Update Tile
                                     IconicTileData TileData = new IconicTileData
@@ -1398,15 +1352,15 @@ namespace WeatherLock
                                         SmallIconImage = smallIcon,
                                         Title = cityName,
                                         Count = temp,
-                                        WideContent1 = string.Format("Currently: " + weather.currentConditions + ", " + temp + " degrees"),
-                                        WideContent2 = string.Format("Today: " + weather.todayShort + " " + todayHigh + "/" + todayLow),
-                                        WideContent3 = string.Format("Tomorrow: " + weather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
+                                        WideContent1 = string.Format("Currently: " + otherTileWeather.currentConditions + ", " + temp + " degrees"),
+                                        WideContent2 = string.Format("Today: " + otherTileWeather.todayShort + " " + todayHigh + "/" + todayLow),
+                                        WideContent3 = string.Format("Tomorrow: " + otherTileWeather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
 
                                     };
                                     tile.Update(TileData);
 
                                     //mark the tile as finished updating
-                                    markUpdated(cityName, weather.city, weather.state, false);
+                                    markUpdated(cityName, otherTileWeather.city, otherTileWeather.state, false);
 
                                     //stop looping
                                     break;
@@ -1440,32 +1394,11 @@ namespace WeatherLock
                 XElement weatherError = doc.Element("response").Element("error");
                 if (weatherError == null && !error)
                 {
-                    //Current Conditions
-                    XElement currentObservation = doc.Element("response").Element("current_observation");
-                    weatherCurrent.city = (string)currentObservation.Element("display_location").Element("city");
-                    weatherCurrent.state = (string)currentObservation.Element("display_location").Element("state_name");
+                    WeatherToClass creator = new WeatherToClass();
+                    weatherCurrent = creator.weatherToClass(doc);
+                    
                     string cityName = weatherCurrent.city + ", " + weatherCurrent.state;
-                    weatherCurrent.currentConditions = (string)currentObservation.Element("weather");
-
-                    XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
-
-                    XElement today = forecastDays.Element("forecastday");
-                    XElement tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
-
-                    weatherCurrent.todayShort = (string)today.Element("conditions");
-                    weatherCurrent.tomorrowShort = (string)tomorrow.Element("conditions");
-
-                    weatherCurrent.tempC = (string)currentObservation.Element("temp_c");
-                    weatherCurrent.todayLowC = (string)today.Element("low").Element("celsius");
-                    weatherCurrent.todayHighC = (string)today.Element("high").Element("celsius");
-                    weatherCurrent.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
-                    weatherCurrent.tomorrowHighC = (string)tomorrow.Element("high").Element("celsius");
-
-                    weatherCurrent.tempF = (string)currentObservation.Element("temp_f");
-                    weatherCurrent.todayLowF = (string)today.Element("low").Element("fahrenheit");
-                    weatherCurrent.todayHighF = (string)today.Element("high").Element("fahrenheit");
-                    weatherCurrent.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
-                    weatherCurrent.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
+                    
 
                     //get weather icons
                     Uri[] weatherIcons = getWeatherIcons(weatherCurrent.currentConditions);

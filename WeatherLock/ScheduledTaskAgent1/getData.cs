@@ -1,25 +1,28 @@
 ﻿using System;
-using System.IO.IsolatedStorage;
-using System.Net;
-using System.Xml.Linq;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
-using Helpers;
+using System.Net;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Xml;
+using System.Xml.Linq;
 
-namespace WeatherLock
+namespace ScheduledTaskAgent1
 {
 
-    class getDataMain
+    class getData
     {
         #region variables
-
-        dynamic store = IsolatedStorageSettings.ApplicationSettings;
-
         //Current Conditions
         private String cityName;
         private String tempC;
         private String tempF;
         private String weather;
-        private int tempInt;
 
         //Forecast Conditions
         private String minC;
@@ -32,13 +35,10 @@ namespace WeatherLock
         private String maxCTomorrow;
         private String minFTomorrow;
         private String maxFTomorrow;
-        private String todayHigh;
-        private String todayLow;
-        private String tomorrowHigh;
-        private String tomorrowLow;
 
-        private String tempUnit;
-
+        //Flags
+        private bool currentComplete;
+        private bool forecastComplete;
         #endregion
 
         #region getters/setters
@@ -102,34 +102,47 @@ namespace WeatherLock
             return maxCTomorrow;
         }
 
-
+        //Flags
+        public bool getCurrentComplete()
+        {
+            return currentComplete;
+        }
+        public bool getForecastComplete()
+        {
+            return forecastComplete;
+        }
         #endregion
 
 
-        public getDataMain(string url, string tempUnit)
+        public getData(string current, string forecast)
         {
-            this.tempUnit = tempUnit;
-            getData(url);
+            this.currentComplete = false;
+            this.forecastComplete = false;
+            getCurrentData(current);
+            getForecastData(forecast);
         }
 
-        private void getData(string url)
+        private void getCurrentData(string url)
         {
             var client = new WebClient();
-
             Uri uri = new Uri(url);
 
-            client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(StringCallback);
+            client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(CurrentStringCallback);
+            client.DownloadStringAsync(uri);
+        }
+        private void getForecastData(string url)
+        {
+            var client = new WebClient();
+            Uri uri = new Uri(url);
+
+            client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(ForecastStringCallback);
             client.DownloadStringAsync(uri);
         }
 
-
-        private void StringCallback(object sender, DownloadStringCompletedEventArgs e)
-        {
-
+        private void CurrentStringCallback(object sender, DownloadStringCompletedEventArgs e)
+        { 
             if (!e.Cancelled && e.Error == null)
             {
-                String tempStr = null;
-
                 XDocument doc = XDocument.Parse(e.Result);
                 var currentObservation = doc.Element("response").Element("current_observation");
                 this.cityName = (string)currentObservation.Element("display_location").Element("full");
@@ -137,7 +150,14 @@ namespace WeatherLock
                 this.tempF = (string)currentObservation.Element("temp_f");
                 this.weather = (string)currentObservation.Element("weather");
 
-
+                this.currentComplete = true;
+            }
+        }
+        private void ForecastStringCallback(object sender, DownloadStringCompletedEventArgs e)
+        {
+            if (!e.Cancelled && e.Error == null)
+            {
+                XDocument doc = XDocument.Parse(e.Result);
                 XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
                 var today = forecastDays.Element("forecastday");
                 this.forecastToday = (string)today.Element("conditions");
@@ -153,88 +173,8 @@ namespace WeatherLock
                 this.maxFTomorrow = (string)tomorrow.Element("high").Element("fahrenheit");
                 this.minFTomorrow = (string)tomorrow.Element("low").Element("fahrenheit");
 
-                if (tempUnit == "c")
-                {
-                    todayHigh = maxC;
-                    todayLow = minC;
-                    tomorrowHigh = maxCTomorrow;
-                    tomorrowLow = minCTomorrow;
-
-                }
-                else
-                {
-                    todayHigh = maxF;
-                    todayLow = minF;
-                    tomorrowHigh = maxFTomorrow;
-                    tomorrowLow = minFTomorrow;
-                }
-
-
-                String[] backupResavedSettings = new String[9];
-
-                if ((bool)store.Contains("backup"))
-                {
-                    backupResavedSettings = (String[])store["backup"];
-
-                    if (cityName == null)
-                    {
-                        cityName = backupResavedSettings[0];
-                    }
-                    if (tempStr == null)
-                    {
-                        tempStr = backupResavedSettings[1];
-                    }
-                    if (weather == null)
-                    {
-                        weather = backupResavedSettings[2];
-                    }
-                    if (todayHigh == null)
-                    {
-                        todayHigh = backupResavedSettings[3];
-                    }
-                    if (todayLow == null)
-                    {
-                        todayLow = backupResavedSettings[4];
-                    }
-                    if (forecastToday == null)
-                    {
-                        forecastToday = backupResavedSettings[5];
-                    }
-                    if (forecastTomorrow == null)
-                    {
-                        forecastTomorrow = backupResavedSettings[6];
-                    }
-                    if (tomorrowHigh == null)
-                    {
-                        tomorrowHigh = backupResavedSettings[7];
-                    }
-                    if (tomorrowLow == null)
-                    {
-                        tomorrowLow = backupResavedSettings[8];
-                    }
-                }
-                else
-                {
-                    String[] backup = { cityName, tempStr, weather, todayHigh, todayLow, forecastToday, forecastTomorrow, tomorrowHigh, tomorrowLow };
-                    store["backup"] = backup;
-                }
-
-                if (tempUnit == "c")
-                {
-                    tempStr = tempC;
-                }
-                else
-                {
-                    tempStr = tempF;
-                }
-
-                var getTemp = new convertTemp(tempStr);
-                this.tempInt = getTemp.temp;
-
-                var updateTile = new updateTile(cityName, tempInt, weather, todayHigh, todayLow, forecastToday, forecastTomorrow, tomorrowHigh, tomorrowLow);
-                store["locName"] = cityName;
+                this.forecastComplete = true;
             }
         }
-
     }
 }

@@ -768,6 +768,7 @@ namespace WeatherLock
                 forecastListBox.ItemsSource = weather.forecastF;
             }
 
+
             //set alerts box
             alertListBox.ItemsSource = results;
 
@@ -856,20 +857,14 @@ namespace WeatherLock
         {
             if (!e.Cancelled && e.Error == null && e.Result != null)
             {
-                weather = new WeatherInfo();
                 XDocument doc = XDocument.Parse(e.Result);
                 XElement error = doc.Element("response").Element("error");
+
                 if (error == null)
                 {
+                    WeatherToClass creator = new WeatherToClass();
+                    weather = creator.weatherToClass(doc);
 
-                    #region current conditions
-                    //Current Conditions
-                    var currentObservation = doc.Element("response").Element("current_observation");
-
-                    //location name
-                    weather.city = (string)currentObservation.Element("display_location").Element("city");
-                    weather.state = (string)currentObservation.Element("display_location").Element("state_name");
-                    weather.shortCityName = (string)currentObservation.Element("display_location").Element("city");
 
                     cityName = weather.city + ", " + weather.state;
 
@@ -878,145 +873,6 @@ namespace WeatherLock
                         store["saveDefaultLocName"] = cityName;
                         store.Save();
                     }
-
-                    //Current Weather
-                    weather.currentConditions = (string)currentObservation.Element("weather");
-
-                    //Current wind
-                    weather.windSpeedM = (string)currentObservation.Element("wind_mph") + " mph";
-                    weather.windSpeedK = (string)currentObservation.Element("wind_kph") + " kph";
-                    weather.windDir = (string)currentObservation.Element("wind_dir");
-                    //Current Temp and feels like
-                    weather.tempC = (string)currentObservation.Element("temp_c");
-                    weather.feelsLikeC = (string)currentObservation.Element("feelslike_c");
-                    weather.tempF = (string)currentObservation.Element("temp_f");
-                    weather.feelsLikeF = (string)currentObservation.Element("feelslike_f");
-
-                    //current humidity
-                    weather.humidity = (string)currentObservation.Element("relative_humidity");
-                    #endregion
-
-                    #region forecast conditions
-                    //Forecast Conditions
-                    XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
-
-                    //Today's conditions
-                    XElement today = forecastDays.Element("forecastday");
-
-                    //Today's High/Low
-                    weather.todayLowC = (string)today.Element("low").Element("celsius");
-                    weather.todayHighC = (string)today.Element("high").Element("celsius");
-                    weather.todayLowF = (string)today.Element("low").Element("fahrenheit");
-                    weather.todayHighF = (string)today.Element("high").Element("fahrenheit");
-
-                    //Tomorrow's conditions
-                    XElement tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
-
-                    //Tomorrow's High/Low
-                    weather.tomorrowHighC = (string)tomorrow.Element("high").Element("celsius");
-                    weather.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
-                    weather.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
-                    weather.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
-
-                    //convert to ints
-                    weather.todayHighIntC = Convert.ToInt32(weather.todayHighC);
-                    weather.tomorrowHighIntC = Convert.ToInt32(weather.tomorrowHighC);
-                    weather.todayHighIntF = Convert.ToInt32(weather.todayHighF);
-                    weather.tomorrowHighIntF = Convert.ToInt32(weather.tomorrowHighF);
-
-                    if (weather.todayHighIntC + 10 < weather.tomorrowHighIntC)
-                    {
-                        weather.tempCompareC = "MUCH WARMER THAN";
-                    }
-                    else if (weather.todayHighIntC + 3 < weather.tomorrowHighIntC)
-                    {
-                        weather.tempCompareC = "WARMER THAN";
-                    }                    
-                    else if (weather.todayHighIntC - 10 > weather.tomorrowHighIntC)
-                    {
-                        weather.tempCompareC = "MUCH COOLER THAN";
-                    }
-                    else if (weather.todayHighIntC - 3 > weather.tomorrowHighIntC)
-                    {
-                        weather.tempCompareC = "COOLER THAN";
-                    }
-                    else
-                    {
-                        weather.tempCompareC = "ABOUT THE SAME AS";
-                    }
-
-                    if (weather.todayHighIntF + 20 < weather.tomorrowHighIntF)
-                    {
-                        weather.tempCompareF = "MUCH WARMER THAN";
-                    }
-                    else if (weather.todayHighIntF + 5 < weather.tomorrowHighIntF)
-                    {
-                        weather.tempCompareF = "WARMER THAN";
-                    }
-                    else if (weather.todayHighIntF - 20 > weather.tomorrowHighIntF)
-                    {
-                        weather.tempCompareF = "MUCH COOLER THAN";
-                    }
-                    else if (weather.todayHighIntF - 5 > weather.tomorrowHighIntF)
-                    {
-                        weather.tempCompareF = "COOLER THAN";
-                    }
-                    else
-                    {
-                        weather.tempCompareF = "ABOUT THE SAME AS";
-                    }
-
-                    var forecastDaysTxt = doc.Element("response").Element("forecast").Element("txt_forecast").Element("forecastdays");
-
-                    //clear out forecast list first
-
-                    weather.forecastC = new ObservableCollection<ForecastC>();
-                    weather.forecastF = new ObservableCollection<ForecastF>();
-
-                    weather.forecastC.Clear();
-                    weather.forecastF.Clear();
-
-                    foreach (XElement elm in forecastDaysTxt.Elements("forecastday"))
-                    {
-                        ForecastC forecastC = new WeatherData.ForecastC();
-                        ForecastF forecastF = new WeatherData.ForecastF();
-
-
-
-                        forecastC.title = forecastF.title = (string)elm.Element("title");
-                        forecastC.text = (string)elm.Element("fcttext_metric");
-                        forecastF.text = (string)elm.Element("fcttext");
-                        forecastC.pop = forecastF.pop = (string)elm.Element("pop");
-
-
-                        weather.forecastF.Add(forecastF);
-                        weather.forecastC.Add(forecastC);
-                        if (forecastUnitIsM)
-                        {
-                            forecastListBox.ItemsSource = weather.forecastC;
-                        }
-                        else
-                        {
-                            forecastListBox.ItemsSource = weather.forecastF;
-                        }
-                    }
-                    #endregion
-
-                    #region tile stuff
-                    weather.todayShort = (string)today.Element("conditions");
-                    weather.tomorrowShort = (string)tomorrow.Element("conditions");
-
-                    weather.todayLowC = (string)today.Element("low").Element("celsius");
-                    weather.todayHighC = (string)today.Element("high").Element("celsius");
-                    weather.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
-                    weather.tomorrowHighC = (string)tomorrow.Element("high").Element("celsius");
-
-                    weather.todayLowF = (string)today.Element("low").Element("fahrenheit");
-                    weather.todayHighF = (string)today.Element("high").Element("fahrenheit");
-                    weather.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
-                    weather.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
-                    #endregion
-
 
                     //set ui elements
                     weatherSet = true;
@@ -1028,23 +884,7 @@ namespace WeatherLock
                 }
                 else
                 {
-                    weather.error = doc.Element("response").Element("error").Element("description").Value;
-                    clearWeather();
-
-                    errorSet = true;
-                    string errorDescrip = weather.error;
-                    if(errorDescrip.Contains("you must supply a location query"))
-                    {
-                        errorDescrip = "No info for this location, try selecting another";
-                    }
-                    else if (errorDescrip.Contains("location"))
-                    {
-                        errorDescrip += Environment.NewLine + "Try checking your location settings.";
-                    }
-                    errorText.Text = errorDescrip;
-
-                    progWeather.IsVisible = false;
-                    HideTray();
+                    weatherError(doc);
                 }
             }
             else if (timesWeatherBroke < 5)
@@ -1053,6 +893,187 @@ namespace WeatherLock
                 updateWeather();
             }
 
+        }
+
+        private void weatherError(XDocument doc)
+        {
+            weather.error = doc.Element("response").Element("error").Element("description").Value;
+            clearWeather();
+
+            errorSet = true;
+            string errorDescrip = weather.error;
+            if (errorDescrip.Contains("you must supply a location query"))
+            {
+                errorDescrip = "No info for this location, try selecting another";
+            }
+            else if (errorDescrip.Contains("location"))
+            {
+                errorDescrip += Environment.NewLine + "Try checking your location settings.";
+            }
+            errorText.Text = errorDescrip;
+
+            progWeather.IsVisible = false;
+            HideTray();
+        }
+        private WeatherInfo weatherToClass(XDocument doc)
+        {
+            WeatherInfo currentWeather = new WeatherInfo();
+            #region current conditions
+            //Current Conditions
+            var currentObservation = doc.Element("response").Element("current_observation");
+
+            //location name
+            currentWeather.city = (string)currentObservation.Element("display_location").Element("city");
+            currentWeather.state = (string)currentObservation.Element("display_location").Element("state_name");
+            currentWeather.shortCityName = (string)currentObservation.Element("display_location").Element("city");
+
+            cityName = currentWeather.city + ", " + currentWeather.state;
+
+            if (store["defaultLocation"] == "Current Location")
+            {
+                store["saveDefaultLocName"] = cityName;
+                store.Save();
+            }
+
+            //Current currentWeather
+            currentWeather.currentConditions = (string)currentObservation.Element("weather");
+
+            //Current wind
+            currentWeather.windSpeedM = (string)currentObservation.Element("wind_mph") + " mph";
+            currentWeather.windSpeedK = (string)currentObservation.Element("wind_kph") + " kph";
+            currentWeather.windDir = (string)currentObservation.Element("wind_dir");
+            //Current Temp and feels like
+            currentWeather.tempC = (string)currentObservation.Element("temp_c");
+            currentWeather.feelsLikeC = (string)currentObservation.Element("feelslike_c");
+            currentWeather.tempF = (string)currentObservation.Element("temp_f");
+            currentWeather.feelsLikeF = (string)currentObservation.Element("feelslike_f");
+
+            //current humidity
+            currentWeather.humidity = (string)currentObservation.Element("relative_humidity");
+            #endregion
+
+            #region forecast conditions
+            //Forecast Conditions
+            XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
+
+            //Today's conditions
+            XElement today = forecastDays.Element("forecastday");
+
+            //Today's High/Low
+            currentWeather.todayLowC = (string)today.Element("low").Element("celsius");
+            currentWeather.todayHighC = (string)today.Element("high").Element("celsius");
+            currentWeather.todayLowF = (string)today.Element("low").Element("fahrenheit");
+            currentWeather.todayHighF = (string)today.Element("high").Element("fahrenheit");
+
+            //Tomorrow's conditions
+            XElement tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
+
+            //Tomorrow's High/Low
+            currentWeather.tomorrowHighC = (string)tomorrow.Element("high").Element("celsius");
+            currentWeather.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
+            currentWeather.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
+            currentWeather.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
+
+            //convert to ints
+            currentWeather.todayHighIntC = Convert.ToInt32(currentWeather.todayHighC);
+            currentWeather.tomorrowHighIntC = Convert.ToInt32(currentWeather.tomorrowHighC);
+            currentWeather.todayHighIntF = Convert.ToInt32(currentWeather.todayHighF);
+            currentWeather.tomorrowHighIntF = Convert.ToInt32(currentWeather.tomorrowHighF);
+
+            if (currentWeather.todayHighIntC + 10 < currentWeather.tomorrowHighIntC)
+            {
+                currentWeather.tempCompareC = "MUCH WARMER THAN";
+            }
+            else if (currentWeather.todayHighIntC + 3 < currentWeather.tomorrowHighIntC)
+            {
+                currentWeather.tempCompareC = "WARMER THAN";
+            }
+            else if (currentWeather.todayHighIntC - 10 > currentWeather.tomorrowHighIntC)
+            {
+                currentWeather.tempCompareC = "MUCH COOLER THAN";
+            }
+            else if (currentWeather.todayHighIntC - 3 > currentWeather.tomorrowHighIntC)
+            {
+                currentWeather.tempCompareC = "COOLER THAN";
+            }
+            else
+            {
+                currentWeather.tempCompareC = "ABOUT THE SAME AS";
+            }
+
+            if (currentWeather.todayHighIntF + 20 < currentWeather.tomorrowHighIntF)
+            {
+                currentWeather.tempCompareF = "MUCH WARMER THAN";
+            }
+            else if (currentWeather.todayHighIntF + 5 < currentWeather.tomorrowHighIntF)
+            {
+                currentWeather.tempCompareF = "WARMER THAN";
+            }
+            else if (currentWeather.todayHighIntF - 20 > currentWeather.tomorrowHighIntF)
+            {
+                currentWeather.tempCompareF = "MUCH COOLER THAN";
+            }
+            else if (currentWeather.todayHighIntF - 5 > currentWeather.tomorrowHighIntF)
+            {
+                currentWeather.tempCompareF = "COOLER THAN";
+            }
+            else
+            {
+                currentWeather.tempCompareF = "ABOUT THE SAME AS";
+            }
+
+            var forecastDaysTxt = doc.Element("response").Element("forecast").Element("txt_forecast").Element("forecastdays");
+
+            //clear out forecast list first
+
+            currentWeather.forecastC = new ObservableCollection<ForecastC>();
+            currentWeather.forecastF = new ObservableCollection<ForecastF>();
+
+            currentWeather.forecastC.Clear();
+            currentWeather.forecastF.Clear();
+
+            foreach (XElement elm in forecastDaysTxt.Elements("forecastday"))
+            {
+                ForecastC forecastC = new WeatherData.ForecastC();
+                ForecastF forecastF = new WeatherData.ForecastF();
+
+
+
+                forecastC.title = forecastF.title = (string)elm.Element("title");
+                forecastC.text = (string)elm.Element("fcttext_metric");
+                forecastF.text = (string)elm.Element("fcttext");
+                forecastC.pop = forecastF.pop = (string)elm.Element("pop");
+
+
+                currentWeather.forecastF.Add(forecastF);
+                currentWeather.forecastC.Add(forecastC);
+                if (forecastUnitIsM)
+                {
+                    forecastListBox.ItemsSource = currentWeather.forecastC;
+                }
+                else
+                {
+                    forecastListBox.ItemsSource = currentWeather.forecastF;
+                }
+            }
+            #endregion
+
+            #region tile stuff
+            currentWeather.todayShort = (string)today.Element("conditions");
+            currentWeather.tomorrowShort = (string)tomorrow.Element("conditions");
+
+            currentWeather.todayLowC = (string)today.Element("low").Element("celsius");
+            currentWeather.todayHighC = (string)today.Element("high").Element("celsius");
+            currentWeather.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
+            currentWeather.tomorrowHighC = (string)tomorrow.Element("high").Element("celsius");
+
+            currentWeather.todayLowF = (string)today.Element("low").Element("fahrenheit");
+            currentWeather.todayHighF = (string)today.Element("high").Element("fahrenheit");
+            currentWeather.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
+            currentWeather.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
+            #endregion
+
+            return currentWeather;
         }
         private void backupWeather()
         {

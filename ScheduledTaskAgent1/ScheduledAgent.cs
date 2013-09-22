@@ -233,33 +233,9 @@ namespace ScheduledTaskAgent1
                 XElement weatherError = doc.Element("response").Element("error");
                 if (weatherError == null && !error)
                 {
-                    //Current Conditions
-                    XElement currentObservation = doc.Element("response").Element("current_observation");
-                    weatherMain.city = (string)currentObservation.Element("display_location").Element("city");
-                    weatherMain.state = (string)currentObservation.Element("display_location").Element("state_name");
+                    WeatherToClass creator = new WeatherToClass();
+                    weatherMain = creator.weatherToClass(doc);
                     string cityName = weatherMain.city + ", " + weatherMain.state;
-
-
-                    weatherMain.currentConditions = (string)currentObservation.Element("weather");
-                    weatherMain.tempC = (string)currentObservation.Element("temp_c");
-                    weatherMain.tempF = (string)currentObservation.Element("temp_f");
-
-                    XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
-
-                    XElement today = forecastDays.Element("forecastday");
-                    weatherMain.todayShort = (string)today.Element("conditions");
-                    weatherMain.todayLowC = (string)today.Element("low").Element("celsius");
-                    weatherMain.todayHighC = (string)today.Element("high").Element("celsius");
-                    weatherMain.todayLowF = (string)today.Element("low").Element("fahrenheit");
-                    weatherMain.todayHighF = (string)today.Element("high").Element("fahrenheit");
-
-                    XElement tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
-                    weatherMain.tomorrowShort = (string)tomorrow.Element("conditions");
-                    weatherMain.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
-                    weatherMain.tomorrowHighC = (string)tomorrow.Element("high").Element("celsius");
-                    weatherMain.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
-                    weatherMain.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
-
                     //get weather icons
                     Uri[] weatherIcons = getWeatherIcons(weatherMain.currentConditions);
                     normalIcon = weatherIcons[0];
@@ -430,33 +406,10 @@ namespace ScheduledTaskAgent1
                 XElement weatherError = doc.Element("response").Element("error");
                 if (weatherError == null && !error)
                 {
-                    //Current Conditions
-                    XElement currentObservation = doc.Element("response").Element("current_observation");
-                    weather.city = (string)currentObservation.Element("display_location").Element("city");
-                    weather.state = (string)currentObservation.Element("display_location").Element("state_name");
+                    WeatherToClass creator = new WeatherToClass();
+                    weather = creator.weatherToClass(doc);
+
                     string cityName = weather.city + ", " + weather.state;
-                    weather.currentConditions = (string)currentObservation.Element("weather");
-
-                    XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
-
-                    XElement today = forecastDays.Element("forecastday");
-                    XElement tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
-
-                    weather.todayShort = (string)today.Element("conditions");
-                    weather.tomorrowShort = (string)tomorrow.Element("conditions");
-
-                    weather.tempC = (string)currentObservation.Element("temp_c");
-                    weather.todayLowC = (string)today.Element("low").Element("celsius");
-                    weather.todayHighC = (string)today.Element("high").Element("celsius");
-                    weather.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
-                    weather.tomorrowHighC = (string)tomorrow.Element("high").Element("celsius");
-
-                    weather.tempF = (string)currentObservation.Element("temp_f");
-                    weather.todayLowF = (string)today.Element("low").Element("fahrenheit");
-                    weather.todayHighF = (string)today.Element("high").Element("fahrenheit");
-                    weather.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
-                    weather.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
-
                     //get weather icons
                     Uri[] weatherIcons = getWeatherIcons(weather.currentConditions);
                     normalIcon = weatherIcons[0];
@@ -560,33 +513,11 @@ namespace ScheduledTaskAgent1
                 XElement weatherError = doc.Element("response").Element("error");
                 if (weatherError == null && !error)
                 {
-                    //Current Conditions
-                    XElement currentObservation = doc.Element("response").Element("current_observation");
-                    weatherCurrent.city = (string)currentObservation.Element("display_location").Element("city");
-                    weatherCurrent.state = (string)currentObservation.Element("display_location").Element("state_name");
+                    WeatherToClass creator = new WeatherToClass();
+                    weatherCurrent = creator.weatherToClass(doc);
+
                     string cityName = weatherCurrent.city + ", " + weatherCurrent.state;
-                    weatherCurrent.currentConditions = (string)currentObservation.Element("weather");
-
-                    XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
-
-                    XElement today = forecastDays.Element("forecastday");
-                    XElement tomorrow = forecastDays.Element("forecastday").ElementsAfterSelf("forecastday").First();
-
-                    weatherCurrent.todayShort = (string)today.Element("conditions");
-                    weatherCurrent.tomorrowShort = (string)tomorrow.Element("conditions");
-
-                    weatherCurrent.tempC = (string)currentObservation.Element("temp_c");
-                    weatherCurrent.todayLowC = (string)today.Element("low").Element("celsius");
-                    weatherCurrent.todayHighC = (string)today.Element("high").Element("celsius");
-                    weatherCurrent.tomorrowLowC = (string)tomorrow.Element("low").Element("celsius");
-                    weatherCurrent.tomorrowHighC = (string)tomorrow.Element("high").Element("celsius");
-
-                    weatherCurrent.tempF = (string)currentObservation.Element("temp_f");
-                    weatherCurrent.todayLowF = (string)today.Element("low").Element("fahrenheit");
-                    weatherCurrent.todayHighF = (string)today.Element("high").Element("fahrenheit");
-                    weatherCurrent.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
-                    weatherCurrent.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
-
+                    
                     //get weather icons
                     Uri[] weatherIcons = getWeatherIcons(weatherCurrent.currentConditions);
                     normalIcon = weatherIcons[0];

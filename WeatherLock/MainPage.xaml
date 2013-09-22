@@ -40,11 +40,15 @@
 
     <!--LayoutRoot contains the root grid where all other page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Black">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="9*"/>
+            <ColumnDefinition Width="151*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="29*"/>
             <RowDefinition Height="131*"/>
         </Grid.RowDefinitions>
-        <phone:Panorama SelectionChanged="title_SelectionChanged" Background="{Binding}"  Name="title" Title="location" TitleTemplate="{StaticResource smallTitle}" HeaderTemplate="{StaticResource smallHeader}" Grid.RowSpan="2">
+        <phone:Panorama SelectionChanged="title_SelectionChanged" Background="{Binding}"  Name="title" Title="location" TitleTemplate="{StaticResource smallTitle}" HeaderTemplate="{StaticResource smallHeader}" Grid.RowSpan="2" Grid.ColumnSpan="2">
 
             <!--Panorama item one-->
             <phone:PanoramaItem Header="now">
@@ -54,8 +58,8 @@
                         <ColumnDefinition Width="9*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Name="temp"   FontFamily="Segoe WP Light" FontSize="100" Margin="0,0,159,0" VerticalAlignment="Top" Height="87" Width="261" HorizontalAlignment="Right" Foreground="White" TextAlignment="Right" Grid.ColumnSpan="2" LineStackingStrategy="BlockLineHeight" LineHeight="90" TextOptions.TextHintingMode="Animated"/>
-                    <TextBlock Name="conditions"  Margin="-13,87,10,0" Height="87" TextOptions.TextHintingMode="Animated" FontSize="36" FontFamily="Segoe WP Black" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Top" LineHeight="30" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" Width="234" Foreground="White" TextAlignment="Right"/>
-                    <TextBlock Name="feelsLike"  HorizontalAlignment="Left" Margin="35,0,-15,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="32" Width="169" Foreground="White" FontFamily="Segoe WP" FontSize="22" Grid.Column="1" LineStackingStrategy="BlockLineHeight" LineHeight="30" TextOptions.TextHintingMode="Animated" TextTrimming="WordEllipsis"/>
+                    <TextBlock Name="conditions"  Margin="0,87,10,0" Height="87" TextOptions.TextHintingMode="Animated" FontSize="36" FontFamily="Segoe WP Black" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Top" LineHeight="30" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" Width="221" Foreground="White" TextAlignment="Right"/>
+                    <TextBlock Name="feelsLike"  HorizontalAlignment="Left" Margin="35,0,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="32" Width="154" Foreground="White" FontFamily="Segoe WP" FontSize="22" Grid.Column="1" LineStackingStrategy="BlockLineHeight" LineHeight="30" TextOptions.TextHintingMode="Animated" TextTrimming="WordEllipsis"/>
                     <TextBlock Name="wind" HorizontalAlignment="Left" Margin="35,32,0,0" TextWrapping="Wrap" VerticalAlignment="Top" RenderTransformOrigin="-0.491,1.49" Height="55" Width="154" Foreground="White" FontSize="22" Grid.Column="1" LineStackingStrategy="BlockLineHeight" LineHeight="22" TextOptions.TextHintingMode="Animated"/>
                     <TextBlock Name="humidity" Grid.Column="1" HorizontalAlignment="Left" Margin="35,79,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="34" Width="154" Foreground="White" FontSize="22" LineStackingStrategy="BlockLineHeight" LineHeight="22"/>
                     <TextBlock Name="tempCompare" Margin="0,174,0,342" TextWrapping="Wrap" FontSize="24" Grid.ColumnSpan="2" FontWeight="Bold" TextAlignment="Right" LineStackingStrategy="BlockLineHeight" LineHeight="24" Foreground="White"/>
@@ -69,18 +73,18 @@
                 <Grid>
                     <Grid>
                         <StackPanel>
-                            <Rectangle toolkit:TiltEffect.IsTiltEnabled="True"  Opacity=".3" Name="radarMapBox" Height="250" Tap="radarMap_Tap" Fill="Black"/>
-                            <Rectangle toolkit:TiltEffect.IsTiltEnabled="True" Opacity=".3" Name="satMapBox" Height="250" Margin="0,20,0,0" Tap="satMap_Tap" Fill="Black" />
+                            <Rectangle toolkit:TiltEffect.IsTiltEnabled="True"  Opacity=".3" Name="radarMapBox" Height="250" Tap="radarMap_Tap" Fill="Black" Margin="10,0,0,0"/>
+                            <Rectangle toolkit:TiltEffect.IsTiltEnabled="True" Opacity=".3" Name="satMapBox" Height="250" Margin="10,20,0,0" Tap="satMap_Tap" Fill="Black" />
                         </StackPanel>
 
                         <TextBlock toolkit:TiltEffect.IsTiltEnabled="True" Text="radar" Margin="270,100,32,454" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="30" Tap="radarMap_Tap" Foreground="White"/>
                         <TextBlock toolkit:TiltEffect.IsTiltEnabled="True" Text="satellite" Margin="270,369,32,185" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="30" Tap="satMap_Tap" Foreground="White"/>
-                        
+
                     </Grid>
                     <Grid Name="maps">
                         <StackPanel>
-                            <maps:Map toolkit:TiltEffect.IsTiltEnabled="True" Name="radarMap" Height="250" Width="250" HorizontalAlignment="Left" VerticalAlignment="Top" Tap="radarMap_Tap"/>
-                            <maps:Map toolkit:TiltEffect.IsTiltEnabled="True" Name="satMap" Height="250" Width="250" Margin="0,20,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Tap="satMap_Tap" />
+                            <maps:Map toolkit:TiltEffect.IsTiltEnabled="True" Name="radarMap" Height="250" Width="240" HorizontalAlignment="Left" VerticalAlignment="Top" Tap="radarMap_Tap" Margin="10,0,0,0"/>
+                            <maps:Map toolkit:TiltEffect.IsTiltEnabled="True" Name="satMap" Height="250" Width="240" Margin="10,20,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Tap="satMap_Tap" />
                         </StackPanel>
                     </Grid>
                 </Grid>
@@ -89,7 +93,7 @@
             <!--Panorama item three-->
             <phone:PanoramaItem Header="forecast">
                 <Grid>
-                    <ListBox x:Name="forecastListBox" Margin="0,0,0,30">
+                    <ListBox x:Name="forecastListBox" Margin="10,0,0,30">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical">
@@ -112,7 +116,7 @@
             <!--Panorama item four-->
             <phone:PanoramaItem Header="alerts">
                 <Grid>
-                    <ListBox x:Name="alertListBox" Margin="0,0,0,42" SelectionChanged="alertListBox_SelectionChanged">
+                    <ListBox x:Name="alertListBox" Margin="10,0,0,42" SelectionChanged="alertListBox_SelectionChanged">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
@@ -132,7 +136,7 @@
 
 
         </phone:Panorama>
-        <my:AdControl x:Name="adControl" IsAutoRefreshEnabled="True" ApplicationId="2af06aa6-4d1c-448b-908a-40372c39a9e1" AdUnitId="140266" Margin="0,548,0,27" Width="480" Grid.Row="1" Height="80" />
+        <my:AdControl x:Name="adControl" IsAutoRefreshEnabled="True" ApplicationId="2af06aa6-4d1c-448b-908a-40372c39a9e1" AdUnitId="140266" Margin="0,548,0,27" Width="480" Grid.Row="1" Height="80" Grid.ColumnSpan="2" />
     </Grid>
 
     <phone:PhoneApplicationPage.ApplicationBar>
