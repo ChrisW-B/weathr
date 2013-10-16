@@ -72,7 +72,7 @@ namespace ScheduledTaskAgent1
         protected override void OnInvoke(ScheduledTask task)
         {
             //Testing Key
-            //apiKey = "fb1dd3f4321d048d";
+            apiKey = "fb1dd3f4321d048d";
 
             error = false;
             checkUnits();

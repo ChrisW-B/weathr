@@ -102,7 +102,7 @@ namespace WeatherLock
             InitializeComponent();
 
             //Testing Key
-            //apiKey = "fb1dd3f4321d048d";
+            apiKey = "fb1dd3f4321d048d";
             ApplicationBar.StateChanged += ApplicationBar_StateChanged;
             initializeProgIndicators();
             setUnits();
@@ -127,6 +127,8 @@ namespace WeatherLock
 
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
+            askForRating();
+            
 
             licInfo = new LicenseInformation();
             isTrial = licInfo.IsTrial();
@@ -212,6 +214,60 @@ namespace WeatherLock
             checkPinned();
             checkUpdated();
             showAd();
+        }
+
+        private void askForRating()
+        {
+            int launchCount = 0;
+            try
+            {
+                if (store.Contains("launchCount"))
+                {
+                    launchCount = store["launchCount"] + 1;
+                    if (store.Contains("rated"))
+                    {
+                        if (!(bool)store["rated"])
+                        {
+                            if ((launchCount == 5 || launchCount == 10))
+                            {
+                                MessageBoxResult m = MessageBox.Show("I'd be thrilled if you could give it a good rating in the store!", "Enjoying Weathr?", MessageBoxButton.OKCancel);
+                                if (m == MessageBoxResult.OK)
+                                {
+                                    store["rated"] = true;
+                                    Microsoft.Phone.Tasks.MarketplaceReviewTask dt = new Microsoft.Phone.Tasks.MarketplaceReviewTask();
+                                    dt.Show();
+                                }
+                                else
+                                {
+                                    MessageBoxResult mCancel = MessageBox.Show("If you're having problems with Weathr, tap ok to email me and let me know! ", "Something wrong?", MessageBoxButton.OKCancel);
+                                    if (mCancel == MessageBoxResult.OK)
+                                    {
+                                        EmailComposeTask mail = new EmailComposeTask();
+                                        mail.To = "ChrisApps@outlook.com";
+                                        mail.Subject = "Weathr Feedback";
+                                        mail.Body = "\n --------------------------------------------- \n"+"Version: " + Environment.OSVersion + "\n" + "Phone: " + Microsoft.Phone.Info.DeviceStatus.DeviceName + "\n" + "App version: " + "1.2.6";
+                                        mail.Show();
+                                    }
+                                }
+                            }
+                            
+                        }
+                    }
+                    else
+                    {
+                        store["rated"] = false;
+                        askForRating();
+                    }
+                }
+                else
+                {
+                    store["launchCount"] = 1;
+                }
+            }
+            finally
+            {
+                store["launchCount"] = launchCount;
+            }
         }
 
         private void restoreLastBackground()
