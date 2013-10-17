@@ -51,16 +51,16 @@
         <phone:Panorama SelectionChanged="title_SelectionChanged" Background="{Binding}"  Name="title" Title="location" TitleTemplate="{StaticResource smallTitle}" HeaderTemplate="{StaticResource smallHeader}" Grid.RowSpan="2" Grid.ColumnSpan="2">
             <phone:PanoramaItem Header="locations">
                 <Grid>
-                    <ListBox x:Name="LocationListBox" HorizontalAlignment="Left" SelectionChanged="LocationListBox_SelectionChanged" VerticalAlignment="Top" Height="487" Width="436" Margin="10,0,0,0">
+                    <ListBox x:Name="LocationListBox" HorizontalAlignment="Left" SelectionChanged="LocationListBox_SelectionChanged" VerticalAlignment="Top" Height="496" Width="436" Margin="10,0,-26,0">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal">                                 
                                     <ListBoxItem x:Name="locationName"
                                                      Content="{Binding LocName}"
                                                      FontFamily="Segoe WP SemiLight"
-                                                     FontSize="30"
+                                                     FontSize="40"
                                                      Tap="locationName_Tap"
-                                                     toolkit:TiltEffect.IsTiltEnabled="True"
+                                                     toolkit:TiltEffect.IsTiltEnabled="True" Foreground="White" Margin="0,0,0,15"
                                         >
                                     </ListBoxItem>
                                 </StackPanel>
@@ -81,7 +81,7 @@
                     <TextBlock Name="feelsLike"  HorizontalAlignment="Left" Margin="35,0,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="32" Width="154" Foreground="White" FontFamily="Segoe WP" FontSize="22" Grid.Column="1" LineStackingStrategy="BlockLineHeight" LineHeight="30" TextOptions.TextHintingMode="Animated" TextTrimming="WordEllipsis"/>
                     <TextBlock Name="wind" HorizontalAlignment="Left" Margin="35,32,0,0" TextWrapping="Wrap" VerticalAlignment="Top" RenderTransformOrigin="-0.491,1.49" Height="55" Width="154" Foreground="White" FontSize="22" Grid.Column="1" LineStackingStrategy="BlockLineHeight" LineHeight="22" TextOptions.TextHintingMode="Animated"/>
                     <TextBlock Name="humidity" Grid.Column="1" HorizontalAlignment="Left" Margin="35,79,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="34" Width="154" Foreground="White" FontSize="22" LineStackingStrategy="BlockLineHeight" LineHeight="22"/>
-                    <TextBlock Name="tempCompare" Margin="0,174,0,342" TextWrapping="Wrap" FontSize="24" Grid.ColumnSpan="2" FontWeight="Bold" TextAlignment="Right" LineStackingStrategy="BlockLineHeight" LineHeight="24" Foreground="White"/>
+                    <TextBlock Name="tempCompare" Margin="10,174,0,342" TextWrapping="Wrap" FontSize="24" Grid.ColumnSpan="2" FontWeight="Bold" TextAlignment="Right" LineStackingStrategy="BlockLineHeight" LineHeight="24" Foreground="White"/>
                     <TextBlock Name="time" HorizontalAlignment="Left" Margin="10,-92,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="69" Width="179" Foreground="White" FontSize="40" LineStackingStrategy="BlockLineHeight" TextAlignment="Right" LineHeight="50" Grid.Column="1"/>
                     <TextBlock Name="errorText" Grid.ColumnSpan="2" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="White"/>
                 </Grid>

@@ -507,6 +507,10 @@ namespace WeatherLock
                 {
                     if (useWeatherGroup)
                     {
+                        if (weather == null)
+                        {
+                            updateWeather();
+                        }
                         fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&group_id=" + weatherGroup + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weather.currentConditions + "&per_page=500&tag_mode=any&content_type=1&media=photos&sort=relevance&has_geo=&format=rest";
                     }
                     else
@@ -1846,6 +1850,9 @@ namespace WeatherLock
                     ApplicationBar.Mode = ApplicationBarMode.Default;
                     break;
                 case 1:
+                    ApplicationBar.Mode = ApplicationBarMode.Minimized;                   
+                    break;
+                case 2:
                     ApplicationBar.Mode = ApplicationBarMode.Minimized;
                     if (!mapsSet)
                     {
@@ -1854,10 +1861,10 @@ namespace WeatherLock
                         setupSat();
                     }
                     break;
-                case 2:
-                    ApplicationBar.Mode = ApplicationBarMode.Minimized;
-                    break;
                 case 3:
+                    ApplicationBar.Mode = ApplicationBarMode.Minimized;                    
+                    break;
+                case 4:
                     ApplicationBar.Mode = ApplicationBarMode.Minimized;
                     if (!alertSet)
                     {
