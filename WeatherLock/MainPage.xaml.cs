@@ -97,7 +97,7 @@ namespace WeatherLock
 
 
         ObservableCollection<Locations> locations = new ObservableCollection<Locations>();
-        
+
         #endregion
 
         //Initialize the main page
@@ -174,8 +174,8 @@ namespace WeatherLock
 
                     if (cityStore.Contains(','))
                     {
-                    citySplit = cityStore.Split(',')[0];
-                    stateSplit = cityStore.Split(',')[1];
+                        citySplit = cityStore.Split(',')[0];
+                        stateSplit = cityStore.Split(',')[1];
                     }
                     else
                     {
@@ -183,7 +183,8 @@ namespace WeatherLock
                         stateSplit = "";
                     }
 
-                    if (cityNameLoad.Contains(',')) {
+                    if (cityNameLoad.Contains(','))
+                    {
                         cityLoadSplit = cityNameLoad.Split(',')[0];
                         stateLoadSplit = cityNameLoad.Split(',')[1];
                     }
@@ -226,12 +227,19 @@ namespace WeatherLock
             if (store.Contains("locations"))
             {
                 locations = (ObservableCollection<Locations>)store["locations"];
-                LocationListBox.ItemsSource = locations;
+                foreach (Locations loc in locations)
+                {
+                    loc.LocName = loc.LocName.ToLower();
+                }
             }
             else
             {
                 locations.Add(new Locations() { LocName = "Current Location", IsCurrent = true, ImageSource = "/Images/favs.png" });
-                LocationListBox.ItemsSource = locations;
+                store["locations"] = locations;
+                foreach (Locations loc in locations)
+                {
+                    loc.LocName = loc.LocName.ToLower();
+                }
             }
             LocationListBox.ItemsSource = locations;
         }
@@ -295,12 +303,12 @@ namespace WeatherLock
                                         EmailComposeTask mail = new EmailComposeTask();
                                         mail.To = "ChrisApps@outlook.com";
                                         mail.Subject = "Weathr Feedback";
-                                        mail.Body = "\n --------------------------------------------- \n"+"Version: " + Environment.OSVersion + "\n" + "Phone: " + Microsoft.Phone.Info.DeviceStatus.DeviceName + "\n" + "App version: " + "1.2.6";
+                                        mail.Body = "\n --------------------------------------------- \n" + "Version: " + Environment.OSVersion + "\n" + "Phone: " + Microsoft.Phone.Info.DeviceStatus.DeviceName + "\n" + "App version: " + "1.2.6";
                                         mail.Show();
                                     }
                                 }
                             }
-                            
+
                         }
                     }
                     else
@@ -1207,7 +1215,7 @@ namespace WeatherLock
             {
                 double lat = Convert.ToDouble(latitude, new CultureInfo("en-US"));
                 double lon = Convert.ToDouble(longitude, new CultureInfo("en-US"));
-               
+
                 radarMap.Center = new GeoCoordinate(lat, lon);
 
                 radarMap.CartographicMode = MapCartographicMode.Road;
@@ -1451,7 +1459,7 @@ namespace WeatherLock
                 var rand = new Random();
 
                 int numPhotos;
-                if (photos.Attribute("total") != null && (string)photos.Attribute("total") != "" )
+                if (photos.Attribute("total") != null && (string)photos.Attribute("total") != "")
                 {
                     numPhotos = Convert.ToInt32(photos.Attribute("total").Value);
                 }
@@ -1850,9 +1858,6 @@ namespace WeatherLock
                     ApplicationBar.Mode = ApplicationBarMode.Default;
                     break;
                 case 1:
-                    ApplicationBar.Mode = ApplicationBarMode.Minimized;                   
-                    break;
-                case 2:
                     ApplicationBar.Mode = ApplicationBarMode.Minimized;
                     if (!mapsSet)
                     {
@@ -1861,16 +1866,19 @@ namespace WeatherLock
                         setupSat();
                     }
                     break;
-                case 3:
-                    ApplicationBar.Mode = ApplicationBarMode.Minimized;                    
+                case 2:
+                    ApplicationBar.Mode = ApplicationBarMode.Minimized;
                     break;
-                case 4:
+                case 3:
                     ApplicationBar.Mode = ApplicationBarMode.Minimized;
                     if (!alertSet)
                     {
                         alertSet = true;
                         updateAlerts();
                     }
+                    break;
+                case 4:
+                    ApplicationBar.Mode = ApplicationBarMode.Default;
                     break;
             }
         }
