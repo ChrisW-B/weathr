@@ -419,15 +419,6 @@ namespace WeatherLock
         //Location Pivot
         #region variables
         ObservableCollection<Locations> locations = new ObservableCollection<Locations>();
-        public class Locations
-        {
-            public string LocName { get; set; }
-            public string LocUrl { get; set; }
-            public bool IsCurrent { get; set; }
-            public string Lat { get; set; }
-            public string Lon { get; set; }
-            public string ImageSource { get; set; }
-        }
         #endregion
 
         ///checkboxes and buttons

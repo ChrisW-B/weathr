@@ -49,7 +49,26 @@
             <RowDefinition Height="131*"/>
         </Grid.RowDefinitions>
         <phone:Panorama SelectionChanged="title_SelectionChanged" Background="{Binding}"  Name="title" Title="location" TitleTemplate="{StaticResource smallTitle}" HeaderTemplate="{StaticResource smallHeader}" Grid.RowSpan="2" Grid.ColumnSpan="2">
-
+            <phone:PanoramaItem Header="locations">
+                <Grid>
+                    <ListBox x:Name="LocationListBox" HorizontalAlignment="Left" SelectionChanged="LocationListBox_SelectionChanged" VerticalAlignment="Top" Height="487" Width="436" Margin="10,0,0,0">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <ListBoxItem x:Name="locationName"
+                                                     Content="{Binding LocName}"
+                                                     FontFamily="Segoe WP SemiLight"
+                                                     FontSize="30"
+                                                     Tap="locationName_Tap"
+                                                     toolkit:TiltEffect.IsTiltEnabled="True"
+                                        >
+                                    </ListBoxItem>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </phone:PanoramaItem>
             <!--Panorama item one-->
             <phone:PanoramaItem Header="now">
                 <Grid>

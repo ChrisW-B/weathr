@@ -94,6 +94,10 @@ namespace WeatherLock
 
         string periodicTaskName = "PeriodicAgent";
         public bool agentsAreEnabled = true;
+
+
+        ObservableCollection<Locations> locations = new ObservableCollection<Locations>();
+        
         #endregion
 
         //Initialize the main page
@@ -103,6 +107,7 @@ namespace WeatherLock
 
             //Testing Key
             apiKey = "fb1dd3f4321d048d";
+            askForRating();
             ApplicationBar.StateChanged += ApplicationBar_StateChanged;
             initializeProgIndicators();
             setUnits();
@@ -127,9 +132,6 @@ namespace WeatherLock
 
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
-            askForRating();
-            
-
             licInfo = new LicenseInformation();
             isTrial = licInfo.IsTrial();
 
@@ -139,6 +141,8 @@ namespace WeatherLock
             mapsSet = false;
             getBackground = false;
             weatherSet = false;
+
+            fillLocations();
 
             checkUseWeatherGroup();
 
@@ -214,6 +218,52 @@ namespace WeatherLock
             checkPinned();
             checkUpdated();
             showAd();
+        }
+
+        private void fillLocations()
+        {
+
+            if (store.Contains("locations"))
+            {
+                locations = (ObservableCollection<Locations>)store["locations"];
+                LocationListBox.ItemsSource = locations;
+            }
+            else
+            {
+                locations.Add(new Locations() { LocName = "Current Location", IsCurrent = true, ImageSource = "/Images/favs.png" });
+                LocationListBox.ItemsSource = locations;
+            }
+            LocationListBox.ItemsSource = locations;
+        }
+        private Locations getLocation(string loc)
+        {
+            foreach (Locations location in locations)
+            {
+                if (location.LocName == loc)
+                {
+                    return location;
+                }
+            }
+            return null;
+        }
+        private void locationName_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            ListBoxItem lbItem = (ListBoxItem)sender;
+            String loc = lbItem.Content.ToString();
+
+            Locations location = getLocation(loc);
+
+            NavigationService.Navigate(new Uri(
+                "/MainPage.xaml?cityName=" + location.LocName
+                + "&url=" + location.LocUrl
+                + "&isCurrent=" + location.IsCurrent
+                + "&lat=" + location.Lat
+                + "&lon=" + location.Lon,
+                UriKind.Relative));
+        }
+        private void LocationListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            return;
         }
 
         private void askForRating()
