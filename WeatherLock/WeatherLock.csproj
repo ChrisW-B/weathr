@@ -212,15 +212,20 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Helpers\Helpers\Helpers.csproj">
+      <Project>{8FE230F8-F423-4A27-AF3D-961192D20BC1}</Project>
+      <Name>Helpers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\WeatherData\WeatherData\WeatherData.csproj">
+      <Project>{5AE82238-A30C-4BD7-986B-1BF961D5659A}</Project>
+      <Name>WeatherData</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ScheduledTaskAgent1\ScheduledTaskAgent1.csproj">
       <Project>{935D572A-2D45-4C9F-A2D0-3D3403A85282}</Project>
       <Name>ScheduledTaskAgent1</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Helpers">
-      <HintPath>..\..\Helpers\Helpers\Bin\Release\Helpers.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Expression.Interactions, Version=3.9.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Phone.Controls, Version=8.0.0.0, Culture=neutral, PublicKeyToken=24eec0d8c86cda1e, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Phone.Controls.Toolkit, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b772ad94eb9ca604, processorArchitecture=MSIL">
@@ -228,9 +233,6 @@
       <HintPath>..\packages\WPToolkit.4.2013.06.11\lib\wp8\Microsoft.Phone.Controls.Toolkit.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Interactivity, Version=3.9.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="WeatherData">
-      <HintPath>..\..\WeatherData\WeatherData\Bin\Release\WeatherData.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <SDKReference Include="MSAdvertising, Version=6.1">

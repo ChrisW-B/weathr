@@ -94,12 +94,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Helpers">
-      <HintPath>..\..\Helpers\Helpers\Bin\Release\Helpers.dll</HintPath>
-    </Reference>
-    <Reference Include="WeatherData">
-      <HintPath>..\..\WeatherData\WeatherData\Bin\Release\WeatherData.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\Helpers\Helpers\Helpers.csproj">
+      <Project>{8FE230F8-F423-4A27-AF3D-961192D20BC1}</Project>
+      <Name>Helpers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\WeatherData\WeatherData\WeatherData.csproj">
+      <Project>{5AE82238-A30C-4BD7-986B-1BF961D5659A}</Project>
+      <Name>WeatherData</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).$(TargetFrameworkVersion).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).CSharp.targets" />
