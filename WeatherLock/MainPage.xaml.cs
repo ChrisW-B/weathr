@@ -18,9 +18,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Controls;
 using Microsoft.Phone.Tasks;
-using WeatherData;
 using System.Globalization;
 using Helpers;
+using WeatherData;
 
 namespace WeatherLock
 {

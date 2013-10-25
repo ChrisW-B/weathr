@@ -1,15 +1,142 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Xml.Linq;
+﻿using Microsoft.Phone.Shell;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Device.Location;
+using System.IO.IsolatedStorage;
+using System.Globalization;
+using System.Xml.Linq;
+using System.Collections.ObjectModel;
 using WeatherData;
 
-
-namespace ScheduledTaskAgent1
+namespace Helpers
 {
+    public class getLocation
+    {
+        #region variables
+        private string latitude;
+        private string longitude;
+        #endregion
+
+        #region getters
+        public string getLat()
+        {
+            return latitude;
+        }
+        public string getLong()
+        {
+            return longitude;
+        }
+        #endregion
+
+        public getLocation()
+        {
+            getInfo();
+        }
+
+        private void getInfo()
+        {
+
+            GeoCoordinateWatcher watcher = new GeoCoordinateWatcher();
+            watcher.MovementThreshold = 1000;
+
+            watcher.Start();
+
+            GeoCoordinate coord = watcher.Position.Location;
+
+            if (coord.IsUnknown != true)
+            {
+                latitude = coord.Latitude.ToString();
+                longitude = coord.Longitude.ToString();
+            }
+            else
+            {
+                Console.WriteLine("Unknown latitude and longitude.");
+            }
+        }
+    }
+
+    public class convertTemp
+    {
+        public int temp;
+        dynamic store = IsolatedStorageSettings.ApplicationSettings;
+        public convertTemp(string tempStr)
+        {
+            tempCon(tempStr);
+        }
+
+        private void tempCon(string tempStr)
+        {
+            //convert temp into integer
+            double tempDec;
+
+            tempDec = Convert.ToDouble(tempStr, new CultureInfo("en-US"));
+            this.temp = (int)tempDec;
+        }
+    }
+
+    public class updateTile
+    {
+        public updateTile(
+            string cityName,
+            int temp,
+            string conditions,
+            string todayHigh,
+            string todayLow,
+            string forecastToday,
+            string forecastTomorrow,
+            string tomorrowHigh,
+            string tomorrowLow
+            )
+        {
+            update(cityName, temp, conditions, todayHigh, todayLow, forecastToday, forecastTomorrow, tomorrowHigh, tomorrowLow);
+        }
+        private void update(
+            string cityName,
+            int temp,
+            string conditions,
+            string high,
+            string low,
+            string forecastToday,
+            string forecastTomorrow,
+            string forecastHigh,
+            string forecastLow
+            )
+        {
+
+            ShellTile tile = ShellTile.ActiveTiles.FirstOrDefault();
+
+            IconicTileData TileData = new IconicTileData
+            {
+                Title = cityName,
+                Count = temp,
+                WideContent1 = string.Format("Currently: " + conditions + ", " + temp + " degrees"),
+                WideContent2 = string.Format("Today: " + forecastToday + " " + high + "/" + low),
+                WideContent3 = string.Format("Tomorrow: " + forecastTomorrow + " " + forecastHigh + "/" + forecastLow)
+
+            };
+            tile.Update(TileData);
+        }
+    }
+    public class Locations
+    {
+        public string LocName { get; set; }
+        public string LocUrl { get; set; }
+        public bool IsCurrent { get; set; }
+        public string Lat { get; set; }
+        public string Lon { get; set; }
+        public string ImageSource { get; set; }
+        public string rand { get; set; }
+    }
+
     class WeatherToClass
     {
         public WeatherInfo weatherToClass(XDocument doc)
+        {
+            return toClass(doc);
+        }
+        private WeatherInfo toClass(XDocument doc)
         {
             WeatherInfo currentWeather = new WeatherInfo();
             #region current conditions
