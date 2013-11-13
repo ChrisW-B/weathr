@@ -1111,10 +1111,12 @@ namespace WeatherLock
                     string todayLow;
                     string tomorrowHigh;
                     string tomorrowLow;
+                    string origTemp;
 
                     if (tempUnitIsC)
                     {
                         getTemp = new convertTemp(mainTileWeather.tempC);
+                        origTemp = mainTileWeather.tempC;
                         todayHigh = mainTileWeather.todayHighC;
                         todayLow = mainTileWeather.todayLowC;
                         tomorrowHigh = mainTileWeather.tomorrowHighC;
@@ -1123,6 +1125,7 @@ namespace WeatherLock
                     else
                     {
                         getTemp = new convertTemp(mainTileWeather.tempF);
+                        origTemp = mainTileWeather.tempF;
                         todayHigh = mainTileWeather.todayHighF;
                         todayLow = mainTileWeather.todayLowF;
                         tomorrowHigh = mainTileWeather.tomorrowHighF;
@@ -1151,7 +1154,7 @@ namespace WeatherLock
                                     SmallIconImage = smallIcon,
                                     Title = cityName,
                                     Count = temp,
-                                    WideContent1 = string.Format("Currently: " + mainTileWeather.currentConditions + ", " + temp + " degrees"),
+                                    WideContent1 = string.Format("Currently: " + mainTileWeather.currentConditions + ", " + origTemp + " degrees"),
                                     WideContent2 = string.Format("Today: " + mainTileWeather.todayShort + " " + todayHigh + "/" + todayLow),
                                     WideContent3 = string.Format("Tomorrow: " + mainTileWeather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
 
@@ -1291,10 +1294,12 @@ namespace WeatherLock
                     string todayLow;
                     string tomorrowHigh;
                     string tomorrowLow;
+                    string origTemp;
 
                     if (tempUnitIsC)
                     {
                         getTemp = new convertTemp(otherTileWeather.tempC);
+                        origTemp = otherTileWeather.tempC;
                         todayHigh = otherTileWeather.todayHighC;
                         todayLow = otherTileWeather.todayLowC;
                         tomorrowHigh = otherTileWeather.tomorrowHighC;
@@ -1303,6 +1308,7 @@ namespace WeatherLock
                     else
                     {
                         getTemp = new convertTemp(otherTileWeather.tempF);
+                        origTemp = otherTileWeather.tempF;
                         todayHigh = otherTileWeather.todayHighF;
                         todayLow = otherTileWeather.todayLowF;
                         tomorrowHigh = otherTileWeather.tomorrowHighF;
@@ -1343,7 +1349,7 @@ namespace WeatherLock
                                         SmallIconImage = smallIcon,
                                         Title = cityName,
                                         Count = temp,
-                                        WideContent1 = string.Format("Currently: " + otherTileWeather.currentConditions + ", " + temp + " degrees"),
+                                        WideContent1 = string.Format("Currently: " + otherTileWeather.currentConditions + ", " + origTemp + " degrees"),
                                         WideContent2 = string.Format("Today: " + otherTileWeather.todayShort + " " + todayHigh + "/" + todayLow),
                                         WideContent3 = string.Format("Tomorrow: " + otherTileWeather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
 
@@ -1402,10 +1408,12 @@ namespace WeatherLock
                     string todayLow;
                     string tomorrowHigh;
                     string tomorrowLow;
+                    string origTemp;
 
                     if (tempUnitIsC)
                     {
                         getTemp = new convertTemp(weatherCurrent.tempC);
+                        origTemp = weatherCurrent.tempC;
                         todayHigh = weatherCurrent.todayHighC;
                         todayLow = weatherCurrent.todayLowC;
                         tomorrowHigh = weatherCurrent.tomorrowHighC;
@@ -1414,6 +1422,7 @@ namespace WeatherLock
                     else
                     {
                         getTemp = new convertTemp(weatherCurrent.tempF);
+                        origTemp = weatherCurrent.tempF;
                         todayHigh = weatherCurrent.todayHighF;
                         todayLow = weatherCurrent.todayLowF;
                         tomorrowHigh = weatherCurrent.tomorrowHighF;
@@ -1449,7 +1458,7 @@ namespace WeatherLock
                                         SmallIconImage = smallIcon,
                                         Title = cityName,
                                         Count = temp,
-                                        WideContent1 = string.Format("Currently: " + weatherCurrent.currentConditions + ", " + temp + " degrees"),
+                                        WideContent1 = string.Format("Currently: " + weatherCurrent.currentConditions + ", " + origTemp + " degrees"),
                                         WideContent2 = string.Format("Today: " + weatherCurrent.todayShort + " " + todayHigh + "/" + todayLow),
                                         WideContent3 = string.Format("Tomorrow: " + weatherCurrent.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
 
