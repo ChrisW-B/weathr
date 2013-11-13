@@ -142,7 +142,9 @@ namespace WeatherLock
             getBackground = false;
             weatherSet = false;
 
+            addLocations();
             fillLocations();
+
 
             checkUseWeatherGroup();
 
@@ -243,6 +245,54 @@ namespace WeatherLock
             }
             LocationListBox.ItemsSource = locations;
         }
+        private void addLocations()
+        {
+            if (store.Contains("locAdded") && store.Contains("newLocation"))
+            {
+                if ((bool)store["locAdded"])
+                {
+                    foreach (Locations loc in locations)
+                    {
+                        if (store["newLocation"].Contains(loc.LocName))
+                        {
+                            return;
+                        }
+                    }
+                    String lat;
+                    String lon;
+                    store["locAdded"] = false;
+                    String locationName = store["newLocation"];
+                    String locationUrl = store["newUrl"];
+                    if (!locationName.Contains("Current Location"))
+                    {
+                        String[] location = store["newLoc"];
+                        lat = location[0];
+                        lon = location[1];
+                    }
+                    else
+                    {
+                        lat = null;
+                        lon = null;
+                    }
+                    if (!locationName.Contains("Current Location"))
+                    {
+                        locations.Add(new Locations() { LocName = locationName, IsCurrent = false, LocUrl = locationUrl, Lat = lat, Lon = lon, ImageSource = "/Images/Clear.png" });
+                    }
+                    else
+                    {
+                        locations.Add(new Locations() { LocName = locationName, IsCurrent = true, LocUrl = locationUrl, Lat = lat, Lon = lon, ImageSource = "/Images/Clear.png" });
+                    }
+                    LocationListBox.ItemsSource = locations;
+                    backupLocations();
+                }
+            }
+        }
+        void backupLocations()
+        {
+            store["locations"] = locations;
+            store.Save();
+        }
+             
         private Locations getLocation(string loc)
         {
             foreach (Locations location in locations)
@@ -1848,14 +1898,28 @@ namespace WeatherLock
         {
             NavigationService.Navigate(new Uri("/SelectLocation.xaml", UriKind.Relative));
         }
+        private void ApplicationBarMenuItem_Click_3(object sender, EventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/AddLocation.xaml", UriKind.Relative));
+        }
 
         //Change stuff in panorama as you move through
         private void title_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            Uri addButtonIcon = new Uri("/Assets/AppBar/add.png", UriKind.Relative);
+            ApplicationBarIconButton addButton = new ApplicationBarIconButton(addButtonIcon);
+            addButton.Text = "Add Location";
+            addButton.Click += new EventHandler(ApplicationBarMenuItem_Click_3);
+
+
             switch (((Panorama)sender).SelectedIndex)
             {
                 case 0:
                     ApplicationBar.Mode = ApplicationBarMode.Default;
+                    if (ApplicationBar.Buttons.Count == 4)
+                    {
+                        ApplicationBar.Buttons.Remove(ApplicationBar.Buttons[3]);
+                    }
                     break;
                 case 1:
                     ApplicationBar.Mode = ApplicationBarMode.Minimized;
@@ -1876,9 +1940,17 @@ namespace WeatherLock
                         alertSet = true;
                         updateAlerts();
                     }
+                    if (ApplicationBar.Buttons.Count == 4)
+                    {
+                        ApplicationBar.Buttons.Remove(ApplicationBar.Buttons[3]);
+                    }
                     break;
                 case 4:
                     ApplicationBar.Mode = ApplicationBarMode.Default;
+                    if (!(ApplicationBar.Buttons.Count == 4))
+                    {
+                        ApplicationBar.Buttons.Add(addButton);
+                    }
                     break;
             }
         }

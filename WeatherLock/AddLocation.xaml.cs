@@ -47,7 +47,16 @@ namespace WeatherLock
             {
                 var locationName = (string)elm.Value;
                 var wuUrlNode = elm.NextNode.NextNode.NextNode.NextNode.NextNode.NextNode;
-                var wuUrl = wuUrlNode.ToString();
+                string wuUrl = "";
+                if (wuUrlNode != null)
+                {
+                    wuUrl = wuUrlNode.ToString();
+                }
+                else
+                {
+                    wuUrl = elm.NextNode.NextNode.NextNode.NextNode.NextNode.ToString();
+                }
+                
                 wuUrl = wuUrl.Replace("<l>", "");
                 wuUrl = wuUrl.Replace("</l>", "");
 
