@@ -247,10 +247,12 @@ namespace ScheduledTaskAgent1
                     string todayLow;
                     string tomorrowHigh;
                     string tomorrowLow;
+                    string origTemp;
 
                     if (tempUnitIsC)
                     {
                         getTemp = new convertTemp(weatherMain.tempC);
+                        origTemp = weatherMain.tempC;
                         todayHigh = weatherMain.todayHighC;
                         todayLow = weatherMain.todayLowC;
                         tomorrowHigh = weatherMain.tomorrowHighC;
@@ -259,6 +261,7 @@ namespace ScheduledTaskAgent1
                     else
                     {
                         getTemp = new convertTemp(weatherMain.tempF);
+                        origTemp = weatherMain.tempF;
                         todayHigh = weatherMain.todayHighF;
                         todayLow = weatherMain.todayLowF;
                         tomorrowHigh = weatherMain.tomorrowHighF;
@@ -287,7 +290,7 @@ namespace ScheduledTaskAgent1
                                     SmallIconImage = smallIcon,
                                     Title = cityName,
                                     Count = temp,
-                                    WideContent1 = string.Format("Currently: " + weatherMain.currentConditions + ", " + temp + " degrees"),
+                                    WideContent1 = string.Format("Currently: " + weatherMain.currentConditions + ", " + origTemp + " degrees"),
                                     WideContent2 = string.Format("Today: " + weatherMain.todayShort + " " + todayHigh + "/" + todayLow),
                                     WideContent3 = string.Format("Tomorrow: " + weatherMain.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
 
@@ -310,7 +313,7 @@ namespace ScheduledTaskAgent1
                                         SmallIconImage = smallIcon,
                                         Title = cityName,
                                         Count = temp,
-                                        WideContent1 = string.Format("Currently: " + weatherMain + ", " + temp + " degrees"),
+                                        WideContent1 = string.Format("Currently: " + weatherMain.currentConditions + ", " + origTemp + " degrees"),
                                         WideContent2 = string.Format("Today: " + weatherMain.todayShort + " " + todayHigh + "/" + todayLow),
                                         WideContent3 = string.Format("Tomorrow: " + weatherMain.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
 
@@ -421,10 +424,11 @@ namespace ScheduledTaskAgent1
                     string todayLow;
                     string tomorrowHigh;
                     string tomorrowLow;
-
+                    string origTemp;
                     if (tempUnitIsC)
                     {
                         getTemp = new convertTemp(weather.tempC);
+                        origTemp = weather.tempC;
                         todayHigh = weather.todayHighC;
                         todayLow = weather.todayLowC;
                         tomorrowHigh = weather.tomorrowHighC;
@@ -433,6 +437,7 @@ namespace ScheduledTaskAgent1
                     else
                     {
                         getTemp = new convertTemp(weather.tempF);
+                        origTemp = weather.tempF;
                         todayHigh = weather.todayHighF;
                         todayLow = weather.todayLowF;
                         tomorrowHigh = weather.tomorrowHighF;
@@ -473,7 +478,7 @@ namespace ScheduledTaskAgent1
                                         SmallIconImage = smallIcon,
                                         Title = cityName,
                                         Count = temp,
-                                        WideContent1 = string.Format("Currently: " + weather.currentConditions + ", " + temp + " degrees"),
+                                        WideContent1 = string.Format("Currently: " + weather.currentConditions + ", " + origTemp + " degrees"),
                                         WideContent2 = string.Format("Today: " + weather.todayShort + " " + todayHigh + "/" + todayLow),
                                         WideContent3 = string.Format("Tomorrow: " + weather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
 
@@ -529,10 +534,11 @@ namespace ScheduledTaskAgent1
                     string todayLow;
                     string tomorrowHigh;
                     string tomorrowLow;
-
+                    string origTemp;
                     if (tempUnitIsC)
                     {
                         getTemp = new convertTemp(weatherCurrent.tempC);
+                        origTemp = weatherCurrent.tempC;
                         todayHigh = weatherCurrent.todayHighC;
                         todayLow = weatherCurrent.todayLowC;
                         tomorrowHigh = weatherCurrent.tomorrowHighC;
@@ -541,6 +547,7 @@ namespace ScheduledTaskAgent1
                     else
                     {
                         getTemp = new convertTemp(weatherCurrent.tempF);
+                        origTemp = weatherCurrent.tempF;
                         todayHigh = weatherCurrent.todayHighF;
                         todayLow = weatherCurrent.todayLowF;
                         tomorrowHigh = weatherCurrent.tomorrowHighF;
@@ -576,7 +583,7 @@ namespace ScheduledTaskAgent1
                                         SmallIconImage = smallIcon,
                                         Title = cityName,
                                         Count = temp,
-                                        WideContent1 = string.Format("Currently: " + weatherCurrent.currentConditions + ", " + temp + " degrees"),
+                                        WideContent1 = string.Format("Currently: " + weatherCurrent.currentConditions + ", " + origTemp + " degrees"),
                                         WideContent2 = string.Format("Today: " + weatherCurrent.todayShort + " " + todayHigh + "/" + todayLow),
                                         WideContent3 = string.Format("Tomorrow: " + weatherCurrent.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
 
