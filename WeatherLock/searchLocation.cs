@@ -7,17 +7,21 @@ using System.Xml.Linq;
 
 namespace WeatherLock
 {
-    class searchLocation : INotifyPropertyChanged
+    internal class searchLocation : INotifyPropertyChanged
     {
         #region variables
+
         //Current Conditions
         private String cityName;
+
         private String wuUrl;
 
         public event PropertyChangedEventHandler PropertyChanged;
-        #endregion
+
+        #endregion variables
 
         #region getters/setters
+
         //Current Conditions
         public String CityName
         {
@@ -34,6 +38,7 @@ namespace WeatherLock
                 }
             }
         }
+
         public string WUUrl
         {
             get
@@ -49,10 +54,11 @@ namespace WeatherLock
                 }
             }
         }
-        
-        #endregion
+
+        #endregion getters/setters
 
         #region private helpers
+
         //Rais the property changed event and pass along the property that changed
 
         private void NotifyPropertyChanged(string property)
@@ -63,7 +69,7 @@ namespace WeatherLock
             }
         }
 
-        #endregion
+        #endregion private helpers
 
         #region constructors
 
@@ -71,8 +77,7 @@ namespace WeatherLock
         {
         }
 
-        #endregion
-       
+        #endregion constructors
 
         public void getLocations(string location)
         {
@@ -117,10 +122,8 @@ namespace WeatherLock
                 //Start parsing the XML
                 XElement xmlResults = xmlLocation.Element("RESULTS");
 
-
                 newCityName = (string)xmlResults.Element("name");
                 newWUUrl = (string)xmlResults.Element("l");
-                
 
                 //copy the data over
                 Deployment.Current.Dispatcher.BeginInvoke(() =>
@@ -136,12 +139,11 @@ namespace WeatherLock
             }
         }
 
-      
         public class LocationUpdateState
         {
             public HttpWebRequest AsyncRequest { get; set; }
+
             public HttpWebResponse AsyncResponse { get; set; }
         }
     }
 }
-

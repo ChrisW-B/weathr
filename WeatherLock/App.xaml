@@ -7,7 +7,7 @@
 
     <!--Application Resources-->
     <Application.Resources>
-        <local:LocalizedStrings xmlns:local="clr-namespace:WeatherLock" x:Key="LocalizedStrings"/>        
+        <local:LocalizedStrings xmlns:local="clr-namespace:WeatherLock" x:Key="LocalizedStrings" />
         <DataTemplate x:Key="smallTitle">
             <Grid>
                 <ContentPresenter>
@@ -15,25 +15,20 @@
                 </ContentPresenter>
             </Grid>
         </DataTemplate>
-        
+
         <DataTemplate x:Key="smallHeader">
             <Grid>
                 <ContentPresenter>
-                    <TextBlock Text="{Binding}" FontSize="50" Margin="0,-10,0,0" Foreground="White"  />
+                    <TextBlock Text="{Binding}" FontSize="50" Margin="0,-10,0,0" Foreground="White" />
                 </ContentPresenter>
             </Grid>
         </DataTemplate>
-        
-
-        
-
-
     </Application.Resources>
 
     <Application.ApplicationLifetimeObjects>
         <!--Required object that handles lifetime events for the application-->
         <shell:PhoneApplicationService
             Launching="Application_Launching" Closing="Application_Closing"
-            Activated="Application_Activated" Deactivated="Application_Deactivated"/>
+            Activated="Application_Activated" Deactivated="Application_Deactivated" />
     </Application.ApplicationLifetimeObjects>
 </Application>

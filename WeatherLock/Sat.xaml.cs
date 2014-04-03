@@ -1,39 +1,41 @@
-﻿using Microsoft.Phone.Controls;
+﻿using Helpers;
+using Microsoft.Phone.Controls;
 using Microsoft.Phone.Maps;
 using Microsoft.Phone.Maps.Controls;
 using System;
 using System.Device.Location;
+using System.Globalization;
 using System.IO.IsolatedStorage;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using Helpers;
-using System.Globalization;
 
 namespace WeatherLock
 {
     public partial class Sat : PhoneApplicationPage
     {
         #region variables
-        String latitude = null;
-        String longitude = null;
 
-        int satTries;
-        int locationSearchTimes;
-        bool isCurrent;
+        private String latitude = null;
+        private String longitude = null;
 
-        dynamic store = IsolatedStorageSettings.ApplicationSettings;
-        #endregion
+        private int satTries;
+        private int locationSearchTimes;
+        private bool isCurrent;
+
+        private dynamic store = IsolatedStorageSettings.ApplicationSettings;
+
+        #endregion variables
 
         public Sat()
         {
             InitializeComponent();
-            
         }
+
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
             locationSearchTimes = 0;
-            satTries=0;
+            satTries = 0;
 
             base.OnNavigatedTo(e);
             if (this.NavigationContext.QueryString.ContainsKey("isCurrent") && this.NavigationContext.QueryString.ContainsKey("lat") && this.NavigationContext.QueryString.ContainsKey("lon"))
@@ -65,7 +67,6 @@ namespace WeatherLock
                 map.ZoomLevel = 5;
 
                 showSatLocation(lat, lon);
-                
             }
             else if (satTries >= 5)
             {
@@ -76,17 +77,17 @@ namespace WeatherLock
                 satTries++;
                 findLocation();
                 setupSat();
-
             }
         }
+
         private void addSat(object sender, RoutedEventArgs e)
         {
             TileSource sat = new CurrentSat();
             map.TileSources.Add(sat);
         }
+
         private void showSatLocation(double lat, double lon)
         {
-
             //create a marker
 
             Polygon triangle = new Polygon();
@@ -95,8 +96,6 @@ namespace WeatherLock
             triangle.Points.Add((new Point(0, 80)));
             triangle.Points.Add((new Point(40, 80)));
             triangle.Points.Add((new Point(40, 40)));
-
-
 
             ScaleTransform flip = new ScaleTransform();
             flip.ScaleY = -1;
@@ -121,12 +120,10 @@ namespace WeatherLock
         //Find the location
         private void findLocation()
         {
-
             if (store.Contains("enableLocation"))
             {
                 if ((bool)store["enableLocation"])
                 {
-
                     if (isCurrent && locationSearchTimes <= 5)
                     {
                         //get location
@@ -156,7 +153,6 @@ namespace WeatherLock
                             latitude = loc[0];
                             longitude = loc[1];
                         }
-                       
                         else
                         {
                             latitude = "0";
@@ -164,7 +160,6 @@ namespace WeatherLock
                         }
                     }
                 }
-               
             }
             else
             {

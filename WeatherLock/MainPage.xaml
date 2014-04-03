@@ -13,58 +13,56 @@
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="White"
-    SupportedOrientations="Portrait"  Orientation="Portrait" 
-    >
+    SupportedOrientations="Portrait"  Orientation="Portrait">
 
     <toolkit:TransitionService.NavigationInTransition>
         <toolkit:NavigationInTransition>
             <toolkit:NavigationInTransition.Backward>
-                <toolkit:TurnstileTransition Mode="BackwardIn"/>
+                <toolkit:TurnstileTransition Mode="BackwardIn" />
             </toolkit:NavigationInTransition.Backward>
             <toolkit:NavigationInTransition.Forward>
-                <toolkit:TurnstileTransition Mode="ForwardIn"/>
+                <toolkit:TurnstileTransition Mode="ForwardIn" />
             </toolkit:NavigationInTransition.Forward>
         </toolkit:NavigationInTransition>
     </toolkit:TransitionService.NavigationInTransition>
     <toolkit:TransitionService.NavigationOutTransition>
         <toolkit:NavigationOutTransition>
             <toolkit:NavigationOutTransition.Backward>
-                <toolkit:TurnstileTransition Mode="BackwardOut"/>
+                <toolkit:TurnstileTransition Mode="BackwardOut" />
             </toolkit:NavigationOutTransition.Backward>
             <toolkit:NavigationOutTransition.Forward>
-                <toolkit:TurnstileTransition Mode="ForwardOut"/>
+                <toolkit:TurnstileTransition Mode="ForwardOut" />
             </toolkit:NavigationOutTransition.Forward>
         </toolkit:NavigationOutTransition>
     </toolkit:TransitionService.NavigationOutTransition>
 
-
     <!--LayoutRoot contains the root grid where all other page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Black">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="9*"/>
-            <ColumnDefinition Width="151*"/>
+            <ColumnDefinition Width="9*" />
+            <ColumnDefinition Width="151*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="29*"/>
-            <RowDefinition Height="131*"/>
+            <RowDefinition Height="29*" />
+            <RowDefinition Height="131*" />
         </Grid.RowDefinitions>
         <phone:Panorama SelectionChanged="title_SelectionChanged" Background="{Binding}"  Name="title" Title="location" TitleTemplate="{StaticResource smallTitle}" HeaderTemplate="{StaticResource smallHeader}" Grid.RowSpan="2" Grid.ColumnSpan="2">
-           
+
             <!--Panorama item one-->
             <phone:PanoramaItem Header="now">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="11*"/>
-                        <ColumnDefinition Width="9*"/>
+                        <ColumnDefinition Width="11*" />
+                        <ColumnDefinition Width="9*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Name="temp"   FontFamily="Segoe WP Light" FontSize="100" Margin="0,0,159,0" VerticalAlignment="Top" Height="87" Width="261" HorizontalAlignment="Right" Foreground="White" TextAlignment="Right" Grid.ColumnSpan="2" LineStackingStrategy="BlockLineHeight" LineHeight="90" TextOptions.TextHintingMode="Animated"/>
-                    <TextBlock Name="conditions"  Margin="0,87,10,0" Height="87" TextOptions.TextHintingMode="Animated" FontSize="36" FontFamily="Segoe WP Black" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Top" LineHeight="30" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" Width="221" Foreground="White" TextAlignment="Right"/>
-                    <TextBlock Name="feelsLike"  HorizontalAlignment="Left" Margin="35,0,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="32" Width="154" Foreground="White" FontFamily="Segoe WP" FontSize="22" Grid.Column="1" LineStackingStrategy="BlockLineHeight" LineHeight="30" TextOptions.TextHintingMode="Animated" TextTrimming="WordEllipsis"/>
-                    <TextBlock Name="wind" HorizontalAlignment="Left" Margin="35,32,0,0" TextWrapping="Wrap" VerticalAlignment="Top" RenderTransformOrigin="-0.491,1.49" Height="55" Width="154" Foreground="White" FontSize="22" Grid.Column="1" LineStackingStrategy="BlockLineHeight" LineHeight="22" TextOptions.TextHintingMode="Animated"/>
-                    <TextBlock Name="humidity" Grid.Column="1" HorizontalAlignment="Left" Margin="35,79,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="34" Width="154" Foreground="White" FontSize="22" LineStackingStrategy="BlockLineHeight" LineHeight="22"/>
-                    <TextBlock Name="tempCompare" Margin="10,174,0,342" TextWrapping="Wrap" FontSize="24" Grid.ColumnSpan="2" FontWeight="Bold" TextAlignment="Right" LineStackingStrategy="BlockLineHeight" LineHeight="24" Foreground="White"/>
-                    <TextBlock Name="time" HorizontalAlignment="Left" Margin="10,-92,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="69" Width="179" Foreground="White" FontSize="40" LineStackingStrategy="BlockLineHeight" TextAlignment="Right" LineHeight="50" Grid.Column="1"/>
-                    <TextBlock Name="errorText" Grid.ColumnSpan="2" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="White"/>
+                    <TextBlock Name="temp"   FontFamily="Segoe WP Light" FontSize="100" Margin="0,0,159,0" VerticalAlignment="Top" Height="87" Width="261" HorizontalAlignment="Right" Foreground="White" TextAlignment="Right" Grid.ColumnSpan="2" LineStackingStrategy="BlockLineHeight" LineHeight="90" TextOptions.TextHintingMode="Animated" />
+                    <TextBlock Name="conditions"  Margin="0,87,10,0" Height="87" TextOptions.TextHintingMode="Animated" FontSize="36" FontFamily="Segoe WP Black" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Top" LineHeight="30" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" Width="221" Foreground="White" TextAlignment="Right" />
+                    <TextBlock Name="feelsLike"  HorizontalAlignment="Left" Margin="35,0,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="32" Width="154" Foreground="White" FontFamily="Segoe WP" FontSize="22" Grid.Column="1" LineStackingStrategy="BlockLineHeight" LineHeight="30" TextOptions.TextHintingMode="Animated" TextTrimming="WordEllipsis" />
+                    <TextBlock Name="wind" HorizontalAlignment="Left" Margin="35,32,0,0" TextWrapping="Wrap" VerticalAlignment="Top" RenderTransformOrigin="-0.491,1.49" Height="55" Width="154" Foreground="White" FontSize="22" Grid.Column="1" LineStackingStrategy="BlockLineHeight" LineHeight="22" TextOptions.TextHintingMode="Animated" />
+                    <TextBlock Name="humidity" Grid.Column="1" HorizontalAlignment="Left" Margin="35,79,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="34" Width="154" Foreground="White" FontSize="22" LineStackingStrategy="BlockLineHeight" LineHeight="22" />
+                    <TextBlock Name="tempCompare" Margin="10,174,0,342" TextWrapping="Wrap" FontSize="24" Grid.ColumnSpan="2" FontWeight="Bold" TextAlignment="Right" LineStackingStrategy="BlockLineHeight" LineHeight="24" Foreground="White" />
+                    <TextBlock Name="time" HorizontalAlignment="Left" Margin="10,-92,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="69" Width="179" Foreground="White" FontSize="40" LineStackingStrategy="BlockLineHeight" TextAlignment="Right" LineHeight="50" Grid.Column="1" />
+                    <TextBlock Name="errorText" Grid.ColumnSpan="2" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="White" />
                 </Grid>
             </phone:PanoramaItem>
 
@@ -73,17 +71,16 @@
                 <Grid>
                     <Grid>
                         <StackPanel>
-                            <Rectangle toolkit:TiltEffect.IsTiltEnabled="True"  Opacity=".3" Name="radarMapBox" Height="250" Tap="radarMap_Tap" Fill="Black" Margin="10,0,0,0"/>
+                            <Rectangle toolkit:TiltEffect.IsTiltEnabled="True"  Opacity=".3" Name="radarMapBox" Height="250" Tap="radarMap_Tap" Fill="Black" Margin="10,0,0,0" />
                             <Rectangle toolkit:TiltEffect.IsTiltEnabled="True" Opacity=".3" Name="satMapBox" Height="250" Margin="10,20,0,0" Tap="satMap_Tap" Fill="Black" />
                         </StackPanel>
 
-                        <TextBlock toolkit:TiltEffect.IsTiltEnabled="True" Text="radar" Margin="270,100,32,454" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="30" Tap="radarMap_Tap" Foreground="White"/>
-                        <TextBlock toolkit:TiltEffect.IsTiltEnabled="True" Text="satellite" Margin="270,369,32,185" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="30" Tap="satMap_Tap" Foreground="White"/>
-
+                        <TextBlock toolkit:TiltEffect.IsTiltEnabled="True" Text="radar" Margin="270,100,32,454" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="30" Tap="radarMap_Tap" Foreground="White" />
+                        <TextBlock toolkit:TiltEffect.IsTiltEnabled="True" Text="satellite" Margin="270,369,32,185" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="30" Tap="satMap_Tap" Foreground="White" />
                     </Grid>
                     <Grid Name="maps">
                         <StackPanel>
-                            <maps:Map toolkit:TiltEffect.IsTiltEnabled="True" Name="radarMap" Height="250" Width="240" HorizontalAlignment="Left" VerticalAlignment="Top" Tap="radarMap_Tap" Margin="10,0,0,0"/>
+                            <maps:Map toolkit:TiltEffect.IsTiltEnabled="True" Name="radarMap" Height="250" Width="240" HorizontalAlignment="Left" VerticalAlignment="Top" Tap="radarMap_Tap" Margin="10,0,0,0" />
                             <maps:Map toolkit:TiltEffect.IsTiltEnabled="True" Name="satMap" Height="250" Width="240" Margin="10,20,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Tap="satMap_Tap" />
                         </StackPanel>
                     </Grid>
@@ -98,14 +95,12 @@
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical">
                                     <TextBlock x:Name="title"
-                                               Text="{Binding title}" Foreground="White" FontFamily="Segoe WP SemiLight" FontSize="30"
-                                               />
+                                               Text="{Binding title}" Foreground="White" FontFamily="Segoe WP SemiLight" FontSize="30" />
                                     <TextBlock x:Name="forecast"
-                                    Text="{Binding text}" 
+                                    Text="{Binding text}"
                                            FontSize="20"
                                            Margin="15,0,0,15"
-                                           Foreground="White" FontFamily="Segoe UI" TextWrapping="Wrap" TextOptions.TextHintingMode="Animated" HorizontalAlignment="Left" VerticalAlignment="Top"                                          
-                                           />
+                                           Foreground="White" FontFamily="Segoe UI" TextWrapping="Wrap" TextOptions.TextHintingMode="Animated" HorizontalAlignment="Left" VerticalAlignment="Top" />
                                 </StackPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -121,11 +116,10 @@
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock toolkit:TiltEffect.IsTiltEnabled="True"  x:Name="entry"
-                                    Text="{Binding Headline}" 
+                                    Text="{Binding Headline}"
                                            FontSize="32"
                                            Margin="12,0,0,2"
-                                           Tag="{Binding TextUrl}" Foreground="White" FontFamily="Segoe UI" LineHeight="48"                                          
-                                           >
+                                           Tag="{Binding TextUrl}" Foreground="White" FontFamily="Segoe UI" LineHeight="48">
                                     </TextBlock>
                                 </StackPanel>
                             </DataTemplate>
@@ -133,7 +127,7 @@
                     </ListBox>
                 </Grid>
             </phone:PanoramaItem>
-            
+
             <phone:PanoramaItem Header="locations">
                 <Grid>
                     <ListBox x:Name="LocationListBox" HorizontalAlignment="Left" SelectionChanged="LocationListBox_SelectionChanged" VerticalAlignment="Top" Height="496" Width="436" Margin="10,0,-26,0">
@@ -145,8 +139,7 @@
                                                      FontFamily="Segoe WP SemiLight"
                                                      FontSize="40"
                                                      Tap="locationName_Tap"
-                                                     toolkit:TiltEffect.IsTiltEnabled="True" Foreground="White" Margin="0,0,0,15"
-                                        >
+                                                     toolkit:TiltEffect.IsTiltEnabled="True" Foreground="White" Margin="0,0,0,15">
                                     </ListBoxItem>
                                 </StackPanel>
                             </DataTemplate>
@@ -154,23 +147,20 @@
                     </ListBox>
                 </Grid>
             </phone:PanoramaItem>
-
-
         </phone:Panorama>
         <my:AdControl x:Name="adControl" IsAutoRefreshEnabled="True" ApplicationId="2af06aa6-4d1c-448b-908a-40372c39a9e1" AdUnitId="140266" Margin="0,548,0,27" Width="480" Grid.Row="1" Height="80" Grid.ColumnSpan="2" />
     </Grid>
 
     <phone:PhoneApplicationPage.ApplicationBar>
-        <shell:ApplicationBar IsVisible="True"  IsMenuEnabled="True" Mode="Default"  Opacity="0.8" >
+        <shell:ApplicationBar IsVisible="True"  IsMenuEnabled="True" Mode="Default"  Opacity="0.8">
 
             <shell:ApplicationBarIconButton IconUri="/Images/refresh.png" Text="refresh" Click="refresh_Click" />
             <shell:ApplicationBarIconButton IconUri="/Images/settings.png" Text="settings" Click="settings_Click" />
-            <shell:ApplicationBarIconButton IconUri="/Images/appbar.pin.png" Text="pin" Click="pin_Click"/>
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar.pin.png" Text="pin" Click="pin_Click" />
             <shell:ApplicationBar.MenuItems>
-                <shell:ApplicationBarMenuItem Text="change image" Click="ApplicationBarMenuItem_Click"/>
-                <shell:ApplicationBarMenuItem Text="about" Click="ApplicationBarMenuItem_Click_1"/>
+                <shell:ApplicationBarMenuItem Text="change image" Click="ApplicationBarMenuItem_Click" />
+                <shell:ApplicationBarMenuItem Text="about" Click="ApplicationBarMenuItem_Click_1" />
             </shell:ApplicationBar.MenuItems>
         </shell:ApplicationBar>
     </phone:PhoneApplicationPage.ApplicationBar>
-
 </phone:PhoneApplicationPage>

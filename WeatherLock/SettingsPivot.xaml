@@ -16,24 +16,23 @@
     <toolkit:TransitionService.NavigationInTransition>
         <toolkit:NavigationInTransition>
             <toolkit:NavigationInTransition.Backward>
-                <toolkit:TurnstileTransition Mode="BackwardIn"/>
+                <toolkit:TurnstileTransition Mode="BackwardIn" />
             </toolkit:NavigationInTransition.Backward>
             <toolkit:NavigationInTransition.Forward>
-                <toolkit:TurnstileTransition Mode="ForwardIn"/>
+                <toolkit:TurnstileTransition Mode="ForwardIn" />
             </toolkit:NavigationInTransition.Forward>
         </toolkit:NavigationInTransition>
     </toolkit:TransitionService.NavigationInTransition>
     <toolkit:TransitionService.NavigationOutTransition>
         <toolkit:NavigationOutTransition>
             <toolkit:NavigationOutTransition.Backward>
-                <toolkit:TurnstileTransition Mode="BackwardOut"/>
+                <toolkit:TurnstileTransition Mode="BackwardOut" />
             </toolkit:NavigationOutTransition.Backward>
             <toolkit:NavigationOutTransition.Forward>
-                <toolkit:TurnstileTransition Mode="ForwardOut"/>
+                <toolkit:TurnstileTransition Mode="ForwardOut" />
             </toolkit:NavigationOutTransition.Forward>
         </toolkit:NavigationOutTransition>
     </toolkit:TransitionService.NavigationOutTransition>
-
 
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
@@ -44,19 +43,19 @@
             <phone:PivotItem Header="now">
                 <Grid>
                     <StackPanel>
-                        <TextBlock Text="Units" Margin="12,0" Height="40" FontSize="30"/>
+                        <TextBlock Text="Units" Margin="12,0" Height="40" FontSize="30" />
                         <StackPanel x:Name="TempUnit" Orientation="Horizontal">
-                            <RadioButton GroupName="changeTemp"  x:Name="celsius" Content="celsius" Checked="celsius_Checked"  />
-                            <RadioButton GroupName="changeTemp" x:Name="fahrenheit" Content="fahrenheit" Checked="fahrenheit_Checked"  />
+                            <RadioButton GroupName="changeTemp"  x:Name="celsius" Content="celsius" Checked="celsius_Checked" />
+                            <RadioButton GroupName="changeTemp" x:Name="fahrenheit" Content="fahrenheit" Checked="fahrenheit_Checked" />
                         </StackPanel>
                         <StackPanel x:Name="DistUnit" Orientation="Horizontal">
-                            <RadioButton Checked="unitKms_Checked" Name="unitKms" Content="kilometers" GroupName="changeDist"/>
-                            <RadioButton Checked="unitMiles_Checked" Name="unitMiles" Content="miles" GroupName="changeDist"/>
+                            <RadioButton Checked="unitKms_Checked" Name="unitKms" Content="kilometers" GroupName="changeDist" />
+                            <RadioButton Checked="unitMiles_Checked" Name="unitMiles" Content="miles" GroupName="changeDist" />
                         </StackPanel>
-                        <CheckBox Name="flickrPics" Content="Use Pictures from Flickr" IsChecked="{Binding flickrChecked}" Checked="flickrPics_Checked" Unchecked="flickrPics_Unchecked"/>
+                        <CheckBox Name="flickrPics" Content="Use Pictures from Flickr" IsChecked="{Binding flickrChecked}" Checked="flickrPics_Checked" Unchecked="flickrPics_Unchecked" />
                         <StackPanel>
-                            <CheckBox Name="weatherGroup" Content="Use Pictures from Yahoo Weather App" IsChecked="{Binding weatherChecked}" Checked="weatherGroup_Checked" Unchecked="weatherGroup_Unchecked"/>
-                            <TextBlock Text="using pictures from the yahoo weather app group should increase relevant pictures, but there may be fewer overall" FontSize="16" TextWrapping="Wrap" Width="407" Height="61" Foreground="#FF9E9E9E" HorizontalAlignment="Right" VerticalAlignment="Top" LineStackingStrategy="BlockLineHeight"/>
+                            <CheckBox Name="weatherGroup" Content="Use Pictures from Yahoo Weather App" IsChecked="{Binding weatherChecked}" Checked="weatherGroup_Checked" Unchecked="weatherGroup_Unchecked" />
+                            <TextBlock Text="using pictures from the yahoo weather app group should increase relevant pictures, but there may be fewer overall" FontSize="16" TextWrapping="Wrap" Width="407" Height="61" Foreground="#FF9E9E9E" HorizontalAlignment="Right" VerticalAlignment="Top" LineStackingStrategy="BlockLineHeight" />
                         </StackPanel>
                     </StackPanel>
                 </Grid>
@@ -73,7 +72,7 @@
                                     <StackPanel Orientation="Horizontal">
                                         <Rectangle Fill="{StaticResource PhoneAccentBrush}" Width="45" Height="45">
                                             <Rectangle.OpacityMask>
-                                                <ImageBrush ImageSource="{Binding ImageSource}"/>
+                                                <ImageBrush ImageSource="{Binding ImageSource}" />
                                             </Rectangle.OpacityMask>
                                         </Rectangle>
 
@@ -83,14 +82,13 @@
                                        FontFamily="Segoe WP SemiLight"
                                        FontSize="30"
                                        Tap="locationName_Tap"
-                                       toolkit:TiltEffect.IsTiltEnabled="True"
-                                                 >
+                                       toolkit:TiltEffect.IsTiltEnabled="True">
 
                                                 <toolkit:ContextMenuService.ContextMenu>
                                                     <toolkit:ContextMenu>
-                                                        <toolkit:MenuItem toolkit:TiltEffect.IsTiltEnabled="True" Name="delete" Header="delete" Tag="{Binding LocName}" Click="delete_Click"/>
-                                                        <toolkit:MenuItem toolkit:TiltEffect.IsTiltEnabled="True" Name="pin" Header="pin to start" Tag="{Binding LocName}" Click="pin_Click"/>
-                                                        <toolkit:MenuItem toolkit:TiltEffect.IsTiltEnabled="True" Name="default" Header="make default location" Tag="{Binding LocName}" Click="default_Click"/>
+                                                        <toolkit:MenuItem toolkit:TiltEffect.IsTiltEnabled="True" Name="delete" Header="delete" Tag="{Binding LocName}" Click="delete_Click" />
+                                                        <toolkit:MenuItem toolkit:TiltEffect.IsTiltEnabled="True" Name="pin" Header="pin to start" Tag="{Binding LocName}" Click="pin_Click" />
+                                                        <toolkit:MenuItem toolkit:TiltEffect.IsTiltEnabled="True" Name="default" Header="make default location" Tag="{Binding LocName}" Click="default_Click" />
                                                     </toolkit:ContextMenu>
                                                 </toolkit:ContextMenuService.ContextMenu>
                                             </ListBoxItem>
@@ -103,20 +101,18 @@
                 </StackPanel>
             </phone:PivotItem>
 
-
             <!--Pivot item 3-->
             <phone:PivotItem Header="forecast">
                 <Grid>
                     <StackPanel>
-                        <TextBlock Text="Units" Margin="12,0" Height="40" FontSize="30"/>
+                        <TextBlock Text="Units" Margin="12,0" Height="40" FontSize="30" />
                         <StackPanel x:Name="unitSyst" Orientation="Horizontal">
-                            <RadioButton GroupName="changeUnit"  x:Name="metric" Content="metric" Checked="metric_Checked"  />
-                            <RadioButton GroupName="changeUnit" x:Name="imperial" Content="imperial" Checked="imperial_Checked"  />
+                            <RadioButton GroupName="changeUnit"  x:Name="metric" Content="metric" Checked="metric_Checked" />
+                            <RadioButton GroupName="changeUnit" x:Name="imperial" Content="imperial" Checked="imperial_Checked" />
                         </StackPanel>
                     </StackPanel>
                 </Grid>
             </phone:PivotItem>
-
 
             <!--Pivot item 4-->
             <phone:PivotItem Header="tile and lock">
@@ -124,34 +120,33 @@
                     <ScrollViewer>
                         <StackPanel  Orientation="Vertical" Name="PeriodicStackPanel" Margin="0,0,0,40">
                             <StackPanel>
-                                <CheckBox Content="Update in Background" x:Name="PeriodicCheckBox" IsChecked="{Binding IsEnabled}" Checked="PeriodicCheckBox_Checked" Unchecked="PeriodicCheckBox_Unchecked"/>
+                                <CheckBox Content="Update in Background" x:Name="PeriodicCheckBox" IsChecked="{Binding IsEnabled}" Checked="PeriodicCheckBox_Checked" Unchecked="PeriodicCheckBox_Unchecked" />
                                 <toolkit:ListPicker MouseLeftButtonDown="UpdateBox_MouseLeftButtonDown" SelectedIndex="{Binding selectedItem}" SelectionChanged="UpdateBox_SelectionChanged" Name="UpdateBox" Header="Update Every:" FullModeHeader="CHOOSE UPDATE RATE">
-                                    <toolkit:ListPickerItem Name="twelve" Content="12 Hours"/>
-                                    <toolkit:ListPickerItem Name="six" Content="6 Hours"/>
-                                    <toolkit:ListPickerItem Name="three" Content="3 Hours"/>
-                                    <toolkit:ListPickerItem Name="one" Content="1 Hour"/>
-                                    <toolkit:ListPickerItem Name="thirty" Content="30 Minutes"/>
+                                    <toolkit:ListPickerItem Name="twelve" Content="12 Hours" />
+                                    <toolkit:ListPickerItem Name="six" Content="6 Hours" />
+                                    <toolkit:ListPickerItem Name="three" Content="3 Hours" />
+                                    <toolkit:ListPickerItem Name="one" Content="1 Hour" />
+                                    <toolkit:ListPickerItem Name="thirty" Content="30 Minutes" />
                                 </toolkit:ListPicker>
                                 <StackPanel Orientation="Vertical">
-                                    <CheckBox Name="notifyMe" Content="Notify When Updated" IsChecked="{Binding IsEnabled}" Checked="notifyMe_Checked" Unchecked="notifyMe_Unchecked"/>
-                                    <CheckBox Name="HiLo" Content="Alert if Temp is above 100 or below 1" IsChecked="{Binding IsEnabled}" Checked="HiLo_Checked" Unchecked="HiLo_Unchecked"/>
+                                    <CheckBox Name="notifyMe" Content="Notify When Updated" IsChecked="{Binding IsEnabled}" Checked="notifyMe_Checked" Unchecked="notifyMe_Unchecked" />
+                                    <CheckBox Name="HiLo" Content="Alert if Temp is above 100 or below 1" IsChecked="{Binding IsEnabled}" Checked="HiLo_Checked" Unchecked="HiLo_Unchecked" />
                                 </StackPanel>
-                                <TextBlock Text="Units" Margin="12,0" Height="40" FontSize="30"/>
+                                <TextBlock Text="Units" Margin="12,0" Height="40" FontSize="30" />
                                 <StackPanel x:Name="LockTempUnit" Orientation="Horizontal">
-                                    <RadioButton GroupName="changeTemp"  x:Name="lockCelsius" Content="celsius" Checked="lockCelsius_Checked"  />
-                                    <RadioButton GroupName="changeTemp" x:Name="lockFahrenheit" Content="fahrenheit" Checked="lockFahrenheit_Checked"  />
+                                    <RadioButton GroupName="changeTemp"  x:Name="lockCelsius" Content="celsius" Checked="lockCelsius_Checked" />
+                                    <RadioButton GroupName="changeTemp" x:Name="lockFahrenheit" Content="fahrenheit" Checked="lockFahrenheit_Checked" />
                                 </StackPanel>
-                                <Button Name="btnGoToLockSettings"  Content="Lockscreen Settings" Click="btnGoToLockSettings_Click"/>
+                                <Button Name="btnGoToLockSettings"  Content="Lockscreen Settings" Click="btnGoToLockSettings_Click" />
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
             </phone:PivotItem>
-
         </phone:Pivot>
     </Grid>
     <phone:PhoneApplicationPage.ApplicationBar>
-        <shell:ApplicationBar IsVisible="True"  IsMenuEnabled="True" Mode="Minimized"  Opacity="0.8" >
+        <shell:ApplicationBar IsVisible="True"  IsMenuEnabled="True" Mode="Minimized"  Opacity="0.8">
             <shell:ApplicationBarIconButton IconUri="/Assets/AppBar/add.png" Text="add" Click="ApplicationBarIconButton_Click" />
         </shell:ApplicationBar>
     </phone:PhoneApplicationPage.ApplicationBar>

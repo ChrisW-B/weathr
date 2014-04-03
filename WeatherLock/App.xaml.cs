@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Microsoft.Phone.Controls;
+using Microsoft.Phone.Shell;
+using System;
 using System.Diagnostics;
-using System.Resources;
 using System.Windows;
 using System.Windows.Markup;
 using System.Windows.Navigation;
-using Microsoft.Phone.Controls;
-using Microsoft.Phone.Shell;
 using WeatherLock.Resources;
 
 namespace WeatherLock
@@ -54,7 +53,6 @@ namespace WeatherLock
                 // and consume battery power when the user is not using the phone.
                 PhoneApplicationService.Current.UserIdleDetectionMode = IdleDetectionMode.Disabled;
             }
-
         }
 
         // Code to execute when the application is launching (eg, from Start)
@@ -162,7 +160,7 @@ namespace WeatherLock
             }
         }
 
-        #endregion
+        #endregion Phone application initialization
 
         // Initialize the app's font and flow direction as defined in its localized resource strings.
         //

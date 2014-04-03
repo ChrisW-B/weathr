@@ -16,20 +16,20 @@
     <toolkit:TransitionService.NavigationInTransition>
         <toolkit:NavigationInTransition>
             <toolkit:NavigationInTransition.Backward>
-                <toolkit:TurnstileTransition Mode="BackwardIn"/>
+                <toolkit:TurnstileTransition Mode="BackwardIn" />
             </toolkit:NavigationInTransition.Backward>
             <toolkit:NavigationInTransition.Forward>
-                <toolkit:TurnstileTransition Mode="ForwardIn"/>
+                <toolkit:TurnstileTransition Mode="ForwardIn" />
             </toolkit:NavigationInTransition.Forward>
         </toolkit:NavigationInTransition>
     </toolkit:TransitionService.NavigationInTransition>
     <toolkit:TransitionService.NavigationOutTransition>
         <toolkit:NavigationOutTransition>
             <toolkit:NavigationOutTransition.Backward>
-                <toolkit:TurnstileTransition Mode="BackwardOut"/>
+                <toolkit:TurnstileTransition Mode="BackwardOut" />
             </toolkit:NavigationOutTransition.Backward>
             <toolkit:NavigationOutTransition.Forward>
-                <toolkit:TurnstileTransition Mode="ForwardOut"/>
+                <toolkit:TurnstileTransition Mode="ForwardOut" />
             </toolkit:NavigationOutTransition.Forward>
         </toolkit:NavigationOutTransition>
     </toolkit:TransitionService.NavigationOutTransition>
@@ -40,212 +40,210 @@
                     <ScrollViewer>
                         <RichTextBox HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{x:Null}">
                             <Paragraph>
-                                <Run Text="Weathr was developed by Chris Barry "/>
+                                <Run Text="Weathr was developed by Chris Barry " />
                             </Paragraph>
                             <Paragraph>
                                 <Hyperlink NavigateUri="mailto:ChrisApps@outlook.com" TargetName="mailTo">
-                                    <Run Text="Email"/>
+                                    <Run Text="Email" />
                                 </Hyperlink>
                             </Paragraph>
                             <Paragraph>
                                 <Hyperlink NavigateUri="http://twitter.com/CB_27" TargetName="twitter">
-                                    <Run Text="Twitter"/>
+                                    <Run Text="Twitter" />
                                 </Hyperlink>
                             </Paragraph>
-                            <Paragraph/>
+                            <Paragraph />
                             <Paragraph>
-                                <Run FontSize="26" Text="Privacy:"/>
+                                <Run FontSize="26" Text="Privacy:" />
                             </Paragraph>
                             <Paragraph>
-                                <Run Text="When Use Current Location is enabled, rough GPS coordinates are saved for use in finding your location. These coordinates are sent to "/>
+                                <Run Text="When Use Current Location is enabled, rough GPS coordinates are saved for use in finding your location. These coordinates are sent to " />
                                 <Hyperlink NavigateUri="http://www.flickr.com/services/developer/" TargetName="flickrApi">
-                                    <Run Text="Flickr"/>
+                                    <Run Text="Flickr" />
                                 </Hyperlink>
-                                <Run Text=", to get a local picture, "/>
+                                <Run Text=", to get a local picture, " />
                                 <Hyperlink NavigateUri="http://www.wunderground.com/?apiref=cdd8be6583b62f40" TargetName="wunderApi">
-                                    <Run Text="Weather Underground"/>
+                                    <Run Text="Weather Underground" />
                                 </Hyperlink>
-                                <Run Text=" for current weather data, as well as forecasts, and the "/>
+                                <Run Text=" for current weather data, as well as forecasts, and the " />
                                 <Hyperlink NavigateUri="http://graphical.weather.gov/xml/" TargetName="NWSapi">
-                                    <Run Text="National Weather Service"/>
+                                    <Run Text="National Weather Service" />
                                 </Hyperlink>
-                                <Run Text=" to get weather alerts."/>
+                                <Run Text=" to get weather alerts." />
                             </Paragraph>
-                            <Paragraph/>
+                            <Paragraph />
                             <Paragraph>
-                                <Run Text="Additionally, when a location is added manually, rough coordinates are obtained for the town/city via the "/>
+                                <Run Text="Additionally, when a location is added manually, rough coordinates are obtained for the town/city via the " />
                                 <Hyperlink NavigateUri="https://developers.google.com/maps/documentation/geocoding/?hl=en" TargetName="googleApi">
-                                    <Run Text="Google Maps API"/>
+                                    <Run Text="Google Maps API" />
                                 </Hyperlink>
-                                <Run Text=" and then used to find local photos through Flickr. "/>
+                                <Run Text=" and then used to find local photos through Flickr. " />
                             </Paragraph>
-                            <Paragraph/>
+                            <Paragraph />
                             <Paragraph>
-                                <Run Text="Coordinates are also stored on your phone in case the GPS service is inaccessible, and in that case, the last known location can be used. None of this data is saved off your phone, and I (the developer) do not have access to any of it"/>
-                            </Paragraph>
-                            <Paragraph>
-                                <Run/>
+                                <Run Text="Coordinates are also stored on your phone in case the GPS service is inaccessible, and in that case, the last known location can be used. None of this data is saved off your phone, and I (the developer) do not have access to any of it" />
                             </Paragraph>
                             <Paragraph>
-                                <Run Text="Radar is provided through the Iowa State University Department of Agronomy's Iowa Environmental Mesonet project, and comes from the National Weather Service"/>
+                                <Run />
+                            </Paragraph>
+                            <Paragraph>
+                                <Run Text="Radar is provided through the Iowa State University Department of Agronomy's Iowa Environmental Mesonet project, and comes from the National Weather Service" />
                             </Paragraph>
                         </RichTextBox>
                     </ScrollViewer>
                 </Grid>
             </phone:PivotItem>
 
-
             <phone:PivotItem Header="updates">
                 <ScrollViewer>
                     <RichTextBox>
                         <Paragraph>
-                            <Run Text="Version 1.2.5"/>
+                            <Run Text="Version 1.2.5" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Fixes for international geocoordinate problems"/>
+                            <Run Text="-Fixes for international geocoordinate problems" />
                         </Paragraph>
                         <Paragraph>
                             <Run Text="Thanks to Tomas (@" />
                             <Hyperlink NavigateUri="http://twitter.com/thewp8blog" TargetName="twitter">
-                                <Run Text="The WP8Blog"/>
+                                <Run Text="The WP8Blog" />
                             </Hyperlink>
-                            <Run Text=") for telling me about them!"
-                            />
+                            <Run Text=") for telling me about them!" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Possible fix for the occasional flickr related crash"/>
+                            <Run Text="-Possible fix for the occasional flickr related crash" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Allow refreshes if nothings there"/>
+                            <Run Text="-Allow refreshes if nothings there" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Reduced refresh rate limit"/>
+                            <Run Text="-Reduced refresh rate limit" />
                         </Paragraph>
                         <Paragraph>
-                            <Run/>
+                            <Run />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="Version 1.2.4"/>
+                            <Run Text="Version 1.2.4" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Bugfixes, stuff that I missed in 1.2.3 from data handling fixes"/>
+                            <Run Text="-Bugfixes, stuff that I missed in 1.2.3 from data handling fixes" />
                         </Paragraph>
                         <Paragraph>
-                            <Run/>
+                            <Run />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="Version 1.2.3"/>
+                            <Run Text="Version 1.2.3" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Updates tiles when units are changed"/>
+                            <Run Text="-Updates tiles when units are changed" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Tile unit bug fixed"/>
+                            <Run Text="-Tile unit bug fixed" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Redo of data handling in app"/>
+                            <Run Text="-Redo of data handling in app" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Code Cleanups"/>
+                            <Run Text="-Code Cleanups" />
                         </Paragraph>
                         <Paragraph>
-                            <Run/>
+                            <Run />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="Version 1.2.2"/>
+                            <Run Text="Version 1.2.2" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-General visual tweaks for ease of use"/>
+                            <Run Text="-General visual tweaks for ease of use" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Knows when you've already pinned a location"/>
+                            <Run Text="-Knows when you've already pinned a location" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Fixed problems when pinning current location as a separate tile"/>
+                            <Run Text="-Fixed problems when pinning current location as a separate tile" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Auto start background task when a location is pinned"/>
+                            <Run Text="-Auto start background task when a location is pinned" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Bigger radar/satellite maps"/>
+                            <Run Text="-Bigger radar/satellite maps" />
                         </Paragraph>
                         <Paragraph>
-                            <Run/>
+                            <Run />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="1.2.1"/>
+                            <Run Text="1.2.1" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Fixed many bugs in location services that prevented 1.1 from approval"/>
+                            <Run Text="-Fixed many bugs in location services that prevented 1.1 from approval" />
                         </Paragraph>
                         <Paragraph>
-                            <Run/>
+                            <Run />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="1.2"/>
+                            <Run Text="1.2" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Radar Support!(US only, and no animations currently)"/>
+                            <Run Text="-Radar Support!(US only, and no animations currently)" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Only load info as needed, app launches faster"/>
+                            <Run Text="-Only load info as needed, app launches faster" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Improved reliability"/>
+                            <Run Text="-Improved reliability" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Removed some restrictions on trial mode"/>
+                            <Run Text="-Removed some restrictions on trial mode" />
                         </Paragraph>
                         <Paragraph>
-                            <Run/>
+                            <Run />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="1.1.0-4:"/>
+                            <Run Text="1.1.0-4:" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-New icon"/>
+                            <Run Text="-New icon" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Multiple location support!"/>
+                            <Run Text="-Multiple location support!" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Multiple live tile support!"/>
+                            <Run Text="-Multiple live tile support!" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Update weather units without refreshing"/>
+                            <Run Text="-Update weather units without refreshing" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Unified default units"/>
+                            <Run Text="-Unified default units" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-General appearance clean up"/>
+                            <Run Text="-General appearance clean up" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-More reliable background task"/>
+                            <Run Text="-More reliable background task" />
                         </Paragraph>
                         <Paragraph>
-                            <Run/>
+                            <Run />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="1.0.1:"/>
+                            <Run Text="1.0.1:" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Better readability on light backgrounds"/>
+                            <Run Text="-Better readability on light backgrounds" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Fixed restoring forecasts"/>
+                            <Run Text="-Fixed restoring forecasts" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Less calls to API"/>
+                            <Run Text="-Less calls to API" />
                         </Paragraph>
                         <Paragraph>
-                            <Run/>
+                            <Run />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="COMING SOON:"/>
+                            <Run Text="COMING SOON:" />
                         </Paragraph>
                         <Paragraph>
-                            <Run Text="-Lockscreen Images"/>
+                            <Run Text="-Lockscreen Images" />
                         </Paragraph>
                     </RichTextBox>
                 </ScrollViewer>

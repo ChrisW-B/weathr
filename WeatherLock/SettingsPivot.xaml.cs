@@ -1,19 +1,20 @@
-﻿//#define DEBUG_AGENT
+﻿using Helpers;
+
+//#define DEBUG_AGENT
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Marketplace;
 using Microsoft.Phone.Scheduler;
 using Microsoft.Phone.Shell;
 using Microsoft.Phone.Tasks;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO.IsolatedStorage;
-using System.Windows;
-using System.Windows.Controls;
 using System.Linq;
 using System.Net;
+using System.Windows;
+using System.Windows.Controls;
 using System.Xml.Linq;
-using Helpers;
-using System.Collections.Generic;
 using WeatherData;
 
 namespace WeatherLock
@@ -24,28 +25,32 @@ namespace WeatherLock
 
         //Flags for getting data/comparing city
         private Boolean tempUnitIsC;
+
         private Boolean isCurrent;
         private int locationSearchTimes;
         public bool agentsAreEnabled = true;
 
         //info
         private String url;
+
         private String locUrl;
         private String defaultCityName;
         private String apiKey = "102b8ec7fbd47a05";
-       
 
         //coordinates
         private String latitude;
+
         private String longitude;
 
         //handling errors with getting data
         private Boolean error;
+
         private string errorText;
 
         //data lists for updating tiles
-        List<Pins> pinnedList = new List<Pins>();
-        List<Pins> pinnedListCopy = new List<Pins>();
+        private List<Pins> pinnedList = new List<Pins>();
+
+        private List<Pins> pinnedListCopy = new List<Pins>();
 
         //tile info
         public class Pins
@@ -57,19 +62,22 @@ namespace WeatherLock
         }
 
         //periodic task starting
-        PeriodicTask periodicTask;
-        string periodicTaskName = "PeriodicAgent";
+        private PeriodicTask periodicTask;
+
+        private string periodicTaskName = "PeriodicAgent";
 
         //Progress bar
-        ProgressIndicator progTile;
+        private ProgressIndicator progTile;
 
         //Check to see if app is running as trial
-        LicenseInformation licInfo;
+        private LicenseInformation licInfo;
+
         public bool isTrial;
 
         //save some typing
-        dynamic store = IsolatedStorageSettings.ApplicationSettings;
-        #endregion
+        private dynamic store = IsolatedStorageSettings.ApplicationSettings;
+
+        #endregion variables
 
         public SettingsPivot()
         {
@@ -99,6 +107,7 @@ namespace WeatherLock
             createDefaultLoc();
             addLocation();
         }
+
         private void setValues()
         {
             if (store.Contains("enableLocation"))
@@ -238,7 +247,6 @@ namespace WeatherLock
                 HiLo.IsChecked = true;
             }
 
-
             if (store.Contains("updateRate"))
             {
                 string x = (string)store["updateRate"];
@@ -249,21 +257,25 @@ namespace WeatherLock
 
                         store["updateRate"] = "720";
                         break;
+
                     case "360":
                         UpdateBox.SelectedIndex = 1;
 
                         store["updateRate"] = "360";
                         break;
+
                     case "180":
                         UpdateBox.SelectedIndex = 2;
 
                         store["updateRate"] = "180";
                         break;
+
                     case "60":
                         UpdateBox.SelectedIndex = 3;
 
                         store["updateRate"] = "60";
                         break;
+
                     case "0":
                         UpdateBox.SelectedIndex = 4;
 
@@ -304,18 +316,20 @@ namespace WeatherLock
                 case 0:
                     ApplicationBar.IsVisible = false;
                     break;
+
                 case 1:
                     ApplicationBar.Mode = ApplicationBarMode.Default;
                     ApplicationBar.IsVisible = true;
                     break;
+
                 case 2:
                     ApplicationBar.IsVisible = false;
                     break;
+
                 case 3:
                     ApplicationBar.IsVisible = false;
                     break;
             }
-
         }
 
         //Now Pivot
@@ -331,6 +345,7 @@ namespace WeatherLock
                 return;
             }
         }
+
         private void fahrenheit_Checked(object sender, RoutedEventArgs e)
         {
             if (!ignoreCheckBoxEvents)
@@ -343,6 +358,7 @@ namespace WeatherLock
                 return;
             }
         }
+
         private void unitKms_Checked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -355,6 +371,7 @@ namespace WeatherLock
                 store["unitChanged"] = true;
             }
         }
+
         private void unitMiles_Checked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -367,6 +384,7 @@ namespace WeatherLock
                 store["unitChanged"] = true;
             }
         }
+
         private void flickrPics_Checked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -379,6 +397,7 @@ namespace WeatherLock
                 weatherGroup.IsEnabled = true;
             }
         }
+
         private void flickrPics_Unchecked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -391,6 +410,7 @@ namespace WeatherLock
                 weatherGroup.IsEnabled = false;
             }
         }
+
         private void weatherGroup_Checked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -403,6 +423,7 @@ namespace WeatherLock
                 store["groupChanged"] = true;
             }
         }
+
         private void weatherGroup_Unchecked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -417,9 +438,12 @@ namespace WeatherLock
         }
 
         //Location Pivot
+
         #region variables
-        ObservableCollection<Locations> locations = new ObservableCollection<Locations>();
-        #endregion
+
+        private ObservableCollection<Locations> locations = new ObservableCollection<Locations>();
+
+        #endregion variables
 
         ///checkboxes and buttons
         private void enableLocation_Checked(object sender, RoutedEventArgs e)
@@ -433,6 +457,7 @@ namespace WeatherLock
                 store["enableLocation"] = true;
             }
         }
+
         private void enableLocation_Unchecked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -444,16 +469,17 @@ namespace WeatherLock
                 store["enableLocation"] = false;
             }
         }
+
         private void delete_Click(object sender, RoutedEventArgs e)
         {
             MenuItem menuItem = (MenuItem)sender;
             removeLocation(menuItem.Tag.ToString());
         }
+
         private void pin_Click(object sender, RoutedEventArgs e)
         {
             if (!isTrial)
             {
-
                 MenuItem menuItem = (MenuItem)sender;
 
                 Locations location = getLocation(menuItem.Tag.ToString());
@@ -481,9 +507,6 @@ namespace WeatherLock
                         Title = location.LocName
                     };
 
-
-
-
                     ShellTile.Create(new Uri(
                 "/MainPage.xaml?cityName=" + location.LocName
                 + "&url=" + location.LocUrl
@@ -493,7 +516,6 @@ namespace WeatherLock
                 UriKind.Relative),
                 locTile,
                 true);
-
                 }
                 else
                 {
@@ -506,6 +528,7 @@ namespace WeatherLock
                 }
             }
         }
+
         private void default_Click(object sender, RoutedEventArgs e)
         {
             MenuItem menuItem = (MenuItem)sender;
@@ -523,6 +546,7 @@ namespace WeatherLock
             LocationListBox.ItemsSource = locations;
             createDefaultLoc();
         }
+
         private void restoreLocations()
         {
             if (store.Contains("locations"))
@@ -533,11 +557,13 @@ namespace WeatherLock
                 backupLocations();
             }
         }
+
         private void backupLocations()
         {
             store["locations"] = locations;
             store.Save();
         }
+
         private void addLocation()
         {
             if (locations.Count == 0)
@@ -588,6 +614,7 @@ namespace WeatherLock
                 }
             }
         }
+
         private void createDefaultLoc()
         {
             if (!store.Contains("defaultLocation") || !store.Contains("defaultUrl") || !store.Contains("defaultCurrent"))
@@ -599,6 +626,7 @@ namespace WeatherLock
                 store.Save();
             }
         }
+
         private bool checkPeriodic(object sender, RoutedEventArgs e)
         {
             if (store.Contains("periodicStarted"))
@@ -625,6 +653,7 @@ namespace WeatherLock
             }
             return true;
         }
+
         private void changeDefault(string loc)
         {
             //set new default
@@ -642,8 +671,8 @@ namespace WeatherLock
             LocationListBox.ItemsSource = null;
             LocationListBox.ItemsSource = locations;
             backupLocations();
-
         }
+
         private Locations getLocation(string loc)
         {
             foreach (Locations location in locations)
@@ -655,6 +684,7 @@ namespace WeatherLock
             }
             return null;
         }
+
         private void removeLocation(string loc)
         {
             foreach (Locations location in locations)
@@ -667,6 +697,7 @@ namespace WeatherLock
                 }
             }
         }
+
         private void LocationListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -688,8 +719,8 @@ namespace WeatherLock
                     store.Save();
                 }
             }
-
         }
+
         private void locationName_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             ListBoxItem lbItem = (ListBoxItem)sender;
@@ -720,6 +751,7 @@ namespace WeatherLock
                 metric.IsChecked = true;
             }
         }
+
         private void imperial_Checked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -746,6 +778,7 @@ namespace WeatherLock
             {
             }
         }
+
         private void notifyMe_Checked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -758,6 +791,7 @@ namespace WeatherLock
                 notifyMe.IsChecked = true;
             }
         }
+
         private void notifyMe_Unchecked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -770,15 +804,18 @@ namespace WeatherLock
                 notifyMe.IsChecked = false;
             }
         }
+
         private async void btnGoToLockSettings_Click(object sender, RoutedEventArgs e)
         {
             // Launch URI for the lock screen settings screen.
             var op = await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings-lock:"));
         }
+
         private void changeLoc_Click(object sender, RoutedEventArgs e)
         {
             NavigationService.Navigate(new Uri("/ChangeLocation.xaml", UriKind.Relative));
         }
+
         private void UpdateBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -795,15 +832,19 @@ namespace WeatherLock
                         case 0:
                             store["updateRate"] = "720";
                             break;
+
                         case 1:
                             store["updateRate"] = "360";
                             break;
+
                         case 2:
                             store["updateRate"] = "180";
                             break;
+
                         case 3:
                             store["updateRate"] = "60";
                             break;
+
                         case 4:
                             store["updateRate"] = "0";
                             break;
@@ -817,6 +858,7 @@ namespace WeatherLock
                 store.Save();
             }
         }
+
         private void HiLo_Checked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -828,6 +870,7 @@ namespace WeatherLock
                 store["tempAlert"] = true;
             }
         }
+
         private void HiLo_Unchecked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -839,6 +882,7 @@ namespace WeatherLock
                 store["tempAlert"] = false;
             }
         }
+
         private void StartPeriodicAgent()
         {
             store["periodicStarted"] = true;
@@ -850,7 +894,7 @@ namespace WeatherLock
             periodicTask = ScheduledActionService.Find(periodicTaskName) as PeriodicTask;
 
             // If the task already exists and background agents are enabled for the
-            // application, you must remove the task and then add it again to update 
+            // application, you must remove the task and then add it again to update
             // the schedule
             if (periodicTask != null)
             {
@@ -871,7 +915,6 @@ namespace WeatherLock
                 //#if(DEBUG_AGENT)
                 //ScheduledActionService.LaunchForTest(periodicTaskName, TimeSpan.FromSeconds(10));
                 //#endif
-
             }
             catch (InvalidOperationException exception)
             {
@@ -886,7 +929,6 @@ namespace WeatherLock
                 if (exception.Message.Contains("You have too many background tasks. Remove some and try again"))
                 {
                     // No user action required. The system prompts the user when the hard limit of periodic tasks has been reached.
-
                 }
                 PeriodicCheckBox.IsChecked = false;
                 UpdateBox.IsEnabled = false;
@@ -898,7 +940,9 @@ namespace WeatherLock
                 UpdateBox.IsEnabled = false;
             }
         }
-        bool ignoreCheckBoxEvents = false;
+
+        private bool ignoreCheckBoxEvents = false;
+
         private void PeriodicCheckBox_Checked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -909,8 +953,8 @@ namespace WeatherLock
             }
             store["manPerOff"] = false;
             StartPeriodicAgent();
-
         }
+
         private void PeriodicCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -919,8 +963,8 @@ namespace WeatherLock
             UpdateBox.IsEnabled = false;
             store["manPerOff"] = true;
             RemoveAgent(periodicTaskName);
-
         }
+
         private void lockCelsius_Checked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -935,6 +979,7 @@ namespace WeatherLock
                 lockCelsius.IsChecked = true;
             }
         }
+
         private void lockFahrenheit_Checked(object sender, RoutedEventArgs e)
         {
             if (ignoreCheckBoxEvents)
@@ -949,6 +994,7 @@ namespace WeatherLock
                 lockFahrenheit.IsChecked = true;
             }
         }
+
         private void startTileProg()
         {
             SystemTray.SetIsVisible(this, true);
@@ -1006,8 +1052,6 @@ namespace WeatherLock
             //prevent enumeration errors
             pinnedListCopy = pinnedList;
 
-
-
             foreach (ShellTile tile in ShellTile.ActiveTiles)
             {
                 if (tile.NavigationUri.OriginalString == "/")
@@ -1025,14 +1069,11 @@ namespace WeatherLock
                 }
             }
 
-
-
             updateDefault();
             updateOthers();
             //save the time of the last time the app was run
             store["lastRun"] = DateTime.Now.ToString();
             store.Save();
-
         }
 
         //Update each type of tile
@@ -1157,7 +1198,6 @@ namespace WeatherLock
                                     WideContent1 = string.Format("Currently: " + mainTileWeather.currentConditions + ", " + origTemp + " degrees"),
                                     WideContent2 = string.Format("Today: " + mainTileWeather.todayShort + " " + todayHigh + "/" + todayLow),
                                     WideContent3 = string.Format("Tomorrow: " + mainTileWeather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
-
                                 };
                                 tile.Update(TileData);
 
@@ -1180,7 +1220,6 @@ namespace WeatherLock
                                         WideContent1 = string.Format("Currently: " + mainTileWeather.currentConditions + ", " + temp + " degrees"),
                                         WideContent2 = string.Format("Today: " + mainTileWeather.todayShort + " " + todayHigh + "/" + todayLow),
                                         WideContent3 = string.Format("Tomorrow: " + mainTileWeather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
-
                                     };
                                     tile.Update(TileData);
 
@@ -1190,7 +1229,6 @@ namespace WeatherLock
                                     //stop looping
                                     break;
                                 }
-
                             }
                         }
                     }
@@ -1263,6 +1301,7 @@ namespace WeatherLock
                 return;
             }
         }
+
         private void updateOtherTiles(object sender, DownloadStringCompletedEventArgs e)
         {
             WeatherInfo otherTileWeather = new WeatherInfo();
@@ -1276,12 +1315,10 @@ namespace WeatherLock
                 XElement weatherError = doc.Element("response").Element("error");
                 if (weatherError == null && !error)
                 {
-
                     WeatherToClass creator = new WeatherToClass();
                     otherTileWeather = creator.weatherToClass(doc);
 
                     string cityName = otherTileWeather.city + ", " + otherTileWeather.state;
-
 
                     //get weather icons
                     Uri[] weatherIcons = getWeatherIcons(otherTileWeather.currentConditions);
@@ -1325,7 +1362,6 @@ namespace WeatherLock
                         temp = 1;
                     }
 
-
                     foreach (ShellTile tile in ShellTile.ActiveTiles)
                     {
                         if (tile.NavigationUri.ToString() != "/")
@@ -1352,7 +1388,6 @@ namespace WeatherLock
                                         WideContent1 = string.Format("Currently: " + otherTileWeather.currentConditions + ", " + origTemp + " degrees"),
                                         WideContent2 = string.Format("Today: " + otherTileWeather.todayShort + " " + todayHigh + "/" + todayLow),
                                         WideContent3 = string.Format("Tomorrow: " + otherTileWeather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
-
                                     };
                                     tile.Update(TileData);
 
@@ -1378,6 +1413,7 @@ namespace WeatherLock
                 return;
             }
         }
+
         private void updateLocAwareTile(object sender, DownloadStringCompletedEventArgs e)
         {
             WeatherInfo weatherCurrent = new WeatherInfo();
@@ -1393,9 +1429,8 @@ namespace WeatherLock
                 {
                     WeatherToClass creator = new WeatherToClass();
                     weatherCurrent = creator.weatherToClass(doc);
-                    
+
                     string cityName = weatherCurrent.city + ", " + weatherCurrent.state;
-                    
 
                     //get weather icons
                     Uri[] weatherIcons = getWeatherIcons(weatherCurrent.currentConditions);
@@ -1461,7 +1496,6 @@ namespace WeatherLock
                                         WideContent1 = string.Format("Currently: " + weatherCurrent.currentConditions + ", " + origTemp + " degrees"),
                                         WideContent2 = string.Format("Today: " + weatherCurrent.todayShort + " " + todayHigh + "/" + todayLow),
                                         WideContent3 = string.Format("Tomorrow: " + weatherCurrent.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
-
                                     };
                                     tile.Update(TileData);
 

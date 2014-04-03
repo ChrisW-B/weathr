@@ -1,26 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Navigation;
-using Microsoft.Phone.Controls;
+﻿using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
-using System.Xml.Linq;
+using System;
 using System.Collections.ObjectModel;
 using System.IO.IsolatedStorage;
+using System.Linq;
+using System.Net;
+using System.Windows.Controls;
+using System.Windows.Navigation;
+using System.Xml.Linq;
 
 namespace WeatherLock
 {
     public partial class AddLocation : PhoneApplicationPage
     {
         #region variables
-        ObservableCollection<LocResults> locResults = new ObservableCollection<LocResults>();
-        ProgressIndicator progSearch;
-        dynamic store = IsolatedStorageSettings.ApplicationSettings;
-        bool searchComplete;
-        #endregion
+
+        private ObservableCollection<LocResults> locResults = new ObservableCollection<LocResults>();
+        private ProgressIndicator progSearch;
+        private dynamic store = IsolatedStorageSettings.ApplicationSettings;
+        private bool searchComplete;
+
+        #endregion variables
 
         public AddLocation()
         {
@@ -28,7 +28,7 @@ namespace WeatherLock
         }
 
         //Location Pivot
-        void seachResults(object sender, DownloadStringCompletedEventArgs e)
+        private void seachResults(object sender, DownloadStringCompletedEventArgs e)
         {
             if (store.Contains("enableLocation"))
             {
@@ -56,16 +56,16 @@ namespace WeatherLock
                 {
                     wuUrl = elm.NextNode.NextNode.NextNode.NextNode.NextNode.ToString();
                 }
-                
+
                 wuUrl = wuUrl.Replace("<l>", "");
                 wuUrl = wuUrl.Replace("</l>", "");
 
                 locResults.Add(new LocResults() { LocName = locationName, LocUrl = wuUrl });
                 ResultListBox.ItemsSource = locResults;
-
             }
             progSearch.IsVisible = false;
         }
+
         private void SearchBox_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             if (SearchBox.Text.Contains("enter location"))
@@ -73,6 +73,7 @@ namespace WeatherLock
                 SearchBox.Text = "";
             }
         }
+
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (searchComplete == false)
@@ -97,6 +98,7 @@ namespace WeatherLock
                 client.DownloadStringAsync(new Uri(searchUri));
             }
         }
+
         private void ResultListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (ResultListBox.SelectedIndex > -1)
@@ -113,16 +115,15 @@ namespace WeatherLock
                     WebClient client = new WebClient();
                     client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(getCoordinates);
                     client.DownloadStringAsync(new Uri(googleUrl));
-
                 }
                 else
                 {
                     SearchBox.Text = store["newLocation"];
                     NavigationService.GoBack();
-
                 }
             }
         }
+
         private void getCoordinates(object sender, DownloadStringCompletedEventArgs e)
         {
             XDocument doc = XDocument.Parse(e.Result);
@@ -144,6 +145,7 @@ namespace WeatherLock
             SearchBox.Text = store["newLocation"];
             NavigationService.GoBack();
         }
+
         private void startSearchProg()
         {
             SystemTray.SetIsVisible(this, true);
@@ -154,11 +156,12 @@ namespace WeatherLock
             progSearch.IsVisible = true;
             SystemTray.SetProgressIndicator(this, progSearch);
         }
+
         public class LocResults
         {
             public string LocUrl { get; set; }
+
             public string LocName { get; set; }
         }
-
     }
 }

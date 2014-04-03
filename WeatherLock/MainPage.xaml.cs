@@ -1,25 +1,25 @@
-﻿using Microsoft.Phone.Controls;
+﻿using Helpers;
+using Microsoft.Phone.Controls;
+using Microsoft.Phone.Maps;
+using Microsoft.Phone.Maps.Controls;
 using Microsoft.Phone.Marketplace;
 using Microsoft.Phone.Scheduler;
 using Microsoft.Phone.Shell;
+using Microsoft.Phone.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Device.Location;
+using System.Globalization;
 using System.IO.IsolatedStorage;
+using System.Linq;
 using System.Net;
 using System.Windows;
-using System.Xml.Linq;
-using System.Linq;
-using Microsoft.Phone.Maps;
-using System.Device.Location;
-using Microsoft.Phone.Maps.Controls;
-using System.Windows.Shapes;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Controls;
-using Microsoft.Phone.Tasks;
-using System.Globalization;
-using Helpers;
+using System.Windows.Shapes;
+using System.Xml.Linq;
 using WeatherData;
 
 namespace WeatherLock
@@ -27,78 +27,86 @@ namespace WeatherLock
     public partial class MainPage : PhoneApplicationPage
     {
         #region variables
+
         //Collection of weather data
         private WeatherInfo weather;
+
         private string weatherConditions;
         private String cityName;
 
         //Set Units
-        bool tempUnitIsC;
-        bool windUnitIsM;
-        bool forecastUnitIsM;
+        private bool tempUnitIsC;
+
+        private bool windUnitIsM;
+        private bool forecastUnitIsM;
 
         //location data
-        String latitude = null;
-        String longitude = null;
+        private String latitude = null;
 
-        //flags 
-        bool mapsSet;
-        bool alertSet;
-        bool getBackground;
-        bool weatherSet = false;
-        bool errorSet = false;
-        int radTries;
-        int satTries;
-        int locationSearchTimes;
-        int numFlickrAttempts;
-        int timesWeatherBroke;
+        private String longitude = null;
+
+        //flags
+        private bool mapsSet;
+
+        private bool alertSet;
+        private bool getBackground;
+        private bool weatherSet = false;
+        private bool errorSet = false;
+        private int radTries;
+        private int satTries;
+        private int locationSearchTimes;
+        private int numFlickrAttempts;
+        private int timesWeatherBroke;
 
         //Wunderground Api
-        String apiKey = "102b8ec7fbd47a05";
-        String urlKey = null;
-        bool isCurrent;
-        String cityNameLoad;
-        String url = null;
+        private String apiKey = "102b8ec7fbd47a05";
+
+        private String urlKey = null;
+        private bool isCurrent;
+        private String cityNameLoad;
+        private String url = null;
 
         //Flickr Api
         private String flickrTags;
-        String fApiKey = "2781c025a4064160fc77a52739b552ff";
-        bool useWeatherGroup;
-        String weatherGroup = "1463451@N25";
-        String fUrl = null;
+
+        private String fApiKey = "2781c025a4064160fc77a52739b552ff";
+        private bool useWeatherGroup;
+        private String weatherGroup = "1463451@N25";
+        private String fUrl = null;
 
         //collections of alerts
-        ObservableCollection<HazardResults> results = new ObservableCollection<HazardResults>();
+        private ObservableCollection<HazardResults> results = new ObservableCollection<HazardResults>();
 
         //List of photo data
-        List<FlickrImage> photoList = new List<FlickrImage>();
+        private List<FlickrImage> photoList = new List<FlickrImage>();
 
         //create a clock
         private Clock clock;
 
         //Progress Indicators and flags
         private bool progIndicatorsCreated = false;
-        ProgressIndicator progWeather;
-        ProgressIndicator progFlickr;
-        ProgressIndicator progAlerts;
+
+        private ProgressIndicator progWeather;
+        private ProgressIndicator progFlickr;
+        private ProgressIndicator progAlerts;
 
         //Save typing every time
-        dynamic store = IsolatedStorageSettings.ApplicationSettings;
+        private dynamic store = IsolatedStorageSettings.ApplicationSettings;
 
         //Check to see if app is running as trial
-        LicenseInformation licInfo;
+        private LicenseInformation licInfo;
+
         public bool isTrial;
 
         //background stuff
-        PeriodicTask periodicTask;
+        private PeriodicTask periodicTask;
 
-        string periodicTaskName = "PeriodicAgent";
+        private string periodicTaskName = "PeriodicAgent";
         public bool agentsAreEnabled = true;
 
+        private ObservableCollection<Locations> locations = new ObservableCollection<Locations>();
 
-        ObservableCollection<Locations> locations = new ObservableCollection<Locations>();
-
-        #endregion
+        #endregion variables
 
         //Initialize the main page
         public MainPage()
@@ -145,7 +153,6 @@ namespace WeatherLock
             addLocations();
             fillLocations();
 
-
             checkUseWeatherGroup();
 
             if (!progIndicatorsCreated)
@@ -156,7 +163,6 @@ namespace WeatherLock
             base.OnNavigatedTo(e);
             if (this.NavigationContext.QueryString.ContainsKey("cityName") && this.NavigationContext.QueryString.ContainsKey("url") && this.NavigationContext.QueryString.ContainsKey("isCurrent") && this.NavigationContext.QueryString.ContainsKey("lat") && this.NavigationContext.QueryString.ContainsKey("lon"))
             {
-
                 cityNameLoad = this.NavigationContext.QueryString["cityName"];
                 urlKey = this.NavigationContext.QueryString["url"];
                 isCurrent = Convert.ToBoolean(this.NavigationContext.QueryString["isCurrent"]);
@@ -225,7 +231,6 @@ namespace WeatherLock
 
         private void fillLocations()
         {
-
             if (store.Contains("locations"))
             {
                 locations = (ObservableCollection<Locations>)store["locations"];
@@ -245,6 +250,7 @@ namespace WeatherLock
             }
             LocationListBox.ItemsSource = locations;
         }
+
         private void addLocations()
         {
             if (store.Contains("locAdded") && store.Contains("newLocation"))
@@ -287,12 +293,13 @@ namespace WeatherLock
                 }
             }
         }
-        void backupLocations()
+
+        private void backupLocations()
         {
             store["locations"] = locations;
             store.Save();
         }
-             
+
         private Locations getLocation(string loc)
         {
             foreach (Locations location in locations)
@@ -304,6 +311,7 @@ namespace WeatherLock
             }
             return null;
         }
+
         private void locationName_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             ListBoxItem lbItem = (ListBoxItem)sender;
@@ -319,6 +327,7 @@ namespace WeatherLock
                 + "&lon=" + location.Lon,
                 UriKind.Relative));
         }
+
         private void LocationListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             return;
@@ -358,7 +367,6 @@ namespace WeatherLock
                                     }
                                 }
                             }
-
                         }
                     }
                     else
@@ -409,7 +417,6 @@ namespace WeatherLock
                 {
                     pinButton.IsEnabled = true;
                 }
-
             }
         }
 
@@ -432,7 +439,6 @@ namespace WeatherLock
                 useWeatherGroup = true;
             }
         }
-
 
         //Set up location info
         private void noParams()
@@ -462,6 +468,7 @@ namespace WeatherLock
                 noDefaults();
             }
         }
+
         private void noDefaults()
         {
             store["defaultLocation"] = "Current Location";
@@ -542,7 +549,6 @@ namespace WeatherLock
                     if (useWeatherGroup)
                     {
                         fUrl = "http://ycpi.api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + fApiKey + "&group_id=" + weatherGroup + "&lat=" + latitude + "&lon=" + longitude + "&tags=" + weatherConditions + "&per_page=500&tag_mode=any&content_type=1&media=photos&radius=32&format=rest";
-
                     }
                     else
                     {
@@ -582,23 +588,17 @@ namespace WeatherLock
                     setURL();
                 }
 
-
                 url = "http://api.wunderground.com/api/" + apiKey + "/conditions/forecast" + urlKey + ".xml";
-
-
-
             }
         }
 
         //Find the location
         private void findLocation()
         {
-
             if (store.Contains("enableLocation"))
             {
                 if ((bool)store["enableLocation"])
                 {
-
                     if (isCurrent && locationSearchTimes <= 5)
                     {
                         //get location
@@ -726,6 +726,7 @@ namespace WeatherLock
                 store["lastUpdated"] = DateTime.Now;
             }
         }
+
         private void initializeStores()
         {
             if (!store.Contains("locChanged"))
@@ -745,7 +746,6 @@ namespace WeatherLock
         //Show ad if nessecary
         private void showAd()
         {
-
             if (isTrial)
             {
                 adControl.Visibility = System.Windows.Visibility.Visible;
@@ -755,7 +755,6 @@ namespace WeatherLock
             {
                 adControl.Visibility = System.Windows.Visibility.Collapsed;
             }
-
         }
 
         //enable periodic task
@@ -770,7 +769,7 @@ namespace WeatherLock
             periodicTask = ScheduledActionService.Find(periodicTaskName) as PeriodicTask;
 
             // If the task already exists and background agents are enabled for the
-            // application, you must remove the task and then add it again to update 
+            // application, you must remove the task and then add it again to update
             // the schedule
             if (periodicTask != null)
             {
@@ -787,7 +786,6 @@ namespace WeatherLock
             try
             {
                 ScheduledActionService.Add(periodicTask);
-
             }
             catch (InvalidOperationException exception)
             {
@@ -800,13 +798,13 @@ namespace WeatherLock
                 if (exception.Message.Contains("You have too many background tasks. Remove some and try again"))
                 {
                     // No user action required. The system prompts the user when the hard limit of periodic tasks has been reached.
-
                 }
             }
             catch (SchedulerServiceException)
             {
             }
         }
+
         private void RemoveAgent(string name)
         {
             try
@@ -838,6 +836,7 @@ namespace WeatherLock
             progFlickr.IsIndeterminate = true;
             progFlickr.IsVisible = false;
         }
+
         private void startWeatherProg()
         {
             SystemTray.SetIsVisible(this, true);
@@ -845,6 +844,7 @@ namespace WeatherLock
             progWeather.IsVisible = true;
             SystemTray.SetProgressIndicator(this, progWeather);
         }
+
         private void startFlickrProg()
         {
             SystemTray.SetIsVisible(this, true);
@@ -852,6 +852,7 @@ namespace WeatherLock
             progFlickr.IsVisible = true;
             SystemTray.SetProgressIndicator(this, progFlickr);
         }
+
         private void startAlertProg()
         {
             SystemTray.SetIsVisible(this, true);
@@ -859,6 +860,7 @@ namespace WeatherLock
             progAlerts.IsVisible = true;
             SystemTray.SetProgressIndicator(this, progAlerts);
         }
+
         private void HideTray()
         {
             if (progAlerts.IsVisible == false && progFlickr.IsVisible == false && progWeather.IsVisible == false)
@@ -871,8 +873,10 @@ namespace WeatherLock
         private void setWeather()
         {
             #region variables
+
             string windCon;
-            #endregion
+
+            #endregion variables
 
             //Convert weather text to caps
             string weatherUpper = weather.currentConditions.ToUpper();
@@ -936,7 +940,6 @@ namespace WeatherLock
                 forecastListBox.ItemsSource = weather.forecastF;
             }
 
-
             //set alerts box
             alertListBox.ItemsSource = results;
 
@@ -959,6 +962,7 @@ namespace WeatherLock
                 getFlickrPic();
             }
         }
+
         private void clearWeather()
         {
             //Clear old location data
@@ -971,6 +975,7 @@ namespace WeatherLock
             forecastListBox.ItemsSource = null;
             alertListBox.ItemsSource = null;
         }
+
         private void restoreWeather()
         {
             if (store.Contains("backupAlerts"))
@@ -1001,9 +1006,9 @@ namespace WeatherLock
                 }
             }
         }
+
         private void updateWeather()
         {
-
             startWeatherProg();
             setURL();
 
@@ -1021,6 +1026,7 @@ namespace WeatherLock
                 HideTray();
             }
         }
+
         private void client_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
             if (!e.Cancelled && e.Error == null && e.Result != null)
@@ -1032,7 +1038,6 @@ namespace WeatherLock
                 {
                     WeatherToClass creator = new WeatherToClass();
                     weather = creator.weatherToClass(doc);
-
 
                     cityName = weather.city + ", " + weather.state;
 
@@ -1060,7 +1065,6 @@ namespace WeatherLock
                 timesWeatherBroke++;
                 updateWeather();
             }
-
         }
 
         private void weatherError(XDocument doc)
@@ -1083,10 +1087,13 @@ namespace WeatherLock
             progWeather.IsVisible = false;
             HideTray();
         }
+
         private WeatherInfo weatherToClass(XDocument doc)
         {
             WeatherInfo currentWeather = new WeatherInfo();
+
             #region current conditions
+
             //Current Conditions
             var currentObservation = doc.Element("response").Element("current_observation");
 
@@ -1118,9 +1125,11 @@ namespace WeatherLock
 
             //current humidity
             currentWeather.humidity = (string)currentObservation.Element("relative_humidity");
-            #endregion
+
+            #endregion current conditions
 
             #region forecast conditions
+
             //Forecast Conditions
             XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
 
@@ -1205,13 +1214,10 @@ namespace WeatherLock
                 ForecastC forecastC = new WeatherData.ForecastC();
                 ForecastF forecastF = new WeatherData.ForecastF();
 
-
-
                 forecastC.title = forecastF.title = (string)elm.Element("title");
                 forecastC.text = (string)elm.Element("fcttext_metric");
                 forecastF.text = (string)elm.Element("fcttext");
                 forecastC.pop = forecastF.pop = (string)elm.Element("pop");
-
 
                 currentWeather.forecastF.Add(forecastF);
                 currentWeather.forecastC.Add(forecastC);
@@ -1224,9 +1230,11 @@ namespace WeatherLock
                     forecastListBox.ItemsSource = currentWeather.forecastF;
                 }
             }
-            #endregion
+
+            #endregion forecast conditions
 
             #region tile stuff
+
             currentWeather.todayShort = (string)today.Element("conditions");
             currentWeather.tomorrowShort = (string)tomorrow.Element("conditions");
 
@@ -1239,10 +1247,12 @@ namespace WeatherLock
             currentWeather.todayHighF = (string)today.Element("high").Element("fahrenheit");
             currentWeather.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
             currentWeather.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
-            #endregion
+
+            #endregion tile stuff
 
             return currentWeather;
         }
+
         private void backupWeather()
         {
             //Backup location, weather data, and alerts
@@ -1282,17 +1292,17 @@ namespace WeatherLock
                 radTries++;
                 findLocation();
                 setupRadar();
-
             }
         }
-        void addRadar(object sender, RoutedEventArgs e)
+
+        private void addRadar(object sender, RoutedEventArgs e)
         {
             TileSource radar = new CurrentRadar();
             radarMap.TileSources.Add(radar);
         }
+
         private void showRadarLocation(double lat, double lon)
         {
-
             //create a marker
 
             Polygon triangle = new Polygon();
@@ -1301,8 +1311,6 @@ namespace WeatherLock
             triangle.Points.Add((new Point(0, 80)));
             triangle.Points.Add((new Point(40, 80)));
             triangle.Points.Add((new Point(40, 40)));
-
-
 
             ScaleTransform flip = new ScaleTransform();
             flip.ScaleY = -1;
@@ -1323,10 +1331,12 @@ namespace WeatherLock
             // Add the MapLayer to the Map.
             radarMap.Layers.Add(myLocationLayer);
         }
-        void radarMap_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+
+        private void radarMap_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             NavigationService.Navigate(new Uri("/Radar.xaml?isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative));
         }
+
         //Sat Map
         private void setupSat()
         {
@@ -1345,9 +1355,7 @@ namespace WeatherLock
                 satMap.CartographicMode = MapCartographicMode.Road;
                 satMap.ZoomLevel = 5;
 
-
                 showSatLocation(lat, lon);
-
             }
             else if (satTries >= 5)
             {
@@ -1360,14 +1368,15 @@ namespace WeatherLock
                 setupSat();
             }
         }
+
         private void addSat(object sender, RoutedEventArgs e)
         {
             TileSource sat = new CurrentSat();
             satMap.TileSources.Add(sat);
         }
+
         private void showSatLocation(double lat, double lon)
         {
-
             //create a marker
 
             Polygon triangle = new Polygon();
@@ -1376,8 +1385,6 @@ namespace WeatherLock
             triangle.Points.Add((new Point(0, 80)));
             triangle.Points.Add((new Point(40, 80)));
             triangle.Points.Add((new Point(40, 40)));
-
-
 
             ScaleTransform flip = new ScaleTransform();
             flip.ScaleY = -1;
@@ -1398,7 +1405,8 @@ namespace WeatherLock
             // Add the MapLayer to the Map
             satMap.Layers.Add(myLocationLayer);
         }
-        void satMap_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+
+        private void satMap_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             NavigationService.Navigate(new Uri("/Sat.xaml?isCurrent=" + isCurrent + "&lat=" + latitude + "&lon=" + longitude, UriKind.Relative));
         }
@@ -1443,8 +1451,8 @@ namespace WeatherLock
                 store["useFlickr"] = true;
                 getFlickrPic();
             }
-
         }
+
         private void editFlickrTags()
         {
             if (weather.currentConditions == null)
@@ -1489,6 +1497,7 @@ namespace WeatherLock
                 }
             }
         }
+
         private void getFlickrXml(object sender, DownloadStringCompletedEventArgs e)
         {
             if (!e.Cancelled && e.Error == null)
@@ -1543,8 +1552,6 @@ namespace WeatherLock
                         return;
                     }
 
-
-
                     foreach (XElement photo in photos.Elements("photo"))
                     {
                         photoList.Add(new FlickrImage { farm = photo.Attribute("farm").Value, server = photo.Attribute("server").Value, secret = photo.Attribute("secret").Value, id = photo.Attribute("id").Value });
@@ -1571,11 +1578,15 @@ namespace WeatherLock
                 }
             }
         }
+
         public class FlickrImage
         {
             public string farm { get; set; }
+
             public string server { get; set; }
+
             public string secret { get; set; }
+
             public string id { get; set; }
         }
 
@@ -1604,6 +1615,7 @@ namespace WeatherLock
                 client.DownloadStringAsync(new Uri(weatherGovUrl));
             }
         }
+
         private void client_getAlerts(object sender, DownloadStringCompletedEventArgs e)
         {
             if (!e.Cancelled && e.Error == null && !e.Result.Contains("javascript") && !e.Result.Contains("!DOCTYPE"))
@@ -1634,6 +1646,7 @@ namespace WeatherLock
             progAlerts.IsVisible = false;
             HideTray();
         }
+
         private void alertListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             WebBrowserTask webBrowser = new WebBrowserTask();
@@ -1648,11 +1661,12 @@ namespace WeatherLock
                     webBrowser.Show();
                 }
             }
-
         }
+
         public class HazardResults
         {
             public string Headline { get; set; }
+
             public string TextUrl { get; set; }
         }
 
@@ -1661,6 +1675,7 @@ namespace WeatherLock
         {
             NavigationService.Navigate(new Uri("/SettingsPivot.xaml", UriKind.Relative));
         }
+
         private void refresh_Click(object sender, EventArgs e)
         {
             if (isTrial)
@@ -1699,8 +1714,8 @@ namespace WeatherLock
                 updateWeather();
                 updateAlerts();
             }
-
         }
+
         private void pin_Click(object sender, EventArgs e)
         {
             if (!isTrial)
@@ -1712,6 +1727,7 @@ namespace WeatherLock
                         if (weather != null)
                         {
                             #region variables
+
                             convertTemp getTemp;
                             string todayHigh;
                             string todayLow;
@@ -1719,7 +1735,8 @@ namespace WeatherLock
                             string tomorrowLow;
                             Uri normalIcon;
                             Uri smallIcon;
-                            #endregion
+
+                            #endregion variables
 
                             IconicTileData locTile = new IconicTileData();
                             Uri[] weatherIcons = getWeatherIcons(weather.currentConditions);
@@ -1886,18 +1903,22 @@ namespace WeatherLock
             }
             return true;
         }
+
         private void ApplicationBarMenuItem_Click(object sender, EventArgs e)
         {
             getFlickrPic();
         }
+
         private void ApplicationBarMenuItem_Click_1(object sender, EventArgs e)
         {
             NavigationService.Navigate(new Uri("/About.xaml", UriKind.Relative));
         }
+
         private void ApplicationBarMenuItem_Click_2(object sender, EventArgs e)
         {
             NavigationService.Navigate(new Uri("/SelectLocation.xaml", UriKind.Relative));
         }
+
         private void ApplicationBarMenuItem_Click_3(object sender, EventArgs e)
         {
             NavigationService.Navigate(new Uri("/AddLocation.xaml", UriKind.Relative));
@@ -1911,7 +1932,6 @@ namespace WeatherLock
             addButton.Text = "Add Location";
             addButton.Click += new EventHandler(ApplicationBarMenuItem_Click_3);
 
-
             switch (((Panorama)sender).SelectedIndex)
             {
                 case 0:
@@ -1921,6 +1941,7 @@ namespace WeatherLock
                         ApplicationBar.Buttons.Remove(ApplicationBar.Buttons[3]);
                     }
                     break;
+
                 case 1:
                     ApplicationBar.Mode = ApplicationBarMode.Minimized;
                     if (!mapsSet)
@@ -1930,9 +1951,11 @@ namespace WeatherLock
                         setupSat();
                     }
                     break;
+
                 case 2:
                     ApplicationBar.Mode = ApplicationBarMode.Minimized;
                     break;
+
                 case 3:
                     ApplicationBar.Mode = ApplicationBarMode.Minimized;
                     if (!alertSet)
@@ -1945,6 +1968,7 @@ namespace WeatherLock
                         ApplicationBar.Buttons.Remove(ApplicationBar.Buttons[3]);
                     }
                     break;
+
                 case 4:
                     ApplicationBar.Mode = ApplicationBarMode.Default;
                     if (!(ApplicationBar.Buttons.Count == 4))

@@ -1,37 +1,38 @@
-﻿using Microsoft.Phone.Controls;
+﻿using Helpers;
+using Microsoft.Phone.Controls;
 using Microsoft.Phone.Maps;
 using Microsoft.Phone.Maps.Controls;
 using System;
 using System.Collections.Generic;
 using System.Device.Location;
+using System.Globalization;
 using System.IO.IsolatedStorage;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using Helpers;
-using System.Globalization;
 
 namespace WeatherLock
 {
     public partial class Radar : PhoneApplicationPage
     {
         #region variables
-        String latitude = null;
-        String longitude = null;
 
-        int radTries;
-        int locationSearchTimes;
-        int age;
-        bool isCurrent;
+        private String latitude = null;
+        private String longitude = null;
 
-        dynamic store = IsolatedStorageSettings.ApplicationSettings;
-        List<RadarCache> radarHistory = new List<RadarCache>();
+        private int radTries;
+        private int locationSearchTimes;
+        private int age;
+        private bool isCurrent;
 
-        #endregion
+        private dynamic store = IsolatedStorageSettings.ApplicationSettings;
+        private List<RadarCache> radarHistory = new List<RadarCache>();
+
+        #endregion variables
+
         public Radar()
         {
             InitializeComponent();
-            
         }
 
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
@@ -60,9 +61,8 @@ namespace WeatherLock
             {
                 map.Loaded += addRadar;
             }
-            if (latitude != null && longitude != null && latitude != "" && longitude != "" && radTries<5)
+            if (latitude != null && longitude != null && latitude != "" && longitude != "" && radTries < 5)
             {
-
                 double lat = Convert.ToDouble(latitude, new CultureInfo("en-US"));
                 double lon = Convert.ToDouble(longitude, new CultureInfo("en-US"));
 
@@ -71,7 +71,6 @@ namespace WeatherLock
                 map.ZoomLevel = 7;
 
                 showRadarLocation(lat, lon);
-                
             }
             else if (radTries >= 5)
             {
@@ -82,15 +81,15 @@ namespace WeatherLock
                 radTries++;
                 findLocation();
                 setupRadar();
-
             }
         }
 
-        void map_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        private void map_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             //animate();
         }
-        void addRadar(object sender, RoutedEventArgs e)
+
+        private void addRadar(object sender, RoutedEventArgs e)
         {
             RadarCache radarCache = new RadarCache();
             for (int i = 0; i < 51; i = i + 5)
@@ -116,33 +115,43 @@ namespace WeatherLock
                     case 0:
                         radarCache.current = radar;
                         break;
+
                     case 5:
                         radarCache.five = radar;
                         break;
+
                     case 10:
                         radarCache.ten = radar;
                         break;
+
                     case 15:
                         radarCache.fifteen = radar;
                         break;
+
                     case 20:
                         radarCache.twenty = radar;
                         break;
+
                     case 25:
                         radarCache.twentyfive = radar;
                         break;
+
                     case 30:
                         radarCache.thirty = radar;
                         break;
+
                     case 35:
                         radarCache.thirtyfive = radar;
                         break;
+
                     case 40:
                         radarCache.forty = radar;
                         break;
+
                     case 45:
                         radarCache.fortyfive = radar;
                         break;
+
                     case 50:
                         radarCache.fifty = radar;
                         break;
@@ -156,8 +165,7 @@ namespace WeatherLock
         {
             foreach (RadarCache radarCache in radarHistory)
             {
-                
-               // map.TileSources.Remove(map.TileSources.Last());
+                // map.TileSources.Remove(map.TileSources.Last());
 
                 TileSource radar = new CurrentRadar();
                 switch (age)
@@ -165,33 +173,43 @@ namespace WeatherLock
                     case 0:
                         radar = radarCache.current;
                         break;
+
                     case 5:
                         radar = radarCache.five;
                         break;
+
                     case 10:
                         radar = radarCache.ten;
                         break;
+
                     case 15:
                         radar = radarCache.fifteen;
                         break;
+
                     case 20:
                         radar = radarCache.twenty;
                         break;
+
                     case 25:
                         radar = radarCache.twentyfive;
                         break;
+
                     case 30:
                         radar = radarCache.thirty;
                         break;
+
                     case 35:
                         radar = radarCache.thirtyfive;
                         break;
+
                     case 40:
                         radar = radarCache.forty;
                         break;
+
                     case 45:
                         radar = radarCache.fortyfive;
                         break;
+
                     case 50:
                         radar = radarCache.fifty;
                         age = 0;
@@ -208,21 +226,30 @@ namespace WeatherLock
         public class RadarCache
         {
             public TileSource current { get; set; }
-            public TileSource five { get; set; }
-            public TileSource ten { get; set; }
-            public TileSource fifteen { get; set; }
-            public TileSource twenty { get; set; }
-            public TileSource twentyfive { get; set; }
-            public TileSource thirty { get; set; }
-            public TileSource thirtyfive { get; set; }
-            public TileSource forty { get; set; }
-            public TileSource fortyfive { get; set; }
-            public TileSource fifty { get; set; }
 
+            public TileSource five { get; set; }
+
+            public TileSource ten { get; set; }
+
+            public TileSource fifteen { get; set; }
+
+            public TileSource twenty { get; set; }
+
+            public TileSource twentyfive { get; set; }
+
+            public TileSource thirty { get; set; }
+
+            public TileSource thirtyfive { get; set; }
+
+            public TileSource forty { get; set; }
+
+            public TileSource fortyfive { get; set; }
+
+            public TileSource fifty { get; set; }
         }
+
         private void showRadarLocation(double lat, double lon)
         {
-
             //create a marker
             Polygon triangle = new Polygon();
             triangle.Fill = new SolidColorBrush(Colors.Black);
@@ -230,8 +257,6 @@ namespace WeatherLock
             triangle.Points.Add((new Point(0, 80)));
             triangle.Points.Add((new Point(40, 80)));
             triangle.Points.Add((new Point(40, 40)));
-
-
 
             ScaleTransform flip = new ScaleTransform();
             flip.ScaleY = -1;
@@ -251,18 +276,15 @@ namespace WeatherLock
 
             // Add the MapLayer to the Map.
             map.Layers.Add(myLocationLayer);
-
-
         }
+
         //Find the location
         private void findLocation()
         {
-
             if (store.Contains("enableLocation"))
             {
                 if ((bool)store["enableLocation"])
                 {
-
                     if (isCurrent && locationSearchTimes <= 5)
                     {
                         //get location
@@ -292,7 +314,6 @@ namespace WeatherLock
                             latitude = loc[0];
                             longitude = loc[1];
                         }
-                        
                         else
                         {
                             latitude = "0";
@@ -300,7 +321,6 @@ namespace WeatherLock
                         }
                     }
                 }
-               
             }
             else
             {

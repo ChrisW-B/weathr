@@ -3,7 +3,7 @@ using System.Windows.Threading;
 
 namespace WeatherLock
 {
-    class Clock
+    internal class Clock
     {
         private DispatcherTimer dispatcherTimer;
         private MainPage mainPage;
@@ -24,12 +24,12 @@ namespace WeatherLock
             TimeSpan currentTime = now.TimeOfDay;
 
             // Update clock.
-            this.mainPage.time.Text = GetFormattedDateTimeString(now);          
+            this.mainPage.time.Text = GetFormattedDateTimeString(now);
         }
 
         private string GetFormattedDateTimeString(DateTime dateTime)
         {
-            return dateTime.ToString("h:mm");            
+            return dateTime.ToString("h:mm");
         }
     }
 }
