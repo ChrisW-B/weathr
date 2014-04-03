@@ -1,4 +1,5 @@
-﻿using Microsoft.Phone.Scheduler;
+﻿using Helpers;
+using Microsoft.Phone.Scheduler;
 using Microsoft.Phone.Shell;
 using System;
 using System.Collections.Generic;
@@ -7,16 +8,14 @@ using System.IO.IsolatedStorage;
 using System.Net;
 using System.Windows;
 using System.Xml.Linq;
-using System.Linq;
-using Helpers;
 using WeatherData;
 
 namespace ScheduledTaskAgent1
 {
     public class ScheduledAgent : ScheduledTaskAgent
     {
-
         #region variables
+
         private String defaultCityName;
         private Boolean tempUnitIsC;
         private String url;
@@ -33,11 +32,11 @@ namespace ScheduledTaskAgent1
         private string errorText;
 
         //save myself a bit of typing
-        dynamic store = IsolatedStorageSettings.ApplicationSettings;
+        private dynamic store = IsolatedStorageSettings.ApplicationSettings;
 
-        List<Pins> pinnedList = new List<Pins>();
-        List<Pins> pinnedListCopy = new List<Pins>();
-        List<WeatherInfo> weatherList = new List<WeatherInfo>();
+        private List<Pins> pinnedList = new List<Pins>();
+        private List<Pins> pinnedListCopy = new List<Pins>();
+        private List<WeatherInfo> weatherList = new List<WeatherInfo>();
 
         public class Pins
         {
@@ -46,8 +45,8 @@ namespace ScheduledTaskAgent1
             public bool currentLoc;
             public bool updated;
         }
-        #endregion
 
+        #endregion variables
 
         static ScheduledAgent()
         {
@@ -112,7 +111,6 @@ namespace ScheduledTaskAgent1
                 //if more than run period, update
                 if ((int)timeDiff.TotalMinutes > updateRate)
                 {
-
                     foreach (ShellTile tile in ShellTile.ActiveTiles)
                     {
                         if (tile.NavigationUri.OriginalString == "/")
@@ -293,7 +291,6 @@ namespace ScheduledTaskAgent1
                                     WideContent1 = string.Format("Currently: " + weatherMain.currentConditions + ", " + origTemp + " degrees"),
                                     WideContent2 = string.Format("Today: " + weatherMain.todayShort + " " + todayHigh + "/" + todayLow),
                                     WideContent3 = string.Format("Tomorrow: " + weatherMain.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
-
                                 };
                                 tile.Update(TileData);
 
@@ -316,7 +313,6 @@ namespace ScheduledTaskAgent1
                                         WideContent1 = string.Format("Currently: " + weatherMain.currentConditions + ", " + origTemp + " degrees"),
                                         WideContent2 = string.Format("Today: " + weatherMain.todayShort + " " + todayHigh + "/" + todayLow),
                                         WideContent3 = string.Format("Tomorrow: " + weatherMain.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
-
                                     };
                                     tile.Update(TileData);
 
@@ -396,6 +392,7 @@ namespace ScheduledTaskAgent1
                 NotifyComplete();
             }
         }
+
         private void updateOtherTiles(object sender, DownloadStringCompletedEventArgs e)
         {
             WeatherInfo weather = new WeatherInfo();
@@ -454,7 +451,6 @@ namespace ScheduledTaskAgent1
                         temp = 1;
                     }
 
-
                     foreach (ShellTile tile in ShellTile.ActiveTiles)
                     {
                         if (tile.NavigationUri.ToString() != "/")
@@ -481,7 +477,6 @@ namespace ScheduledTaskAgent1
                                         WideContent1 = string.Format("Currently: " + weather.currentConditions + ", " + origTemp + " degrees"),
                                         WideContent2 = string.Format("Today: " + weather.todayShort + " " + todayHigh + "/" + todayLow),
                                         WideContent3 = string.Format("Tomorrow: " + weather.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
-
                                     };
                                     tile.Update(TileData);
 
@@ -505,9 +500,10 @@ namespace ScheduledTaskAgent1
                 NotifyComplete();
             }
         }
+
         private void updateLocAwareTile(object sender, DownloadStringCompletedEventArgs e)
         {
-           WeatherInfo weatherCurrent = new WeatherInfo();
+            WeatherInfo weatherCurrent = new WeatherInfo();
 
             if (!e.Cancelled && e.Error == null)
             {
@@ -522,7 +518,7 @@ namespace ScheduledTaskAgent1
                     weatherCurrent = creator.weatherToClass(doc);
 
                     string cityName = weatherCurrent.city + ", " + weatherCurrent.state;
-                    
+
                     //get weather icons
                     Uri[] weatherIcons = getWeatherIcons(weatherCurrent.currentConditions);
                     normalIcon = weatherIcons[0];
@@ -586,7 +582,6 @@ namespace ScheduledTaskAgent1
                                         WideContent1 = string.Format("Currently: " + weatherCurrent.currentConditions + ", " + origTemp + " degrees"),
                                         WideContent2 = string.Format("Today: " + weatherCurrent.todayShort + " " + todayHigh + "/" + todayLow),
                                         WideContent3 = string.Format("Tomorrow: " + weatherCurrent.tomorrowShort + " " + tomorrowHigh + "/" + tomorrowLow)
-
                                     };
                                     tile.Update(TileData);
 
@@ -867,6 +862,7 @@ namespace ScheduledTaskAgent1
                 }
             }
         }
+
         private void checkLocationCurrent()
         {
             //Check to see if allowed to get location
@@ -900,8 +896,6 @@ namespace ScheduledTaskAgent1
                             locationSearchTimesCurrent++;
                             checkLocationCurrent();
                         }
-
-                        
                     }
                     if (locationSearchTimesCurrent > 5)
                     {

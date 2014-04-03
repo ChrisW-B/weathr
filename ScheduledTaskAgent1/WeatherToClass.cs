@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Xml.Linq;
 using System.Linq;
+using System.Xml.Linq;
 using WeatherData;
-
 
 namespace ScheduledTaskAgent1
 {
-    class WeatherToClass
+    internal class WeatherToClass
     {
         public WeatherInfo weatherToClass(XDocument doc)
         {
             WeatherInfo currentWeather = new WeatherInfo();
+
             #region current conditions
+
             //Current Conditions
             var currentObservation = doc.Element("response").Element("current_observation");
 
@@ -36,9 +37,11 @@ namespace ScheduledTaskAgent1
 
             //current humidity
             currentWeather.humidity = (string)currentObservation.Element("relative_humidity");
-            #endregion
+
+            #endregion current conditions
 
             #region forecast conditions
+
             //Forecast Conditions
             XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
 
@@ -123,20 +126,19 @@ namespace ScheduledTaskAgent1
                 ForecastC forecastC = new WeatherData.ForecastC();
                 ForecastF forecastF = new WeatherData.ForecastF();
 
-
-
                 forecastC.title = forecastF.title = (string)elm.Element("title");
                 forecastC.text = (string)elm.Element("fcttext_metric");
                 forecastF.text = (string)elm.Element("fcttext");
                 forecastC.pop = forecastF.pop = (string)elm.Element("pop");
 
-
                 currentWeather.forecastF.Add(forecastF);
                 currentWeather.forecastC.Add(forecastC);
             }
-            #endregion
+
+            #endregion forecast conditions
 
             #region tile stuff
+
             currentWeather.todayShort = (string)today.Element("conditions");
             currentWeather.tomorrowShort = (string)tomorrow.Element("conditions");
 
@@ -149,7 +151,8 @@ namespace ScheduledTaskAgent1
             currentWeather.todayHighF = (string)today.Element("high").Element("fahrenheit");
             currentWeather.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
             currentWeather.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
-            #endregion
+
+            #endregion tile stuff
 
             return currentWeather;
         }

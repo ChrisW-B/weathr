@@ -1,13 +1,11 @@
 ﻿using Microsoft.Phone.Shell;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Device.Location;
-using System.IO.IsolatedStorage;
-using System.Globalization;
-using System.Xml.Linq;
 using System.Collections.ObjectModel;
+using System.Device.Location;
+using System.Globalization;
+using System.IO.IsolatedStorage;
+using System.Linq;
+using System.Xml.Linq;
 using WeatherData;
 
 namespace Helpers
@@ -15,20 +13,25 @@ namespace Helpers
     public class getLocation
     {
         #region variables
+
         private string latitude;
         private string longitude;
-        #endregion
+
+        #endregion variables
 
         #region getters
+
         public string getLat()
         {
             return latitude;
         }
+
         public string getLong()
         {
             return longitude;
         }
-        #endregion
+
+        #endregion getters
 
         public getLocation()
         {
@@ -37,7 +40,6 @@ namespace Helpers
 
         private void getInfo()
         {
-
             GeoCoordinateWatcher watcher = new GeoCoordinateWatcher();
             watcher.MovementThreshold = 1000;
 
@@ -60,7 +62,8 @@ namespace Helpers
     public class convertTemp
     {
         public int temp;
-        dynamic store = IsolatedStorageSettings.ApplicationSettings;
+        private dynamic store = IsolatedStorageSettings.ApplicationSettings;
+
         public convertTemp(string tempStr)
         {
             tempCon(tempStr);
@@ -92,6 +95,7 @@ namespace Helpers
         {
             update(cityName, temp, conditions, todayHigh, todayLow, forecastToday, forecastTomorrow, tomorrowHigh, tomorrowLow);
         }
+
         private void update(
             string cityName,
             int temp,
@@ -104,7 +108,6 @@ namespace Helpers
             string forecastLow
             )
         {
-
             ShellTile tile = ShellTile.ActiveTiles.FirstOrDefault();
 
             IconicTileData TileData = new IconicTileData
@@ -114,32 +117,41 @@ namespace Helpers
                 WideContent1 = string.Format("Currently: " + conditions + ", " + temp + " degrees"),
                 WideContent2 = string.Format("Today: " + forecastToday + " " + high + "/" + low),
                 WideContent3 = string.Format("Tomorrow: " + forecastTomorrow + " " + forecastHigh + "/" + forecastLow)
-
             };
             tile.Update(TileData);
         }
     }
+
     public class Locations
     {
         public string LocName { get; set; }
+
         public string LocUrl { get; set; }
+
         public bool IsCurrent { get; set; }
+
         public string Lat { get; set; }
+
         public string Lon { get; set; }
+
         public string ImageSource { get; set; }
+
         public string rand { get; set; }
     }
 
-    class WeatherToClass
+    internal class WeatherToClass
     {
         public WeatherInfo weatherToClass(XDocument doc)
         {
             return toClass(doc);
         }
+
         private WeatherInfo toClass(XDocument doc)
         {
             WeatherInfo currentWeather = new WeatherInfo();
+
             #region current conditions
+
             //Current Conditions
             var currentObservation = doc.Element("response").Element("current_observation");
 
@@ -163,9 +175,11 @@ namespace Helpers
 
             //current humidity
             currentWeather.humidity = (string)currentObservation.Element("relative_humidity");
-            #endregion
+
+            #endregion current conditions
 
             #region forecast conditions
+
             //Forecast Conditions
             XElement forecastDays = doc.Element("response").Element("forecast").Element("simpleforecast").Element("forecastdays");
 
@@ -250,20 +264,19 @@ namespace Helpers
                 ForecastC forecastC = new WeatherData.ForecastC();
                 ForecastF forecastF = new WeatherData.ForecastF();
 
-
-
                 forecastC.title = forecastF.title = (string)elm.Element("title");
                 forecastC.text = (string)elm.Element("fcttext_metric");
                 forecastF.text = (string)elm.Element("fcttext");
                 forecastC.pop = forecastF.pop = (string)elm.Element("pop");
 
-
                 currentWeather.forecastF.Add(forecastF);
                 currentWeather.forecastC.Add(forecastC);
             }
-            #endregion
+
+            #endregion forecast conditions
 
             #region tile stuff
+
             currentWeather.todayShort = (string)today.Element("conditions");
             currentWeather.tomorrowShort = (string)tomorrow.Element("conditions");
 
@@ -276,7 +289,8 @@ namespace Helpers
             currentWeather.todayHighF = (string)today.Element("high").Element("fahrenheit");
             currentWeather.tomorrowHighF = (string)tomorrow.Element("high").Element("fahrenheit");
             currentWeather.tomorrowLowF = (string)tomorrow.Element("low").Element("fahrenheit");
-            #endregion
+
+            #endregion tile stuff
 
             return currentWeather;
         }

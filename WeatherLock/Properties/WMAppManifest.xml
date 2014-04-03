@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Deployment xmlns="http://schemas.microsoft.com/windowsphone/2012/deployment" AppPlatformVersion="8.0">
+<Deployment xmlns="http://schemas.microsoft.com/windowsphone/2014/deployment" AppPlatformVersion="8.1">
   <DefaultLanguage xmlns="" code="en-US" />
   <Languages xmlns="">
     <Language code="en" />
@@ -23,17 +23,12 @@
           <Count>0</Count>
           <IconImageURI IsRelative="true" IsResource="false">SunCloud202.png</IconImageURI>
           <Title>Weathr</Title>
-          <Message>
-          </Message>
-          <BackgroundColor>
-          </BackgroundColor>
+          <Message></Message>
+          <BackgroundColor></BackgroundColor>
           <HasLarge>True</HasLarge>
-          <LargeContent1>
-          </LargeContent1>
-          <LargeContent2>
-          </LargeContent2>
-          <LargeContent3>
-          </LargeContent3>
+          <LargeContent1></LargeContent1>
+          <LargeContent2></LargeContent2>
+          <LargeContent3></LargeContent3>
           <DeviceLockImageURI IsRelative="true" IsResource="false">Images\SunLS.png</DeviceLockImageURI>
         </TemplateIconic>
       </PrimaryToken>
